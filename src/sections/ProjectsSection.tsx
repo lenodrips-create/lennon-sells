@@ -3,6 +3,7 @@ import type { MotionValue } from 'framer-motion';
 import { useRef } from 'react';
 import FadeIn from '../components/FadeIn';
 import LiveProjectButton from '../components/LiveProjectButton';
+import SafeImg from '../components/SafeImg';
 
 const img = (file: string) =>
   `https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2F${file}.png&w=1280&q=85`;
@@ -91,14 +92,16 @@ function ProjectCard({
 
         <div className="flex gap-3 sm:gap-4">
           <div className="flex w-[40%] flex-col gap-3 sm:gap-4">
-            <img
+            <SafeImg
+              seed={index}
               src={project.col1[0]}
               alt={`${project.name} preview 1`}
               loading="lazy"
               className={`w-full object-cover ${RADIUS}`}
               style={{ height: 'clamp(130px, 16vw, 230px)' }}
             />
-            <img
+            <SafeImg
+              seed={index + 1}
               src={project.col1[1]}
               alt={`${project.name} preview 2`}
               loading="lazy"
@@ -107,7 +110,8 @@ function ProjectCard({
             />
           </div>
           <div className="w-[60%]">
-            <img
+            <SafeImg
+              seed={index + 2}
               src={project.col2}
               alt={`${project.name} main preview`}
               loading="lazy"

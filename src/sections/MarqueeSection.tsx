@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import SafeImg from '../components/SafeImg';
 
 const IMAGES = [
   'https://motionsites.ai/assets/hero-space-voyage-preview-eECLH3Yc.gif',
@@ -31,11 +32,11 @@ const ROW_2 = [...IMAGES.slice(11), ...IMAGES.slice(11), ...IMAGES.slice(11)];
 // middle copy is in view and neither edge ever shows empty space.
 const TILE_STEP = 432;
 
-function Tile({ src }: { src: string }) {
+function Tile({ src, seed }: { src: string; seed: number }) {
   return (
-    <img
+    <SafeImg
       src={src}
-      alt=""
+      seed={seed}
       loading="lazy"
       className="h-[270px] w-[420px] shrink-0 rounded-2xl object-cover"
     />
@@ -73,7 +74,7 @@ export default function MarqueeSection() {
         }}
       >
         {ROW_1.map((src, i) => (
-          <Tile key={i} src={src} />
+          <Tile key={i} src={src} seed={i} />
         ))}
       </div>
       <div
@@ -85,7 +86,7 @@ export default function MarqueeSection() {
         }}
       >
         {ROW_2.map((src, i) => (
-          <Tile key={i} src={src} />
+          <Tile key={i} src={src} seed={i + 2} />
         ))}
       </div>
     </section>

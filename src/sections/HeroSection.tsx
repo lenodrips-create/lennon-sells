@@ -54,7 +54,7 @@ export default function HeroSection() {
             inactiveTransition="transform 0.6s ease-in-out"
           >
             <img
-              src="/hat.png"
+              src={`${import.meta.env.BASE_URL}hat.png`}
               alt="Chrome Hearts trucker hat"
               className="h-auto w-full select-none"
               style={{ filter: 'drop-shadow(0 30px 60px rgba(187, 204, 215, 0.18))' }}

@@ -1,6 +1,7 @@
 import FadeIn from '../components/FadeIn';
 import AnimatedText from '../components/AnimatedText';
 import ContactButton from '../components/ContactButton';
+import SafeImg from '../components/SafeImg';
 
 const BASE = 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7';
 
@@ -49,7 +50,7 @@ export default function AboutSection() {
           duration={0.9}
           className={`pointer-events-none absolute ${d.className}`}
         >
-          <img src={d.src} alt="" className="h-auto w-full" />
+          <SafeImg src={d.src} className="h-auto w-full" hideOnError />
         </FadeIn>
       ))}
 
