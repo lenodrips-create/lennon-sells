@@ -1,10 +1,3 @@
-// Where requests go. Fill in either to let visitors send directly;
-// left blank, visitors can still copy their written request.
-export const CONTACT = {
-  email: '',
-  instagram: '', // handle without the @
-};
-
 const asset = (f: string) => `${import.meta.env.BASE_URL}${f}`;
 
 export const IMG = {
@@ -14,8 +7,7 @@ export const IMG = {
   painting: asset('painting.webp'),
 };
 
-// Lets any "request" button pre-fill the request form.
-export function seek(item?: string) {
-  window.dispatchEvent(new CustomEvent('seek', { detail: item ?? '' }));
+// Scrolls to the requests section.
+export function seek() {
   document.getElementById('request')?.scrollIntoView({ behavior: 'smooth' });
 }

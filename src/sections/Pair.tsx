@@ -1,9 +1,8 @@
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import type { PointerEvent } from 'react';
 import FadeIn from '../components/FadeIn';
-import Ornament from '../components/Ornament';
 import GoldDust from '../components/GoldDust';
-import { IMG, seek } from '../config';
+import { IMG } from '../config';
 
 const DETAILS = [
   { n: 'I', title: 'Black acetate frame', text: 'Deep black, high-polish finish. Clean from every angle.' },
@@ -93,12 +92,6 @@ export default function Pair() {
         style={{ background: 'radial-gradient(ellipse 50% 40% at 25% 50%, rgba(158,43,31,0.22), transparent 70%)' }}
       />
       <div className="relative mx-auto max-w-6xl">
-        <FadeIn className="mb-16 text-center sm:mb-20">
-          <p className="mb-4 font-display text-xs font-semibold uppercase tracking-[0.45em] text-gold">The only pair</p>
-          <h2 className="gilded font-display text-5xl font-extrabold leading-none sm:text-7xl">Built for a god</h2>
-          <Ornament className="mt-8" />
-        </FadeIn>
-
         <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <Niche />
 
@@ -129,14 +122,9 @@ export default function Pair() {
               ))}
             </ol>
 
-            <FadeIn delay={0.3} className="mt-10 flex flex-wrap items-center gap-6">
-              <div>
-                <p className="font-display text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-gold/80">Price</p>
-                <p className="font-body text-3xl italic text-marble">DM for price</p>
-              </div>
-              <button type="button" className="holy-btn" onClick={() => seek('The Chrome Hearts glasses')}>
-                I want this pair
-              </button>
+            <FadeIn delay={0.3} className="mt-10">
+              <p className="font-display text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-gold/80">Price</p>
+              <p className="font-body text-3xl italic text-marble">DM for price</p>
             </FadeIn>
           </div>
         </div>

@@ -38,7 +38,7 @@ export default function FloatingSeek() {
           >
             ✦
           </motion.span>
-          Request an item
+          Want something else?
         </motion.button>
       )}
     </AnimatePresence>

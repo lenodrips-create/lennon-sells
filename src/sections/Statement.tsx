@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import RevealText from '../components/RevealText';
 import GoldDust from '../components/GoldDust';
 import Laurel from '../components/Laurel';
-import { IMG, seek } from '../config';
+import { IMG } from '../config';
 
 // Neptune rises out of the dark while the line lights up word by word.
 export default function Statement() {
@@ -50,17 +50,6 @@ export default function Statement() {
             text="Statues last two thousand years. Good silver isn't far behind. Wear something that outlives the trend."
             className="font-display text-3xl font-bold uppercase leading-[1.15] text-marble sm:text-5xl"
           />
-          <motion.div
-            className="mt-10"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <button type="button" className="holy-btn" onClick={() => seek('The Chrome Hearts glasses')}>
-              Claim the pair
-            </button>
-          </motion.div>
         </div>
       </div>
     </section>
