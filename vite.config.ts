@@ -4,4 +4,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: './',
   plugins: [react()],
+  build: {
+    // Reach older iPhones/Safari too
+    target: ['es2019', 'safari13'],
+  },
 });

@@ -12,9 +12,23 @@
       rel="stylesheet"
     />
     <title>Lennon Resells</title>
+    <style>
+      /* Paint the page dark before any script or stylesheet arrives, so it is never a blank white screen */
+      html, body { margin: 0; background: #0f0a07; color: #eee7db; }
+      .fallback { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px 16px; text-align: center; font-family: Cinzel, 'Times New Roman', serif; }
+      .fallback h1 { margin: 0; font-size: clamp(2.2rem, 9vw, 5rem); letter-spacing: 0.04em; color: #d2ae62; }
+      .fallback img { width: min(80vw, 520px); height: auto; }
+      .fallback p { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.3rem; opacity: 0.8; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="fallback">
+        <img src="./glasses.webp" alt="Chrome Hearts glasses" />
+        <h1>LENNON RESELLS</h1>
+        <p>One pair of Chrome Hearts glasses. DM for price and requests.</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
