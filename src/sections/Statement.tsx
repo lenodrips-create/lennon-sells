@@ -32,11 +32,6 @@ export default function Statement() {
           src={IMG.neptune}
           alt=""
           className="w-full"
-          style={{
-            maskImage: 'linear-gradient(180deg, black 65%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(180deg, black 65%, transparent 100%)',
-            filter: 'sepia(0.15) drop-shadow(0 0 60px rgba(244,225,166,0.15))',
-          }}
         />
       </motion.div>
       <GoldDust density={45} />

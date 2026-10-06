@@ -68,10 +68,10 @@ body {
     var(--gold-deep) 100%
   );
   background-size: 250% 100%;
+  background-position: 60% 0;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: gild 6s linear infinite;
 }
 
 @keyframes gild {
@@ -92,7 +92,6 @@ body {
   z-index: 60;
   opacity: 0.07;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain 1.2s steps(6) infinite;
 }
 
 @keyframes grain {
@@ -110,7 +109,6 @@ body {
   top: -10%;
   border-radius: 100% 0 100% 0;
   background: linear-gradient(135deg, #f4e1a6, var(--gold) 45%, #6e5a24);
-  box-shadow: 0 0 8px rgba(244, 225, 166, 0.35);
   opacity: 0.8;
   animation: fall linear infinite;
   will-change: transform;
@@ -182,18 +180,19 @@ body {
   font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  transition: transform 0.4s, box-shadow 0.4s, background-color 0.4s, color 0.4s;
+  transition: transform 0.4s, box-shadow 0.4s, background-color 0.4s, background-position 0.8s, color 0.4s;
 }
 
 .holy-btn {
   color: #1a0f08;
   background: linear-gradient(120deg, #9a7633, #d2ae62 30%, #f4e1a6 50%, #d2ae62 70%, #9a7633);
   background-size: 220% 100%;
-  animation: gild 5s linear infinite;
+  background-position: 30% 0;
   box-shadow: 0 0 0 1px rgba(246, 227, 168, 0.6), 0 10px 30px -8px rgba(212, 175, 98, 0.6);
 }
 
 .holy-btn:hover {
+  background-position: 70% 0;
   box-shadow: 0 0 0 1px #f6e3a8, 0 0 40px rgba(246, 227, 168, 0.55);
 }
 

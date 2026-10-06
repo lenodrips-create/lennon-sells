@@ -6,6 +6,8 @@ export const IMG = {
   neptune: asset('neptune.webp'),
   painting: asset('painting.webp'),
   trevi: asset('trevi.webp'),
+  treviBlur: asset('trevi-blur.webp'),
+  rays: asset('rays.webp'),
   cathedral: asset('cathedral.webp'),
 };
 

@@ -30,7 +30,7 @@ function Panel({ p, i, progress }: { p: (typeof PANELS)[number]; i: number; prog
               backgroundRepeat: 'no-repeat',
               backgroundPosition: p.pos,
               backgroundSize: `${p.zoom * 100}% auto`,
-              filter: 'drop-shadow(0 0 14px rgba(244,225,166,0.3))',
+              willChange: 'transform',
             }}
           />
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-ink to-transparent" />

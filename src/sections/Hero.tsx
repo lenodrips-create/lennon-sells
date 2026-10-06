@@ -56,7 +56,7 @@ export default function Hero() {
             src={IMG.painting}
             alt=""
             className="kenburns h-full w-full object-cover object-[50%_25%] opacity-70"
-            style={{ filter: 'saturate(1.05) contrast(1.05)' }}
+            style={{ willChange: 'transform' }}
           />
         </motion.div>
       </motion.div>
@@ -69,15 +69,13 @@ export default function Hero() {
         }}
       />
 
-      {/* Sun rays through the clouds */}
+      {/* Sun rays through the clouds (pre-rendered, just rotated) */}
       <div aria-hidden className="absolute left-1/2 top-[38%] h-0 w-0">
-        <div
-          className="spin-slow absolute left-[-110vmax] top-[-110vmax] h-[220vmax] w-[220vmax] opacity-50"
-          style={{
-            background: 'repeating-conic-gradient(from 0deg, rgba(244,225,166,0.14) 0deg 3deg, transparent 3deg 15deg)',
-            maskImage: 'radial-gradient(circle, black 0%, transparent 40%)',
-            WebkitMaskImage: 'radial-gradient(circle, black 0%, transparent 40%)',
-          }}
+        <img
+          src={IMG.rays}
+          alt=""
+          className="spin-slow absolute left-[-80vmax] top-[-80vmax] h-[160vmax] w-[160vmax] max-w-none"
+          style={{ willChange: 'transform' }}
         />
       </div>
 
@@ -85,7 +83,7 @@ export default function Hero() {
       <motion.div
         aria-hidden
         className="pointer-events-none absolute bottom-0 left-[-14%] z-[5] w-[46vw] max-w-[440px] sm:left-[-2%] sm:w-[30vw] lg:left-[3%]"
-        style={{ x: leftX, y: statueY, opacity: fade }}
+        style={{ x: leftX, y: statueY, opacity: fade, willChange: 'transform' }}
         initial={{ y: 200, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: START - 0.2, duration: 1.8, ease: EASE }}
@@ -94,11 +92,6 @@ export default function Hero() {
           src={IMG.jupiter}
           alt=""
           className="w-full"
-          style={{
-            maskImage: 'linear-gradient(180deg, black 70%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(180deg, black 70%, transparent 100%)',
-            filter: 'drop-shadow(0 0 40px rgba(244,225,166,0.18)) sepia(0.12) brightness(0.85)',
-          }}
         />
       </motion.div>
 
@@ -106,7 +99,7 @@ export default function Hero() {
       <motion.div
         aria-hidden
         className="pointer-events-none absolute bottom-0 right-[-20%] z-[5] w-[58vw] max-w-[560px] sm:right-[-6%] sm:w-[38vw] lg:right-[0%]"
-        style={{ x: rightX, y: statueY, opacity: fade }}
+        style={{ x: rightX, y: statueY, opacity: fade, willChange: 'transform' }}
         initial={{ y: 220, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: START, duration: 1.8, ease: EASE }}
@@ -115,11 +108,6 @@ export default function Hero() {
           src={IMG.neptune}
           alt=""
           className="w-full"
-          style={{
-            maskImage: 'linear-gradient(180deg, black 72%, transparent 100%)',
-            WebkitMaskImage: 'linear-gradient(180deg, black 72%, transparent 100%)',
-            filter: 'drop-shadow(0 0 40px rgba(244,225,166,0.18)) sepia(0.12) brightness(0.85)',
-          }}
         />
       </motion.div>
 
@@ -140,8 +128,8 @@ export default function Hero() {
         <motion.div
           className="relative mb-12 mt-14 w-[min(80vw,520px)] sm:mb-16 sm:mt-20"
           style={{ x: glassX, y: glassY, rotateX: rotX, rotateY: rotY, transformPerspective: 900 }}
-          initial={{ opacity: 0, scale: 0.7, filter: 'blur(14px)' }}
-          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: START + 0.2, duration: 1.6, ease: EASE }}
         >
           <div aria-hidden className="absolute inset-x-[22%] top-[46%] aspect-square -translate-y-1/2">
@@ -160,7 +148,7 @@ export default function Hero() {
               draggable={false}
               animate={{ y: [0, -14, 0], rotate: [-1.5, 1.5, -1.5] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-              style={{ filter: 'drop-shadow(0 0 30px rgba(244,225,166,0.35)) drop-shadow(0 40px 40px rgba(0,0,0,0.7))' }}
+              style={{ willChange: 'transform' }}
             />
           </Magnet>
         </motion.div>
@@ -177,8 +165,8 @@ export default function Hero() {
                   <motion.span
                     key={i}
                     className="gilded inline-block"
-                    initial={{ opacity: 0, y: 70, rotateX: -90, filter: 'blur(10px)' }}
-                    animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
+                    initial={{ opacity: 0, y: 70, rotateX: -90 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 0 }}
                     transition={{ delay: START + 0.6 + i * 0.06, duration: 1, ease: EASE }}
                     style={{ transformOrigin: 'bottom', textShadow: '0 4px 30px rgba(0,0,0,0.5)' }}
                   >

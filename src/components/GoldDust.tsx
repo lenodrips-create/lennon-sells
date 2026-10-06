@@ -1,5 +1,21 @@
 import { useEffect, useRef } from 'react';
 
+// One soft gold mote, drawn once and stamped for every particle (much cheaper
+// than building a gradient per particle per frame).
+function makeSprite() {
+  const size = 32;
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const g = c.getContext('2d')!;
+  const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  grad.addColorStop(0, 'rgba(255, 236, 180, 1)');
+  grad.addColorStop(0.35, 'rgba(210, 174, 98, 0.5)');
+  grad.addColorStop(1, 'rgba(210, 174, 98, 0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, size, size);
+  return c;
+}
+
 // Canvas of gold motes rising like incense through candlelight.
 export default function GoldDust({ density = 70 }: { density?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -10,22 +26,25 @@ export default function GoldDust({ density = 70 }: { density?: number }) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const small = window.innerWidth < 640;
+    const count = Math.round(density * (small ? 0.5 : 1));
+    const sprite = makeSprite();
 
     let w = 0;
     let h = 0;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const resize = () => {
       w = canvas.clientWidth;
       h = canvas.clientHeight;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
+      canvas.width = Math.max(1, w * dpr);
+      canvas.height = Math.max(1, h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    const motes = Array.from({ length: density }, () => ({
+    const motes = Array.from({ length: count }, () => ({
       x: Math.random(),
       y: Math.random(),
       r: 0.4 + Math.random() * 1.8,
@@ -52,18 +71,11 @@ export default function GoldDust({ density = 70 }: { density?: number }) {
             m.x = Math.random();
           }
         }
-        const px = (m.x + Math.sin(m.drift) * 0.01) * w;
-        const py = m.y * h;
-        const a = 0.35 + 0.45 * Math.sin(t * 0.002 + m.tw) ** 2;
-        const g = ctx.createRadialGradient(px, py, 0, px, py, m.r * 4);
-        g.addColorStop(0, `rgba(255, 236, 180, ${a})`);
-        g.addColorStop(0.4, `rgba(212, 175, 98, ${a * 0.5})`);
-        g.addColorStop(1, 'rgba(212, 175, 98, 0)');
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(px, py, m.r * 4, 0, Math.PI * 2);
-        ctx.fill();
+        const size = m.r * 8;
+        ctx.globalAlpha = 0.35 + 0.45 * Math.sin(t * 0.002 + m.tw) ** 2;
+        ctx.drawImage(sprite, (m.x + Math.sin(m.drift) * 0.01) * w - size / 2, m.y * h - size / 2, size, size);
       }
+      ctx.globalAlpha = 1;
     };
     raf = requestAnimationFrame(draw);
 
