@@ -4,11 +4,11 @@ import FloatingSeek from './components/FloatingSeek';
 import Intro from './sections/Intro';
 import Nav from './sections/Nav';
 import Hero from './sections/Hero';
-import LatinMarquee from './sections/LatinMarquee';
-import Relic from './sections/Relic';
-import Seek from './sections/Seek';
-import Sanctum from './sections/Sanctum';
-import Scripture from './sections/Scripture';
+import Ticker from './sections/Ticker';
+import Pair from './sections/Pair';
+import Request from './sections/Request';
+import Angles from './sections/Angles';
+import Statement from './sections/Statement';
 import Footer from './sections/Footer';
 
 export default function App() {
@@ -20,11 +20,11 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
-        <LatinMarquee />
-        <Relic />
-        <Seek />
-        <Sanctum />
-        <Scripture />
+        <Ticker />
+        <Pair />
+        <Request />
+        <Angles />
+        <Statement />
       </main>
       <Footer />
       <FloatingSeek />

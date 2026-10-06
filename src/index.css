@@ -2,16 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Vatican nocturne: candlelit nave, gilded leaf, marble, cardinal crimson. */
+/* Imperial Rome after dark: oil-paint umber, Carrara marble, gilded laurel, legion red. */
 :root {
-  --nave: #0b0709;
-  --crypt: #150d10;
-  --gold: #d4af62;
-  --gold-light: #f6e3a8;
-  --gold-deep: #9c7a35;
-  --marble: #efe7da;
-  --rose: #8e1b2e;
-  --lapis: #1d2a5e;
+  --ink: #0f0a07;
+  --umber: #1b130d;
+  --gold: #d2ae62;
+  --gold-light: #f4e1a6;
+  --gold-deep: #9a7633;
+  --marble: #eee7db;
+  --imperial: #9e2b1f;
+  --ochre: #b98a4e;
   color-scheme: dark;
 }
 
@@ -30,7 +30,7 @@ html {
 html,
 body,
 #root {
-  background: var(--nave);
+  background: var(--ink);
   color: var(--marble);
   font-family: 'Cormorant Garamond', Georgia, serif;
 }
@@ -40,7 +40,7 @@ body {
 }
 
 ::selection {
-  background: var(--rose);
+  background: var(--imperial);
   color: var(--marble);
 }
 
@@ -104,13 +104,14 @@ body {
   100% { transform: translate(0, 0); }
 }
 
-/* Falling rose petals */
+/* Falling gilded laurel leaves */
 .petal {
   position: absolute;
   top: -10%;
-  border-radius: 150% 0 150% 0;
-  background: radial-gradient(circle at 30% 30%, #d6475e, var(--rose) 60%, #4d0b17);
-  opacity: 0.85;
+  border-radius: 100% 0 100% 0;
+  background: linear-gradient(135deg, #f4e1a6, var(--gold) 45%, #6e5a24);
+  box-shadow: 0 0 8px rgba(244, 225, 166, 0.35);
+  opacity: 0.8;
   animation: fall linear infinite;
   will-change: transform;
 }
@@ -186,7 +187,7 @@ body {
 
 .holy-btn {
   color: #1a0f08;
-  background: linear-gradient(120deg, #9c7a35, #d4af62 30%, #f6e3a8 50%, #d4af62 70%, #9c7a35);
+  background: linear-gradient(120deg, #9a7633, #d2ae62 30%, #f4e1a6 50%, #d2ae62 70%, #9a7633);
   background-size: 220% 100%;
   animation: gild 5s linear infinite;
   box-shadow: 0 0 0 1px rgba(246, 227, 168, 0.6), 0 10px 30px -8px rgba(212, 175, 98, 0.6);
@@ -199,14 +200,14 @@ body {
 .ghost-btn {
   color: var(--marble);
   border: 1px solid rgba(212, 175, 98, 0.6);
-  background: rgba(11, 7, 9, 0.35);
+  background: rgba(15, 10, 7, 0.35);
   backdrop-filter: blur(6px);
 }
 
 .ghost-btn:hover {
   color: var(--gold);
-  background: rgba(142, 27, 46, 0.35);
-  box-shadow: 0 0 30px rgba(142, 27, 46, 0.6);
+  background: rgba(158, 43, 31, 0.35);
+  box-shadow: 0 0 30px rgba(158, 43, 31, 0.6);
 }
 
 .holy-btn:focus-visible,
@@ -218,4 +219,27 @@ textarea:focus-visible,
 select:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
+}
+
+/* Fluted marble, like a column shaft */
+.fluted {
+  background-color: #e9e2d5;
+  background-image: repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.16) 0px,
+      rgba(255, 255, 255, 0.5) 6px,
+      rgba(0, 0, 0, 0.05) 14px,
+      rgba(0, 0, 0, 0.2) 22px
+    ),
+    linear-gradient(180deg, #f3eee5, #cfc5b4);
+}
+
+/* Slow push-in on painted backdrops */
+@keyframes kenburns {
+  from { transform: scale(1.08) translate3d(0, 0, 0); }
+  to { transform: scale(1.22) translate3d(-1.5%, -2%, 0); }
+}
+
+.kenburns {
+  animation: kenburns 30s ease-in-out infinite alternate;
 }

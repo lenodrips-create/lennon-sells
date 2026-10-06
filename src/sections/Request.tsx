@@ -23,7 +23,7 @@ const EMPTY: Request = { name: '', item: '', size: '', budget: '', reach: '', no
 
 function compose(r: Request) {
   return [
-    `Lennon — I seek: ${r.item}`,
+    `Hey Lennon, I'm looking for: ${r.item}`,
     r.size && `Size: ${r.size}`,
     r.budget && `Budget: ${r.budget}`,
     r.note && `Notes: ${r.note}`,
@@ -45,7 +45,7 @@ function Field({
 }) {
   return (
     <div className="group relative flex flex-col gap-2">
-      <label htmlFor={id} className="font-roman text-[0.65rem] uppercase tracking-[0.35em] text-gold/80">
+      <label htmlFor={id} className="font-display text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-gold/90">
         {label}
       </label>
       {children}
@@ -67,7 +67,7 @@ function Burst() {
           <motion.span
             key={i}
             className="absolute h-2 w-2 rounded-full"
-            style={{ background: i % 3 ? '#D4AF62' : '#C2334B', boxShadow: '0 0 10px #F6E3A8' }}
+            style={{ background: i % 3 ? '#D2AE62' : '#C9402C', boxShadow: '0 0 10px #F4E1A6' }}
             initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
             animate={{ x: Math.cos(a) * 220, y: Math.sin(a) * 220, opacity: 0, scale: 0.2 }}
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
@@ -78,7 +78,7 @@ function Burst() {
   );
 }
 
-export default function Seek() {
+export default function Request() {
   const [req, setReq] = useState<Request>(EMPTY);
   const [sent, setSent] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -119,23 +119,22 @@ export default function Seek() {
 
   return (
     <section
-      id="seek"
+      id="request"
       className="relative overflow-hidden px-4 py-24 sm:px-8 sm:py-32"
       style={{
         background:
-          'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(29,42,94,0.45), transparent 70%), linear-gradient(180deg, #0B0709, #150D10)',
+          'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(158,43,31,0.3), transparent 70%), linear-gradient(180deg, #0F0A07, #1B130D)',
       }}
     >
       <Petals count={10} />
       <div className="relative mx-auto max-w-4xl">
         <FadeIn className="text-center">
-          <p className="font-roman text-xs uppercase tracking-[0.5em] text-gold/80">Matthew 7:7</p>
-          <h2 className="mt-4 font-gothic text-5xl leading-none text-marble sm:text-7xl">
-            Seek, and ye <span className="gilded">shall find</span>
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.45em] text-gold">Requests</p>
+          <h2 className="mt-4 font-display text-4xl font-extrabold leading-none text-marble sm:text-6xl">
+            Want something <span className="gilded">else?</span>
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-xl italic text-marble/70">
-            Want something other than the relic? Name it. Rings, crosses, hats, hoodies: tell me what you seek and I&apos;ll
-            go find it.
+            Rings, pendants, hats, hoodies, anything. Tell me what you&apos;re after and I&apos;ll track it down.
           </p>
           <Ornament className="mt-8" />
         </FadeIn>
@@ -143,9 +142,9 @@ export default function Seek() {
         <FadeIn delay={0.2} y={50}>
           <div
             className="relative mt-14 rounded-[2rem] p-[1px]"
-            style={{ background: 'linear-gradient(160deg, rgba(246,227,168,0.7), rgba(156,122,53,0.15) 40%, rgba(142,27,46,0.6))' }}
+            style={{ background: 'linear-gradient(160deg, rgba(244,225,166,0.7), rgba(154,118,51,0.15) 40%, rgba(158,43,31,0.6))' }}
           >
-            <div className="relative overflow-hidden rounded-[2rem] bg-nave/90 p-6 backdrop-blur sm:p-12">
+            <div className="relative overflow-hidden rounded-[2rem] bg-ink/90 p-6 backdrop-blur sm:p-12">
               <AnimatePresence mode="wait">
                 {!sent ? (
                   <motion.form
@@ -158,14 +157,14 @@ export default function Seek() {
                     transition={{ duration: 0.5 }}
                   >
                     <div className="sm:col-span-2">
-                      <Field id="seek-item" label="What do you seek?">
+                      <Field id="seek-item" label="What are you looking for?">
                         <input
                           ref={itemRef}
                           id="seek-item"
                           required
                           value={req.item}
                           onChange={set('item')}
-                          placeholder="Chrome Hearts cross ring, size 9…"
+                          placeholder="Chrome Hearts cross ring, size 9"
                           className={inputCls}
                         />
                       </Field>
@@ -175,7 +174,7 @@ export default function Seek() {
                             key={s}
                             type="button"
                             onClick={() => setReq((r) => ({ ...r, item: s }))}
-                            className={`rounded-full border px-4 py-1.5 font-roman text-[0.65rem] uppercase tracking-[0.2em] transition-colors ${
+                            className={`rounded-full border px-4 py-1.5 font-display text-[0.65rem] font-semibold uppercase tracking-[0.15em] transition-colors ${
                               req.item === s
                                 ? 'border-gold bg-gold/15 text-gold'
                                 : 'border-marble/20 text-marble/60 hover:border-gold/60 hover:text-gold'
@@ -194,16 +193,16 @@ export default function Seek() {
                     </div>
 
                     <Field id="seek-size" label="Size (optional)">
-                      <input id="seek-size" value={req.size} onChange={set('size')} placeholder="M, 9, 54mm…" className={inputCls} />
+                      <input id="seek-size" value={req.size} onChange={set('size')} placeholder="M, 9, 54mm" className={inputCls} />
                     </Field>
 
                     <Field id="seek-budget" label="Budget">
                       <select id="seek-budget" value={req.budget} onChange={set('budget')} className={`${inputCls} appearance-none`}>
-                        <option value="" className="bg-crypt">
-                          Choose an offering…
+                        <option value="" className="bg-umber">
+                          Pick a range
                         </option>
                         {BUDGETS.map((b) => (
-                          <option key={b} value={b} className="bg-crypt">
+                          <option key={b} value={b} className="bg-umber">
                             {b}
                           </option>
                         ))}
@@ -232,7 +231,7 @@ export default function Seek() {
                           rows={2}
                           value={req.note}
                           onChange={set('note')}
-                          placeholder="Colorway, condition, timing…"
+                          placeholder="Colorway, condition, when you need it"
                           className={`${inputCls} resize-none`}
                         />
                       </Field>
@@ -240,7 +239,7 @@ export default function Seek() {
 
                     <div className="flex justify-center sm:col-span-2">
                       <motion.button type="submit" className="holy-btn" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Send size={14} aria-hidden /> Send my request
+                        <Send size={14} aria-hidden /> Send request
                       </motion.button>
                     </div>
                   </motion.form>
@@ -258,19 +257,19 @@ export default function Seek() {
                       initial={{ rotate: -180, scale: 0 }}
                       animate={{ rotate: 0, scale: 1 }}
                       transition={{ delay: 0.2, type: 'spring', stiffness: 180, damping: 14 }}
-                      style={{ boxShadow: '0 0 40px rgba(212,175,98,0.5)' }}
+                      style={{ boxShadow: '0 0 40px rgba(210,174,98,0.5)' }}
                     >
                       <Check size={28} aria-hidden />
                     </motion.div>
-                    <h3 className="mt-6 font-gothic text-4xl text-marble sm:text-5xl">Your request is written</h3>
+                    <h3 className="mt-6 font-display text-3xl font-bold text-marble sm:text-4xl">Request ready</h3>
                     <p className="mt-3 max-w-md text-lg italic text-marble/70">
                       {CONTACT.email
-                        ? 'Your email app should open with it ready to send. If it doesn’t, copy it below.'
+                        ? 'Your email app should open with it ready to go. If not, copy it below.'
                         : CONTACT.instagram
-                          ? `Copy it and send it to @${CONTACT.instagram} on Instagram.`
+                          ? `Copy it and DM it to @${CONTACT.instagram} on Instagram.`
                           : 'Copy it and send it to Lennon.'}
                     </p>
-                    <pre className="mt-6 w-full max-w-md whitespace-pre-wrap rounded-2xl border border-gold/20 bg-crypt/80 p-5 text-left font-body text-base text-marble/85">
+                    <pre className="mt-6 w-full max-w-md whitespace-pre-wrap rounded-2xl border border-gold/20 bg-umber/80 p-5 text-left font-body text-base text-marble/85">
                       {sent}
                     </pre>
                     <div className="mt-6 flex flex-wrap justify-center gap-4">
@@ -284,7 +283,7 @@ export default function Seek() {
                         </a>
                       )}
                       <button type="button" onClick={() => setSent(null)} className="ghost-btn">
-                        Seek something else
+                        Request something else
                       </button>
                     </div>
                   </motion.div>

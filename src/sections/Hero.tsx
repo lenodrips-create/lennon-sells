@@ -3,33 +3,36 @@ import { useRef } from 'react';
 import type { PointerEvent } from 'react';
 import GoldDust from '../components/GoldDust';
 import Petals from '../components/Petals';
-import RoseWindow from '../components/RoseWindow';
+import Laurel from '../components/Laurel';
 import Magnet from '../components/Magnet';
-import { GLASSES, seek } from '../config';
+import { IMG, seek } from '../config';
 
-const TITLE = 'Lennon Resells';
-const START = 3.0; // after the intro doors open
+const TITLE = ['LENNON', 'RESELLS'];
+const START = 3.0; // after the intro columns part
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 export default function Hero() {
   const ref = useRef<HTMLElement>(null);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
-  const smx = useSpring(mx, { stiffness: 60, damping: 18 });
-  const smy = useSpring(my, { stiffness: 60, damping: 18 });
+  const smx = useSpring(mx, { stiffness: 50, damping: 18 });
+  const smy = useSpring(my, { stiffness: 50, damping: 18 });
 
-  // Parallax layers at different depths
-  const winX = useTransform(smx, (v) => v * -20);
-  const winY = useTransform(smy, (v) => v * -20);
-  const glassX = useTransform(smx, (v) => v * 30);
-  const glassY = useTransform(smy, (v) => v * 20);
-  const rotY = useTransform(smx, (v) => v * 18);
-  const rotX = useTransform(smy, (v) => v * -12);
+  // Depth layers: painting far, statues mid, glasses near
+  const bgX = useTransform(smx, (v) => v * -18);
+  const bgY = useTransform(smy, (v) => v * -12);
+  const leftX = useTransform(smx, (v) => v * 26);
+  const rightX = useTransform(smx, (v) => v * 34);
+  const glassX = useTransform(smx, (v) => v * 40);
+  const glassY = useTransform(smy, (v) => v * 24);
+  const rotY = useTransform(smx, (v) => v * 22);
+  const rotX = useTransform(smy, (v) => v * -14);
 
-  // Scrolling away lifts the relic and fades the scene
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const liftY = useTransform(scrollYProgress, [0, 1], [0, -160]);
-  const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const zoom = useTransform(scrollYProgress, [0, 1], [1, 1.25]);
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, -180]);
+  const statueY = useTransform(scrollYProgress, [0, 1], [0, 120]);
+  const bgScrollY = useTransform(scrollYProgress, [0, 1], [0, 200]);
+  const fade = useTransform(scrollYProgress, [0, 0.85], [1, 0]);
 
   const onMove = (e: PointerEvent<HTMLElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -37,118 +40,164 @@ export default function Hero() {
     my.set((e.clientY - r.top) / r.height - 0.5);
   };
 
+  let letter = 0;
+
   return (
     <section
       id="top"
       ref={ref}
       onPointerMove={onMove}
-      className="relative flex min-h-[100svh] items-center justify-center overflow-hidden"
-      style={{
-        background:
-          'radial-gradient(ellipse 60% 50% at 50% 45%, rgba(142,27,46,0.45), transparent 70%), radial-gradient(ellipse at 50% 120%, rgba(29,42,94,0.5), transparent 60%), #0B0709',
-      }}
+      className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-ink"
     >
-      {/* God rays */}
-      <div aria-hidden className="absolute left-1/2 top-[42%] h-0 w-0">
+      {/* Painted heavens */}
+      <motion.div aria-hidden className="absolute inset-[-6%]" style={{ x: bgX, y: bgScrollY }}>
+        <motion.div className="h-full w-full" style={{ y: bgY }}>
+          <img
+            src={IMG.painting}
+            alt=""
+            className="kenburns h-full w-full object-cover object-[50%_25%] opacity-70"
+            style={{ filter: 'saturate(1.05) contrast(1.05)' }}
+          />
+        </motion.div>
+      </motion.div>
       <div
-        className="spin-slow absolute left-[-110vmax] top-[-110vmax] h-[220vmax] w-[220vmax] opacity-40"
+        aria-hidden
+        className="absolute inset-0"
         style={{
           background:
-            'repeating-conic-gradient(from 0deg, rgba(246,227,168,0.16) 0deg 4deg, transparent 4deg 18deg)',
-          maskImage: 'radial-gradient(circle, black 0%, transparent 45%)',
-          WebkitMaskImage: 'radial-gradient(circle, black 0%, transparent 45%)',
+            'radial-gradient(ellipse 55% 45% at 50% 42%, rgba(15,10,7,0.15), rgba(15,10,7,0.75) 70%), linear-gradient(180deg, rgba(15,10,7,0.7) 0%, rgba(15,10,7,0.2) 30%, rgba(15,10,7,0.5) 70%, #0F0A07 100%)',
         }}
       />
+
+      {/* Sun rays through the clouds */}
+      <div aria-hidden className="absolute left-1/2 top-[38%] h-0 w-0">
+        <div
+          className="spin-slow absolute left-[-110vmax] top-[-110vmax] h-[220vmax] w-[220vmax] opacity-50"
+          style={{
+            background: 'repeating-conic-gradient(from 0deg, rgba(244,225,166,0.14) 0deg 3deg, transparent 3deg 15deg)',
+            maskImage: 'radial-gradient(circle, black 0%, transparent 40%)',
+            WebkitMaskImage: 'radial-gradient(circle, black 0%, transparent 40%)',
+          }}
+        />
       </div>
 
-      {/* Rose window */}
-      <div aria-hidden className="absolute left-1/2 top-[42%] flex h-0 w-0 items-center justify-center">
+      {/* Jupiter, left */}
       <motion.div
-        className="shrink-0"
-        style={{ x: winX, y: winY, scale: zoom, opacity: fade }}
-        initial={{ opacity: 0, scale: 0.6 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: START - 0.4, duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 left-[-14%] z-[5] w-[46vw] max-w-[440px] sm:left-[-2%] sm:w-[30vw] lg:left-[3%]"
+        style={{ x: leftX, y: statueY, opacity: fade }}
+        initial={{ y: 200, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: START - 0.2, duration: 1.8, ease: EASE }}
       >
-        <RoseWindow className="spin-slow block h-[115vw] max-h-[820px] w-[115vw] max-w-[820px] opacity-60 sm:h-[90vw] sm:w-[90vw]" />
+        <img
+          src={IMG.jupiter}
+          alt=""
+          className="w-full"
+          style={{
+            maskImage: 'linear-gradient(180deg, black 70%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(180deg, black 70%, transparent 100%)',
+            filter: 'drop-shadow(0 0 40px rgba(244,225,166,0.18)) sepia(0.12) brightness(0.85)',
+          }}
+        />
       </motion.div>
-      </div>
 
-      <GoldDust density={90} />
-      <Petals count={22} />
+      {/* Neptune, right */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 right-[-20%] z-[5] w-[58vw] max-w-[560px] sm:right-[-6%] sm:w-[38vw] lg:right-[0%]"
+        style={{ x: rightX, y: statueY, opacity: fade }}
+        initial={{ y: 220, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: START, duration: 1.8, ease: EASE }}
+      >
+        <img
+          src={IMG.neptune}
+          alt=""
+          className="w-full"
+          style={{
+            maskImage: 'linear-gradient(180deg, black 72%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(180deg, black 72%, transparent 100%)',
+            filter: 'drop-shadow(0 0 40px rgba(244,225,166,0.18)) sepia(0.12) brightness(0.85)',
+          }}
+        />
+      </motion.div>
 
-      <motion.div className="relative z-10 flex w-full flex-col items-center px-4 pt-24 text-center" style={{ y: liftY }}>
+      <GoldDust density={80} />
+      <Petals count={16} />
+
+      <motion.div className="relative z-10 flex w-full flex-col items-center px-4 pt-20 text-center" style={{ y: contentY }}>
         <motion.p
-          className="font-roman text-[0.65rem] uppercase tracking-[0.55em] text-gold/80 sm:text-xs"
+          className="font-display text-[0.65rem] font-semibold uppercase tracking-[0.45em] text-gold sm:text-xs"
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: START, duration: 1 }}
         >
-          ✠ Anno Domini MMXXVI ✠
+          Drop 001 · Chrome Hearts eyewear
         </motion.p>
 
-        {/* The relic, crowned with a halo */}
+        {/* The glasses, crowned in laurel */}
         <motion.div
-          className="relative mb-4 mt-14 w-[min(84vw,540px)] sm:mb-6 sm:mt-20"
+          className="relative mb-12 mt-14 w-[min(80vw,520px)] sm:mb-16 sm:mt-20"
           style={{ x: glassX, y: glassY, rotateX: rotX, rotateY: rotY, transformPerspective: 900 }}
           initial={{ opacity: 0, scale: 0.7, filter: 'blur(14px)' }}
           animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-          transition={{ delay: START + 0.2, duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ delay: START + 0.2, duration: 1.6, ease: EASE }}
         >
-          <motion.div
-            aria-hidden
-            className="flicker absolute inset-x-0 top-[-24%] mx-auto h-[20%] w-[55%] rounded-[50%] border-[3px] border-gold"
-            style={{
-              boxShadow:
-                '0 0 25px rgba(246,227,168,0.9), 0 0 70px rgba(212,175,98,0.6), inset 0 0 18px rgba(246,227,168,0.7)',
-            }}
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          />
+          <div aria-hidden className="absolute inset-x-[22%] top-[46%] aspect-square -translate-y-1/2">
+            <Laurel delay={START} className="h-full w-full opacity-90" />
+          </div>
           <div
             aria-hidden
-            className="absolute inset-[-15%] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(246,227,168,0.35), rgba(212,175,98,0.12) 40%, transparent 70%)' }}
+            className="absolute inset-[-25%]"
+            style={{ background: 'radial-gradient(closest-side, rgba(244,225,166,0.32), rgba(210,174,98,0.1) 50%, transparent 100%)' }}
           />
           <Magnet padding={120} strength={5}>
             <motion.img
-              src={GLASSES}
-              alt="Chrome Hearts optical frames in black acetate with silver cross hardware"
+              src={IMG.glasses}
+              alt="Chrome Hearts optical frames in black acetate with sterling silver cross hardware"
               className="relative w-full select-none"
               draggable={false}
               animate={{ y: [0, -14, 0], rotate: [-1.5, 1.5, -1.5] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-              style={{
-                filter:
-                  'drop-shadow(0 0 24px rgba(246,227,168,0.4)) drop-shadow(0 40px 40px rgba(0,0,0,0.7))',
-              }}
+              style={{ filter: 'drop-shadow(0 0 30px rgba(244,225,166,0.35)) drop-shadow(0 40px 40px rgba(0,0,0,0.7))' }}
             />
           </Magnet>
         </motion.div>
 
-        <h1 className="font-gothic text-[15vw] leading-[0.95] sm:text-[11vw] lg:text-[9.5rem]" aria-label={TITLE}>
-          {TITLE.split('').map((c, i) => (
-            <motion.span
-              key={i}
-              aria-hidden
-              className="gilded inline-block"
-              initial={{ opacity: 0, y: 60, rotateX: -90, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
-              transition={{ delay: START + 0.6 + i * 0.06, duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              style={{ transformOrigin: 'bottom' }}
-            >
-              {c === ' ' ? ' ' : c}
-            </motion.span>
+        <h1
+          className="flex flex-wrap justify-center gap-x-[0.3em] font-display text-[13vw] font-extrabold leading-[0.95] tracking-tight sm:text-[8.5vw] lg:text-[7.25rem]"
+          aria-label="Lennon Resells"
+        >
+          {TITLE.map((word) => (
+            <span key={word} aria-hidden className="inline-flex">
+              {word.split('').map((c) => {
+                const i = letter++;
+                return (
+                  <motion.span
+                    key={i}
+                    className="gilded inline-block"
+                    initial={{ opacity: 0, y: 70, rotateX: -90, filter: 'blur(10px)' }}
+                    animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
+                    transition={{ delay: START + 0.6 + i * 0.06, duration: 1, ease: EASE }}
+                    style={{ transformOrigin: 'bottom', textShadow: '0 4px 30px rgba(0,0,0,0.5)' }}
+                  >
+                    {c}
+                  </motion.span>
+                );
+              })}
+            </span>
           ))}
         </h1>
 
         <motion.p
-          className="mt-4 max-w-md text-xl italic text-marble/85 sm:text-2xl"
+          className="mt-4 max-w-md text-xl italic text-marble/90 sm:text-2xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: START + 1.5, duration: 1 }}
+          style={{ textShadow: '0 2px 20px rgba(0,0,0,0.8)' }}
         >
-          One relic, blessed in sterling silver. Chrome Hearts, found and kept for you.
+          One pair. Real sterling silver. When it&apos;s gone, it&apos;s gone.
         </motion.p>
 
         <motion.div
@@ -158,27 +207,27 @@ export default function Hero() {
           transition={{ delay: START + 1.8, duration: 1 }}
         >
           <Magnet padding={60} strength={3}>
-            <a href="#relic" className="holy-btn">
-              Behold the relic
+            <a href="#pair" className="holy-btn">
+              See the pair
             </a>
           </Magnet>
           <Magnet padding={60} strength={3}>
             <button type="button" onClick={() => seek()} className="ghost-btn">
-              Seek another piece
+              Request something else
             </button>
           </Magnet>
         </motion.div>
       </motion.div>
 
       <motion.a
-        href="#relic"
-        aria-label="Scroll to the relic"
-        className="absolute inset-x-0 bottom-4 z-10 mx-auto hidden w-max flex-col [@media(min-height:960px)]:flex items-center gap-2 font-roman text-[0.6rem] uppercase tracking-[0.4em] text-gold/70"
+        href="#pair"
+        aria-label="Scroll to the pair"
+        className="absolute inset-x-0 bottom-4 z-10 mx-auto hidden w-max flex-col items-center gap-2 font-display text-[0.6rem] uppercase tracking-[0.4em] text-gold/80 [@media(min-height:960px)]:flex"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: START + 2.4 }}
       >
-        Descend
+        Scroll
         <motion.span
           className="block h-10 w-px bg-gradient-to-b from-gold to-transparent"
           animate={{ scaleY: [0, 1, 0], originY: 0 }}

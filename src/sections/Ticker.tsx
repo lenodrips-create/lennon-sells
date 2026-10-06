@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform, useVelocity, useSpring } from 'framer-motion';
 
-const WORDS = ['Amor', 'Chrome Hearts', 'Fides', 'Lennon Resells', 'Sanctus', 'Argentum .925', 'Gloria', 'Vitrum Sacrum'];
+const WORDS = ['Chrome Hearts', 'Only 1 available', 'Sterling silver', 'Lennon Resells', 'Requests open', 'Ships fast', 'Pics on request', 'Drop 001'];
 
 function Row({ reverse = false }: { reverse?: boolean }) {
   const { scrollY } = useScroll();
@@ -19,13 +19,13 @@ function Row({ reverse = false }: { reverse?: boolean }) {
             <span
               className={
                 i % 2
-                  ? 'font-gothic text-4xl text-gold sm:text-6xl'
-                  : 'font-roman text-3xl uppercase tracking-[0.2em] text-marble/25 sm:text-5xl'
+                  ? 'gilded font-display text-3xl font-bold uppercase sm:text-5xl'
+                  : 'font-display text-3xl uppercase tracking-[0.15em] text-marble/20 sm:text-5xl'
               }
             >
               {w}
             </span>
-            <span className="text-2xl text-rose-bright">✠</span>
+            <span className="text-xl text-imperial-bright">✦</span>
           </span>
         ))}
       </motion.div>
@@ -33,9 +33,9 @@ function Row({ reverse = false }: { reverse?: boolean }) {
   );
 }
 
-export default function LatinMarquee() {
+export default function Ticker() {
   return (
-    <section aria-label="Inscriptions" className="relative overflow-hidden border-y border-gold/20 bg-crypt py-6 sm:py-8">
+    <section aria-label="Highlights" className="relative overflow-hidden border-y border-gold/20 bg-umber py-6 sm:py-8">
       <div className="flex flex-col gap-4">
         <Row />
         <Row reverse />

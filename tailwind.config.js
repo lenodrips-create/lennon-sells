@@ -4,18 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        nave: '#0B0709',
-        crypt: '#150D10',
-        gold: '#D4AF62',
-        'gold-deep': '#9C7A35',
-        marble: '#EFE7DA',
-        rose: '#8E1B2E',
-        'rose-bright': '#C2334B',
-        lapis: '#1D2A5E',
+        ink: '#0F0A07',
+        umber: '#1B130D',
+        gold: '#D2AE62',
+        'gold-deep': '#9A7633',
+        marble: '#EEE7DB',
+        imperial: '#9E2B1F',
+        'imperial-bright': '#C9402C',
+        ochre: '#B98A4E',
+        sky: '#8FB3D1',
       },
       fontFamily: {
-        gothic: ['UnifrakturCook', 'Cinzel', 'serif'],
-        roman: ['Cinzel', 'Times New Roman', 'serif'],
+        display: ['Cinzel', 'Times New Roman', 'serif'],
         body: ['Cormorant Garamond', 'Georgia', 'serif'],
       },
     },
