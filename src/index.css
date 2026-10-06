@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Vatican nocturne: candlelit nave, gilded leaf, marble, cardinal crimson. */
+:root {
+  --nave: #0b0709;
+  --crypt: #150d10;
+  --gold: #d4af62;
+  --gold-light: #f6e3a8;
+  --gold-deep: #9c7a35;
+  --marble: #efe7da;
+  --rose: #8e1b2e;
+  --lapis: #1d2a5e;
+  color-scheme: dark;
+}
+
 *,
 *::before,
 *::after {
@@ -10,16 +23,199 @@
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body,
 #root {
-  background: #0c0c0c;
-  font-family: 'Kanit', sans-serif;
+  background: var(--nave);
+  color: var(--marble);
+  font-family: 'Cormorant Garamond', Georgia, serif;
 }
 
-.hero-heading {
-  background: linear-gradient(180deg, #646973 0%, #bbccd7 100%);
+body {
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--rose);
+  color: var(--marble);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body,
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    cursor: none;
+  }
+}
+
+/* Gilded text with a slow light sweep */
+.gilded {
+  background: linear-gradient(
+    100deg,
+    var(--gold-deep) 0%,
+    var(--gold) 25%,
+    var(--gold-light) 45%,
+    #fffaf0 50%,
+    var(--gold-light) 55%,
+    var(--gold) 75%,
+    var(--gold-deep) 100%
+  );
+  background-size: 250% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: gild 6s linear infinite;
+}
+
+@keyframes gild {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* Film grain over everything, like old fresco plaster */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -4%); }
+  60% { transform: translate(-4%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Falling rose petals */
+.petal {
+  position: absolute;
+  top: -10%;
+  border-radius: 150% 0 150% 0;
+  background: radial-gradient(circle at 30% 30%, #d6475e, var(--rose) 60%, #4d0b17);
+  opacity: 0.85;
+  animation: fall linear infinite;
+  will-change: transform;
+}
+
+@keyframes fall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) rotateX(0deg);
+  }
+  50% {
+    transform: translate3d(60px, 55vh, 0) rotate(200deg) rotateX(180deg);
+  }
+  100% {
+    transform: translate3d(-40px, 115vh, 0) rotate(420deg) rotateX(360deg);
+  }
+}
+
+/* Candle flicker for glows */
+@keyframes flicker {
+  0%, 100% { opacity: 0.9; }
+  20% { opacity: 0.75; }
+  40% { opacity: 1; }
+  55% { opacity: 0.8; }
+  70% { opacity: 0.95; }
+}
+
+.flicker {
+  animation: flicker 3.5s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+.spin-slow {
+  animation: spin-slow 120s linear infinite;
+}
+
+.spin-rev {
+  animation: spin-slow 90s linear infinite reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .petal {
+    display: none;
+  }
+}
+
+/* Buttons */
+.holy-btn,
+.ghost-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  overflow: hidden;
+  border-radius: 999px;
+  padding: 0.95rem 2rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  transition: transform 0.4s, box-shadow 0.4s, background-color 0.4s, color 0.4s;
+}
+
+.holy-btn {
+  color: #1a0f08;
+  background: linear-gradient(120deg, #9c7a35, #d4af62 30%, #f6e3a8 50%, #d4af62 70%, #9c7a35);
+  background-size: 220% 100%;
+  animation: gild 5s linear infinite;
+  box-shadow: 0 0 0 1px rgba(246, 227, 168, 0.6), 0 10px 30px -8px rgba(212, 175, 98, 0.6);
+}
+
+.holy-btn:hover {
+  box-shadow: 0 0 0 1px #f6e3a8, 0 0 40px rgba(246, 227, 168, 0.55);
+}
+
+.ghost-btn {
+  color: var(--marble);
+  border: 1px solid rgba(212, 175, 98, 0.6);
+  background: rgba(11, 7, 9, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.ghost-btn:hover {
+  color: var(--gold);
+  background: rgba(142, 27, 46, 0.35);
+  box-shadow: 0 0 30px rgba(142, 27, 46, 0.6);
+}
+
+.holy-btn:focus-visible,
+.ghost-btn:focus-visible,
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
 }
