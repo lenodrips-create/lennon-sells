@@ -23,7 +23,7 @@ export default function Nav() {
       }}
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 3.2, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ delay: 0.6, duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-8">
         <a href="#top" className="gilded font-display text-xl font-bold tracking-[0.15em] sm:text-2xl" aria-label="Lennon Resells, back to top">

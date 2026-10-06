@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import HaloCursor from './components/HaloCursor';
 import ScrollProgress from './components/ScrollProgress';
 import FloatingSeek from './components/FloatingSeek';
@@ -12,22 +13,29 @@ import Statement from './sections/Statement';
 import Footer from './sections/Footer';
 
 export default function App() {
+  // The site mounts as the intro's light opens up, so its entrance animations play in sync
+  const [entered, setEntered] = useState(false);
+
   return (
-    <div className="grain relative" style={{ overflowX: 'clip' }}>
-      <Intro />
-      <ScrollProgress />
+    <div className="grain relative min-h-screen bg-ink" style={{ overflowX: 'clip' }}>
+      <Intro onReveal={() => setEntered(true)} />
       <HaloCursor />
-      <Nav />
-      <main>
-        <Hero />
-        <Ticker />
-        <Pair />
-        <Request />
-        <Angles />
-        <Statement />
-      </main>
-      <Footer />
-      <FloatingSeek />
+      {entered && (
+        <>
+          <ScrollProgress />
+          <Nav />
+          <main>
+            <Hero />
+            <Ticker />
+            <Pair />
+            <Request />
+            <Angles />
+            <Statement />
+          </main>
+          <Footer />
+          <FloatingSeek />
+        </>
+      )}
     </div>
   );
 }

@@ -8,7 +8,7 @@ import Magnet from '../components/Magnet';
 import { IMG, seek } from '../config';
 
 const TITLE = ['LENNON', 'RESELLS'];
-const START = 3.0; // after the intro columns part
+const START = 0.35; // the hero mounts as the intro opens
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 export default function Hero() {

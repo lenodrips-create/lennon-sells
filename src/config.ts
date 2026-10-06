@@ -5,6 +5,8 @@ export const IMG = {
   jupiter: asset('jupiter.webp'),
   neptune: asset('neptune.webp'),
   painting: asset('painting.webp'),
+  trevi: asset('trevi.webp'),
+  cathedral: asset('cathedral.webp'),
 };
 
 // Scrolls to the requests section.
