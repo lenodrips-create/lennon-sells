@@ -1,4 +1,5 @@
-const asset = (f: string) => `${import.meta.env.BASE_URL}${f}`;
+// The store lives at /shop/, while images sit at the site root.
+const asset = (f: string) => new URL(`../${f}`, document.baseURI).href;
 
 export const IMG = {
   glasses: asset('glasses.webp'),
