@@ -1,6 +1,7 @@
 # HyperFrames intro
 
 The source for the 12-second intro that plays at the top of the home page (`../index.html`).
+The posters use real screenshots of the projects (`assets/*.jpg`).
 
 ```bash
 cd intro

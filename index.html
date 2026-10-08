@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Lennon</title>
-    <meta name="description" content="Lennon (@lenodrips). Make yourself at home." />
+    <title>Lennon · Developer</title>
+    <meta name="description" content="Lennon (@lenodrips), software developer. Kepler, CTerm Studio, keplerbrowser.org and more." />
     <meta name="theme-color" content="#1a100a" />
     <style>
       @font-face {
@@ -37,18 +37,16 @@
         --terracotta: #d9622b;
         --olive: #4f5a2a;
         --mustard: #e9b44c;
+        --blue: #2f4f6f;
         --leather: #b8742f;
-        --wood: #6b3818;
         --ink: #1c120c;
-        --muted: rgba(244, 230, 204, 0.7);
+        --muted: rgba(244, 230, 204, 0.72);
+        --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
       }
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-      }
-      html {
-        scroll-behavior: smooth;
       }
       html,
       body {
@@ -73,28 +71,26 @@
         color: var(--amber);
       }
 
-      /* film grain over everything */
       .grain {
         position: fixed;
         inset: 0;
-        z-index: 50;
+        z-index: 60;
         pointer-events: none;
         opacity: 0.09;
         mix-blend-mode: overlay;
         background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='4'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
       }
-      /* the cursor is a pool of lamp light */
       .lamplight {
         position: fixed;
         left: 0;
         top: 0;
-        z-index: 40;
-        width: 520px;
-        height: 520px;
-        margin: -260px 0 0 -260px;
+        z-index: 50;
+        width: 560px;
+        height: 560px;
+        margin: -280px 0 0 -280px;
         border-radius: 50%;
         pointer-events: none;
-        background: radial-gradient(circle, rgba(255, 179, 92, 0.18), rgba(255, 179, 92, 0) 65%);
+        background: radial-gradient(circle, rgba(255, 179, 92, 0.16), rgba(255, 179, 92, 0) 65%);
         mix-blend-mode: screen;
         opacity: 0;
       }
@@ -103,6 +99,17 @@
           display: none;
         }
       }
+      .progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 70;
+        height: 3px;
+        background: linear-gradient(90deg, var(--terracotta), var(--amber));
+        transform-origin: 0 50%;
+        transform: scaleX(0);
+      }
 
       /* nav */
       .nav {
@@ -110,16 +117,21 @@
         top: 0;
         left: 0;
         right: 0;
-        z-index: 30;
+        z-index: 40;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 18px clamp(16px, 4vw, 48px);
-        transition: background 0.4s;
+        padding: 16px clamp(16px, 4vw, 48px);
+        transition:
+          background 0.4s,
+          transform 0.4s;
       }
       .nav.solid {
-        background: rgba(26, 16, 10, 0.82);
+        background: rgba(26, 16, 10, 0.85);
         backdrop-filter: blur(10px);
+      }
+      .nav.hide {
+        transform: translateY(-100%);
       }
       .nav .logo {
         font-size: 26px;
@@ -132,19 +144,28 @@
       }
       .nav ul {
         display: flex;
-        gap: clamp(14px, 3vw, 32px);
+        gap: clamp(12px, 2.6vw, 30px);
         list-style: none;
       }
       .nav ul a {
-        white-space: nowrap;
-        font-family: "Caveat", cursive;
-        font-weight: 700;
-        font-size: 24px;
+        font-family: var(--mono);
+        font-size: 14px;
         text-decoration: none;
+        white-space: nowrap;
+        color: var(--muted);
+      }
+      .nav ul a::before {
+        content: "./";
+        color: var(--terracotta);
       }
       .nav ul a:hover,
       .nav ul a:focus-visible {
         color: var(--amber);
+      }
+      @media (max-width: 640px) {
+        .nav ul li.wide {
+          display: none;
+        }
       }
 
       /* hero */
@@ -162,33 +183,17 @@
         height: 100%;
         object-fit: cover;
       }
-      @media (max-aspect-ratio: 4/3) {
-        .hero {
-          height: auto;
-          aspect-ratio: 16 / 9;
-          margin-top: 64px;
-        }
-        .replay {
-          bottom: -48px;
-        }
-        .hero {
-          overflow: visible;
-          margin-bottom: 56px;
-        }
-      }
       .replay {
         position: absolute;
         right: clamp(16px, 4vw, 48px);
         bottom: 26px;
         z-index: 2;
-        padding: 8px 20px;
+        padding: 8px 18px;
         border: 1px solid rgba(244, 230, 204, 0.35);
         border-radius: 999px;
         background: rgba(26, 16, 10, 0.55);
         color: var(--cream);
-        font-family: "Caveat", cursive;
-        font-weight: 700;
-        font-size: 22px;
+        font: 13px var(--mono);
         cursor: pointer;
         backdrop-filter: blur(6px);
       }
@@ -197,46 +202,77 @@
         border-color: var(--amber);
         color: var(--amber);
       }
+      @media (max-aspect-ratio: 4/3) {
+        .hero {
+          height: auto;
+          aspect-ratio: 16 / 9;
+          margin: 64px 0 56px;
+          overflow: visible;
+        }
+        .replay {
+          bottom: -46px;
+        }
+      }
 
       section {
         position: relative;
         padding: clamp(80px, 12vw, 160px) clamp(16px, 6vw, 96px);
       }
+      .room {
+        background:
+          radial-gradient(ellipse 70% 60% at 20% 0%, rgba(255, 160, 70, 0.2), transparent 70%),
+          linear-gradient(180deg, var(--wall-2), var(--wall));
+      }
       .label {
         display: inline-block;
-        margin-bottom: 18px;
-        font-size: clamp(26px, 3vw, 36px);
-        transform: rotate(-3deg);
+        margin-bottom: 14px;
+        font-family: var(--mono);
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        color: var(--amber);
+      }
+      .label::before {
+        content: "// ";
+        color: var(--terracotta);
       }
       h2 {
         font-size: clamp(44px, 7.5vw, 110px);
         font-style: italic;
         font-weight: 600;
-        line-height: 1;
+        line-height: 1.02;
         letter-spacing: -0.02em;
       }
-
-      /* the wall behind every section, lit by a lamp */
-      .room {
-        background:
-          radial-gradient(ellipse 70% 60% at 20% 0%, rgba(255, 160, 70, 0.22), transparent 70%),
-          linear-gradient(180deg, var(--wall-2), var(--wall));
+      .split .ch {
+        display: inline-block;
+        will-change: transform;
+      }
+      .split .wd {
+        display: inline-block;
+        overflow: hidden;
+        vertical-align: top;
+        padding-bottom: 0.1em;
       }
 
-      /* plants */
+      /* plants + pendant */
       .plant {
         position: absolute;
         bottom: 0;
-        width: clamp(110px, 16vw, 220px);
+        width: clamp(110px, 15vw, 210px);
+        pointer-events: none;
+      }
+      .plant svg {
+        display: block;
+        width: 100%;
         transform-origin: 50% 100%;
         animation: sway 6s ease-in-out infinite alternate;
-        pointer-events: none;
       }
       .plant.left {
         left: -10px;
       }
       .plant.right {
         right: -10px;
+      }
+      .plant.right svg {
         animation-duration: 7.5s;
         animation-direction: alternate-reverse;
       }
@@ -248,19 +284,17 @@
           transform: rotate(2.5deg);
         }
       }
-
-      /* pendant lamp */
       .pendant {
         position: absolute;
         top: 0;
-        right: clamp(30px, 12vw, 200px);
+        right: clamp(30px, 10vw, 180px);
         width: 110px;
         transform-origin: 50% 0;
         pointer-events: none;
       }
       .pendant .cord {
         width: 2px;
-        height: clamp(60px, 10vw, 130px);
+        height: clamp(50px, 8vw, 110px);
         margin: 0 auto;
         background: #120b07;
       }
@@ -280,110 +314,363 @@
       }
 
       /* about */
+      .about-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: clamp(30px, 5vw, 80px);
+        align-items: center;
+        margin-top: 10px;
+      }
       .about p.big {
-        max-width: 1100px;
-        font-size: clamp(28px, 4.6vw, 64px);
+        font-size: clamp(24px, 3vw, 42px);
         font-weight: 500;
-        line-height: 1.18;
-        letter-spacing: -0.01em;
+        line-height: 1.25;
       }
       .about .word {
         display: inline-block;
-        opacity: 0.18;
+        opacity: 0.16;
       }
       .about em {
         color: var(--amber);
       }
-
-      /* gallery wall */
-      .gallery {
-        padding-bottom: clamp(140px, 16vw, 220px);
+      .monitor {
+        position: relative;
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, #a8672e, #5e3314);
+        box-shadow:
+          0 40px 60px rgba(0, 0, 0, 0.5),
+          inset 0 2px 0 rgba(255, 255, 255, 0.15);
       }
-      .wall {
+      .monitor::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -46px;
+        width: 120px;
+        height: 46px;
+        margin-left: -60px;
+        background: linear-gradient(180deg, #5e3314, #3d200c);
+        clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%);
+      }
+      .screen {
+        min-height: 300px;
+        padding: 22px 22px 26px;
+        border-radius: 10px;
+        background: #120c08;
+        box-shadow: inset 0 0 60px rgba(255, 150, 60, 0.12);
+        font: clamp(12px, 1.25vw, 16px) / 1.7 var(--mono);
+        color: var(--cream);
+        white-space: pre;
+        overflow: hidden;
+      }
+      .screen .bar {
+        display: flex;
+        gap: 7px;
+        margin-bottom: 14px;
+      }
+      .screen .bar i {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: var(--terracotta);
+      }
+      .screen .bar i:nth-child(2) {
+        background: var(--mustard);
+      }
+      .screen .bar i:nth-child(3) {
+        background: #7d8a3f;
+      }
+      .k {
+        color: var(--terracotta);
+      }
+      .s {
+        color: var(--mustard);
+      }
+      .f {
+        color: #9fb05a;
+      }
+      .c {
+        color: rgba(244, 230, 204, 0.4);
+      }
+      .caret {
+        display: inline-block;
+        width: 0.6em;
+        height: 1.1em;
+        vertical-align: -0.2em;
+        background: var(--amber);
+        animation: blink 1s steps(1) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .stats {
         display: grid;
-        grid-template-columns: repeat(12, 1fr);
-        grid-auto-rows: clamp(60px, 7vw, 100px);
-        gap: clamp(14px, 2vw, 28px);
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-top: clamp(60px, 8vw, 110px);
+      }
+      .stat {
+        padding: 22px 20px;
+        border-top: 2px solid rgba(244, 230, 204, 0.18);
+      }
+      .stat b {
+        display: block;
+        font-size: clamp(40px, 5vw, 72px);
+        font-weight: 700;
+        font-style: italic;
+        line-height: 1;
+        color: var(--amber);
+      }
+      .stat span {
+        display: block;
+        margin-top: 10px;
+        font: 13px/1.5 var(--mono);
+        color: var(--muted);
+      }
+      @media (max-width: 860px) {
+        .about-grid {
+          grid-template-columns: 1fr;
+        }
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .monitor {
+          margin-bottom: 40px;
+        }
+      }
+
+      /* work: a gallery wall you scroll sideways through */
+      .work {
+        padding-left: 0;
+        padding-right: 0;
+        overflow: hidden;
+      }
+      .work-head {
+        padding: 0 clamp(16px, 6vw, 96px);
+      }
+      .work-head p {
+        max-width: 560px;
+        margin-top: 18px;
+        font-size: 19px;
+        line-height: 1.55;
+        color: var(--muted);
+      }
+      .track {
+        display: flex;
+        gap: clamp(28px, 4vw, 60px);
+        width: max-content;
+        padding: clamp(50px, 6vw, 80px) clamp(16px, 6vw, 96px) 20px;
+      }
+      .project {
+        width: min(80vw, 470px);
+        flex-shrink: 0;
+        transform-origin: 50% -40px;
+      }
+      .project .frame {
+        padding: 16px;
+        background: var(--ink);
+        box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5);
+      }
+      .project.wood .frame {
+        background: linear-gradient(135deg, #a8672e, #6d3d18);
+      }
+      .project.gold .frame {
+        background: linear-gradient(135deg, #e9c27a, #9c6a24);
+      }
+      .art {
+        position: relative;
+        height: 270px;
+        overflow: hidden;
+        border: 5px solid var(--paper);
+      }
+      .card-body {
+        padding: 24px 6px 0;
+      }
+      .card-body .meta {
+        font: 13px var(--mono);
+        color: var(--amber);
+      }
+      .card-body h3 {
+        margin: 8px 0 10px;
+        font-size: clamp(30px, 3vw, 40px);
+        font-style: italic;
+        font-weight: 700;
+        line-height: 1.05;
+      }
+      .card-body p {
+        font-size: 17px;
+        line-height: 1.55;
+        color: var(--muted);
+      }
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 16px 0;
+      }
+      .tags span {
+        padding: 5px 11px;
+        border: 1px solid rgba(244, 230, 204, 0.25);
+        border-radius: 999px;
+        font: 12px var(--mono);
+        color: var(--cream);
+      }
+      .card-links {
+        display: flex;
+        gap: 18px;
+        font: 14px var(--mono);
+      }
+      .card-links a {
+        text-decoration: none;
+        color: var(--amber);
+        border-bottom: 1px solid transparent;
+      }
+      .card-links a:hover,
+      .card-links a:focus-visible {
+        border-color: var(--amber);
+      }
+      .art img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .project:hover .art img {
+        transform: scale(1.06);
+      }
+      .work-hint {
+        padding: 10px clamp(16px, 6vw, 96px) 0;
+        font: 13px var(--mono);
+        color: var(--muted);
+      }
+      @media (max-width: 899px) {
+        .track {
+          flex-direction: column;
+          width: auto;
+          align-items: center;
+        }
+        .project {
+          width: min(100%, 520px);
+        }
+        .work-hint {
+          display: none;
+        }
+      }
+
+      /* stack: the record shelf */
+      .marquee {
+        overflow: hidden;
+        padding: 18px 0;
+        white-space: nowrap;
+        border-block: 1px solid rgba(244, 230, 204, 0.12);
+        background: var(--ink);
+      }
+      .marquee .row {
+        display: inline-block;
+        font-size: clamp(34px, 5vw, 70px);
+        font-style: italic;
+        font-weight: 700;
+        will-change: transform;
+      }
+      .marquee .row span {
+        margin: 0 0.4em;
+        color: var(--terracotta);
+        font-style: normal;
+      }
+      .marquee .row.alt {
+        display: block;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(244, 230, 204, 0.5);
+      }
+      .stack {
+        background: linear-gradient(180deg, var(--wall), #2e1b10);
+      }
+      .shelves {
         max-width: 1200px;
         margin: clamp(40px, 6vw, 80px) auto 0;
       }
-      .frame {
+      .shelf {
         position: relative;
-        padding: clamp(8px, 1vw, 14px);
-        background: var(--ink);
-        box-shadow: 0 24px 40px rgba(0, 0, 0, 0.45);
-        transform-origin: 50% -30px;
-        transition: transform 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: clamp(10px, 2vw, 24px);
+        padding-bottom: 24px;
+        margin-bottom: clamp(60px, 7vw, 90px);
       }
-      .frame.wood {
-        background: linear-gradient(135deg, #a8672e, #6d3d18);
+      .shelf::after {
+        content: "";
+        position: absolute;
+        left: -3%;
+        right: -3%;
+        bottom: 0;
+        height: 24px;
+        border-radius: 4px;
+        background: linear-gradient(180deg, #8a4b22, #4e2810);
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.5);
       }
-      .frame.gold {
-        background: linear-gradient(135deg, #e9c27a, #9c6a24);
+      .lp {
+        position: relative;
+        aspect-ratio: 1;
+        cursor: pointer;
+        outline: none;
       }
-      .frame:hover {
-        transform: rotate(var(--tilt, 2deg)) !important;
+      .lp .disc {
+        position: absolute;
+        top: 5%;
+        left: 5%;
+        width: 90%;
+        aspect-ratio: 1;
+        transition: transform 0.6s cubic-bezier(0.3, 1.3, 0.5, 1);
       }
-      .poster {
+      .lp .vinyl {
         width: 100%;
         height: 100%;
+        border-radius: 50%;
+        background: repeating-radial-gradient(circle, #141414 0 2px, #222 2px 4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .lp .vinyl::after {
+        content: "";
+        width: 36%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, var(--lbl, var(--terracotta)) 0 75%, var(--paper) 75% 80%, var(--lbl, var(--terracotta)) 80%);
+      }
+      .lp .sleeve {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        padding: clamp(8px, 1.2vw, 16px);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        padding: clamp(10px, 1.6vw, 22px);
-        border: clamp(3px, 0.4vw, 5px) solid var(--paper);
-        overflow: hidden;
+        box-shadow: 0 14px 24px rgba(0, 0, 0, 0.45);
       }
-      .poster .no {
-        font-family: "Caveat", cursive;
-        font-weight: 700;
-        font-size: clamp(16px, 1.8vw, 26px);
+      .lp .sleeve small {
+        font: clamp(9px, 0.9vw, 12px) var(--mono);
+        opacity: 0.8;
       }
-      .poster .t {
-        font-size: clamp(22px, 3vw, 46px);
-        font-weight: 800;
-        line-height: 0.95;
-        letter-spacing: -0.02em;
+      .lp .sleeve b {
+        font-size: clamp(15px, 1.9vw, 26px);
+        font-style: italic;
+        line-height: 1;
       }
-      .poster .d {
-        font-family: system-ui, sans-serif;
-        font-size: clamp(12px, 1.1vw, 15px);
-        line-height: 1.45;
-        opacity: 0.85;
+      .lp:hover .disc,
+      .lp:focus-visible .disc,
+      .lp.out .disc {
+        transform: translateY(-48%);
       }
-      .shape {
-        align-self: center;
-        width: 38%;
-        aspect-ratio: 1;
-        border-radius: 50%;
-      }
-      .f1 {
-        grid-column: 1 / span 4;
-        grid-row: span 5;
-      }
-      .f2 {
-        grid-column: 5 / span 3;
-        grid-row: span 3;
-      }
-      .f3 {
-        grid-column: 8 / span 5;
-        grid-row: span 4;
-      }
-      .f4 {
-        grid-column: 5 / span 3;
-        grid-row: span 3;
-      }
-      .f5 {
-        grid-column: 8 / span 2;
-        grid-row: span 2;
-      }
-      .f6 {
-        grid-column: 10 / span 3;
-        grid-row: span 3;
-      }
-      .f7 {
-        grid-column: 1 / span 4;
-        grid-row: span 2;
+      .lp:focus-visible .sleeve {
+        outline: 3px solid var(--amber);
+        outline-offset: 4px;
       }
       .terracotta {
         background: var(--terracotta);
@@ -402,163 +689,83 @@
         color: var(--ink);
       }
       .blue {
-        background: #2f4f6f;
+        background: var(--blue);
         color: var(--cream);
       }
-      .round {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: var(--terracotta);
-        color: var(--ink);
-        border: clamp(4px, 0.6vw, 8px) solid var(--paper);
-        text-align: center;
-        font-weight: 800;
-        font-size: clamp(14px, 1.6vw, 22px);
-        line-height: 1;
-      }
-      .f5 .frame-inner {
-        width: 100%;
-        height: 100%;
-      }
-      .f5 {
-        padding: 0;
-        background: none;
-        box-shadow: none;
-      }
-      .sunburst {
-        background: radial-gradient(circle at 50% 110%, var(--mustard) 0 30%, var(--terracotta) 30% 45%, #8a3a1a 45% 60%, var(--olive) 60%);
-      }
-      @media (max-width: 760px) {
-        .wall {
-          grid-template-columns: repeat(2, 1fr);
-          grid-auto-rows: auto;
-        }
-        .wall > * {
-          grid-column: auto / span 1 !important;
-          grid-row: auto !important;
-          aspect-ratio: 3 / 4;
-        }
-        .wall > .f3,
-        .wall > .f7 {
-          grid-column: 1 / -1 !important;
-          aspect-ratio: 16 / 9;
-        }
-        .wall > .f5 {
-          grid-column: 1 / -1 !important;
-          order: 1;
-          aspect-ratio: 1;
-          width: 40%;
-          justify-self: center;
-          align-self: center;
-        }
-        .wall > .f7 {
-          order: 2;
-        }
-        .f7 .no {
-          display: none;
-        }
-        .nav ul li.wide {
-          display: none;
-        }
-      }
-
-      /* record shelf */
-      .records {
-        background: linear-gradient(180deg, var(--wall), #2e1b10);
-      }
-      .shelf {
-        position: relative;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: clamp(16px, 3vw, 40px);
-        max-width: 1200px;
-        margin: clamp(40px, 6vw, 80px) auto 0;
-        padding-bottom: 26px;
-      }
-      .shelf::after {
-        content: "";
-        position: absolute;
-        left: -4%;
-        right: -4%;
-        bottom: 0;
-        height: 26px;
-        border-radius: 4px;
-        background: linear-gradient(180deg, #8a4b22, #4e2810);
-        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.5);
-      }
-      .lp {
-        position: relative;
-        aspect-ratio: 1;
-        cursor: pointer;
-      }
-      .lp .disc {
-        position: absolute;
-        top: 4%;
-        left: 4%;
-        width: 92%;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        background: repeating-radial-gradient(circle, #141414 0 2px, #222 2px 4px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.6s cubic-bezier(0.3, 1.3, 0.5, 1);
-      }
-      .lp .disc::after {
-        content: "";
-        width: 36%;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        background: var(--lbl, var(--terracotta));
-        box-shadow: inset 0 0 0 clamp(4px, 0.8vw, 10px) rgba(0, 0, 0, 0.15);
-      }
-      .lp .sleeve {
-        position: relative;
-        z-index: 1;
-        width: 100%;
-        height: 100%;
-        padding: clamp(10px, 1.6vw, 22px);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45);
-      }
-      .lp .sleeve .side {
-        font-family: "Caveat", cursive;
-        font-weight: 700;
-        font-size: clamp(16px, 1.8vw, 24px);
-      }
-      .lp .sleeve .title {
-        font-size: clamp(20px, 2.6vw, 38px);
-        font-style: italic;
-        font-weight: 700;
-        line-height: 0.95;
-      }
-      .lp:hover .disc,
-      .lp:focus-visible .disc,
-      .lp.out .disc {
-        transform: translateY(-46%) rotate(200deg);
-      }
-      .lp:focus-visible {
-        outline: 3px solid var(--amber);
-        outline-offset: 6px;
-      }
       .now {
-        margin-top: 40px;
         text-align: center;
-        font-size: clamp(24px, 3vw, 34px);
-        min-height: 1.4em;
+        font: clamp(14px, 1.4vw, 17px) var(--mono);
+        color: var(--amber);
+        min-height: 1.5em;
       }
       @media (max-width: 760px) {
         .shelf {
-          grid-template-columns: repeat(2, 1fr);
-          row-gap: 90px;
+          grid-template-columns: repeat(3, 1fr);
+          row-gap: 70px;
         }
       }
 
-      /* checkerboard rug */
+      /* process */
+      .process {
+        overflow: hidden;
+      }
+      .steps {
+        position: relative;
+        max-width: 1100px;
+        margin: clamp(50px, 7vw, 90px) auto 0;
+      }
+      .steps svg.wire {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        pointer-events: none;
+      }
+      .step {
+        position: relative;
+        width: min(46%, 420px);
+        padding: 26px 26px 30px;
+        margin-bottom: clamp(40px, 6vw, 70px);
+        background: var(--paper);
+        color: var(--ink);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      }
+      .step:nth-child(odd of .step) {
+        margin-left: auto;
+      }
+      .step::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        width: 70px;
+        height: 22px;
+        margin-left: -35px;
+        background: rgba(233, 180, 76, 0.75);
+        transform: rotate(-3deg);
+      }
+      .step .n {
+        font: 13px var(--mono);
+        color: var(--terracotta);
+      }
+      .step h3 {
+        margin: 6px 0 8px;
+        font-size: 34px;
+        font-style: italic;
+      }
+      .step p {
+        font-size: 17px;
+        line-height: 1.5;
+      }
+      @media (max-width: 700px) {
+        .step {
+          width: 88%;
+        }
+      }
+
+      /* rug + contact */
       .rug-zone {
         position: relative;
         height: clamp(220px, 30vw, 380px);
@@ -585,73 +792,58 @@
         transform: rotateX(58deg);
         transform-origin: 50% 0;
       }
-
-      /* say hi */
-      .hi {
+      .contact {
         text-align: center;
         overflow: hidden;
       }
-      .hi h2 .line {
-        display: block;
-        overflow: hidden;
-        padding-bottom: 0.08em;
+      .contact h2 {
+        font-size: clamp(52px, 11vw, 170px);
       }
-      .hi h2 .line > span {
-        display: block;
-      }
-      .hi h2 .line:last-child {
+      .contact h2 .accent {
         color: var(--amber);
       }
-      .hi p {
+      .contact p {
         max-width: 560px;
         margin: 26px auto 44px;
         color: var(--muted);
-        font-size: 21px;
+        font-size: 20px;
         line-height: 1.55;
       }
       .links {
+        position: relative;
+        z-index: 1;
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
         gap: 14px;
-        position: relative;
-        z-index: 1;
       }
       .links a {
-        padding: 14px 30px;
+        display: inline-block;
+        padding: 14px 28px;
         border-radius: 999px;
         background: var(--leather);
         color: var(--ink);
-        font-weight: 700;
-        font-size: 18px;
+        font: 600 15px var(--mono);
         text-decoration: none;
         box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2);
-        transition:
-          transform 0.2s,
-          background 0.2s;
       }
       .links a:hover,
       .links a:focus-visible {
         background: var(--amber);
-        transform: translateY(-3px);
       }
-
       footer {
-        padding: 36px clamp(16px, 6vw, 96px);
+        padding: 34px clamp(16px, 6vw, 96px);
         display: flex;
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 10px;
         color: var(--muted);
-        font-size: 15px;
-        background: var(--night);
+        font: 13px var(--mono);
       }
 
       @media (prefers-reduced-motion: reduce) {
-        html {
-          scroll-behavior: auto;
-        }
-        .plant {
+        .plant svg,
+        .caret {
           animation: none;
         }
         .about .word {
@@ -661,6 +853,7 @@
     </style>
   </head>
   <body>
+    <div class="progress" id="progress" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
     <div class="lamplight" id="lamplight" aria-hidden="true"></div>
 
@@ -668,19 +861,20 @@
       <a class="logo" href="#top">Lennon<span>.</span></a>
       <ul>
         <li class="wide"><a href="#about">about</a></li>
-        <li><a href="#wall">the wall</a></li>
-        <li><a href="#records">records</a></li>
-        <li><a href="#hi">say hi</a></li>
+        <li><a href="#work">work</a></li>
+        <li><a href="#stack">stack</a></li>
+        <li class="wide"><a href="#process">process</a></li>
+        <li><a href="#contact">contact</a></li>
       </ul>
     </nav>
 
     <header class="hero" id="top">
       <!-- intro.mp4 / intro.webm are rendered with HyperFrames from intro/index.html -->
-      <video id="intro" autoplay muted playsinline preload="auto" aria-label="Animated intro: Hey, I'm Lennon. Make yourself at home.">
+      <video id="intro" autoplay muted playsinline preload="auto" aria-label="Animated intro: Hey, I'm Lennon, software developer.">
         <source src="./intro.webm" type="video/webm" />
         <source src="./intro.mp4" type="video/mp4" />
       </video>
-      <button class="replay" id="replay" type="button">↻ replay</button>
+      <button class="replay" id="replay" type="button">↻ replay intro</button>
     </header>
 
     <section class="about room" id="about">
@@ -689,134 +883,186 @@
         <div class="shade"></div>
         <div class="bulb"></div>
       </div>
-      <span class="label hand">a little about me</span>
-      <p class="big" id="about-text">
-        I'm Lennon, but you might know me as <em>@lenodrips</em>. My favorite places feel lived in: warm lamps, records on the
-        wall, plants everywhere. That's how I want everything I make to feel. <em>Cozy</em>, a little loud, and very me.
-      </p>
-      <svg class="plant right" viewBox="0 0 260 420" aria-hidden="true">
-        <path d="M130 420 C140 300 200 250 250 220 C190 230 140 270 128 330 Z" fill="#3f4f22" />
-        <path d="M130 420 C120 270 60 200 8 180 C50 230 100 300 122 360 Z" fill="#56692c" />
-        <path d="M130 420 C150 250 140 110 110 30 C100 150 110 280 120 400 Z" fill="#4a5c26" />
-        <path d="M130 420 C170 330 220 320 258 300 C210 340 160 370 134 410 Z" fill="#33421b" />
-        <rect x="70" y="360" width="120" height="60" rx="10" fill="#d9622b" />
-      </svg>
-    </section>
+      <span class="label">about</span>
+      <h2 class="split">Hey, I'm Lennon.</h2>
+      <div class="about-grid">
+        <p class="big" id="about-text">
+          I'm a developer who builds things people actually use, from <em>Kepler</em>, a Chromium-based web browser written in C++,
+          to <em>CTerm Studio</em>, a code studio that runs right in your browser on WebAssembly. I care about how software
+          feels: fast, warm and a little bit fun.
+        </p>
+        <div class="monitor" aria-label="Code on a monitor describing Lennon">
+          <div class="screen" id="screen"><div class="bar"><i></i><i></i><i></i></div><code id="code"><span class="c">// lennon.js</span>
+<span class="k">const</span> lennon = {
+  role: <span class="s">"software developer"</span>,
+  builds: [<span class="s">"browsers"</span>, <span class="s">"studios"</span>, <span class="s">"sites"</span>],
+  stack: [<span class="s">"C++"</span>, <span class="s">"Qt"</span>, <span class="s">"Rust"</span>, <span class="s">"React"</span>],
+  setup: <span class="s">"lamp on, music up"</span>,
+};
 
-    <section class="gallery room" id="wall">
-      <span class="label hand">on my wall</span>
-      <h2>The gallery wall.</h2>
-      <div class="wall">
-        <div class="frame f1" style="--tilt: -2deg">
-          <div class="poster terracotta">
-            <span class="no">no. 01</span>
-            <div class="shape" style="background: var(--paper)"></div>
-            <div>
-              <div class="t">Creator</div>
-              <p class="d">Fits, photos and visuals. If it can be made, I want it to look good.</p>
-            </div>
-          </div>
-        </div>
-        <div class="frame wood f2" style="--tilt: 2deg">
-          <div class="poster olive">
-            <span class="no">no. 02</span>
-            <div class="t">Builder</div>
-            <p class="d">Websites, brands, side projects.</p>
-          </div>
-        </div>
-        <div class="frame f3" style="--tilt: 1.5deg">
-          <div class="poster sunburst" style="color: var(--cream)">
-            <span class="no">est. 2026</span>
-            <div class="t" style="font-style: italic">Stay cozy.</div>
-          </div>
-        </div>
-        <div class="frame gold f4" style="--tilt: -1.5deg">
-          <div class="poster paper">
-            <span class="no">no. 03</span>
-            <div class="shape" style="background: #2f4f6f; border-radius: 12px; width: 30%"></div>
-            <div class="t">Dreamer</div>
-          </div>
-        </div>
-        <div class="frame f5" style="--tilt: 8deg">
-          <div class="frame-inner round">LEN<br />NON</div>
-        </div>
-        <div class="frame wood f6" style="--tilt: -2deg">
-          <div class="poster mustard">
-            <span class="no">side A</span>
-            <div class="t" style="font-style: italic">Always dripping</div>
-          </div>
-        </div>
-        <div class="frame f7" style="--tilt: 1deg">
-          <div class="poster blue" style="flex-direction: row; align-items: center">
-            <div class="t">Good vibes only.</div>
-            <span class="no" style="color: var(--amber)">↗ hang here</span>
-          </div>
+<span class="f">ship</span>(lennon); <span class="c">// always</span></code><span class="caret"></span></div>
         </div>
       </div>
-      <svg class="plant left" viewBox="0 0 260 420" aria-hidden="true">
+      <div class="stats">
+        <div class="stat"><b data-count="5">0</b><span>projects shipped</span></div>
+        <div class="stat"><b data-count="12">0</b><span>tools in rotation</span></div>
+        <div class="stat"><b data-count="70" data-suffix="+">0</b><span>tracker networks Kepler blocks</span></div>
+        <div class="stat"><b data-count="3">0</b><span>languages: C++, Rust, JS</span></div>
+      </div>
+    </section>
+
+    <section class="work room" id="work">
+      <div class="work-head">
+        <span class="label">selected work</span>
+        <h2 class="split">On the wall.</h2>
+        <p>Things I've designed, built and shipped. Every one of them is open source.</p>
+      </div>
+      <div class="work-hint">scroll →</div>
+      <div class="track" id="track">
+        <article class="project">
+          <div class="frame">
+            <div class="art"><img src="./work/kepler.jpg" alt="Kepler browser with its AI side panel open" loading="lazy" /></div>
+          </div>
+          <div class="card-body">
+            <div class="meta">01 · desktop app</div>
+            <h3>Kepler</h3>
+            <p>A web browser from another orbit. Space-themed UI, a built-in ad and tracker blocker, private Orbit mode, session restore and an animated new tab page.</p>
+            <div class="tags"><span>C++17</span><span>Qt 6</span><span>Qt WebEngine</span><span>CMake</span><span>GitHub Actions</span></div>
+            <div class="card-links"><a href="https://github.com/lenodrips-create/kepler" target="_blank" rel="noopener">code ↗</a></div>
+          </div>
+        </article>
+        <article class="project wood">
+          <div class="frame">
+            <div class="art"><img src="./work/cterm-studio.jpg" alt="CTerm Studio with editor, live preview and two shells" loading="lazy" /></div>
+          </div>
+          <div class="card-body">
+            <div class="meta">02 · web app</div>
+            <h3>CTerm Studio</h3>
+            <p>A code studio that runs entirely in the browser: editor, live preview, file explorer and two shells, all powered by a C core compiled to WebAssembly.</p>
+            <div class="tags"><span>C</span><span>WebAssembly</span><span>React 19</span><span>Vite</span><span>motion</span></div>
+            <div class="card-links"><a href="https://github.com/lenodrips-create/cterm-studio" target="_blank" rel="noopener">code ↗</a></div>
+          </div>
+        </article>
+        <article class="project">
+          <div class="frame">
+            <div class="art"><img src="./work/keplerbrowser-org.jpg" alt="keplerbrowser.org home page" loading="lazy" /></div>
+          </div>
+          <div class="card-body">
+            <div class="meta">03 · website + server</div>
+            <h3>keplerbrowser.org</h3>
+            <p>The download site for Kepler: starfield, reveals and a docs page, served by a zero-dependency Rust release server with a JSON releases API.</p>
+            <div class="tags"><span>Rust</span><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+            <div class="card-links">
+              <a href="https://keplerbrowser.org" target="_blank" rel="noopener">live ↗</a>
+              <a href="https://github.com/lenodrips-create/kepler-download-website" target="_blank" rel="noopener">code ↗</a>
+            </div>
+          </div>
+        </article>
+        <article class="project gold">
+          <div class="frame">
+            <div class="art"><img src="./work/forgivn.jpg" alt="FORGIVN storefront hero" loading="lazy" /></div>
+          </div>
+          <div class="card-body">
+            <div class="meta">04 · storefront</div>
+            <h3>FORGIVN</h3>
+            <p>A storefront for a Christian clothing brand: dove intro, filterable products, a saved cart, a contact form and scroll animations, all in one dependency-free file.</p>
+            <div class="tags"><span>HTML</span><span>CSS</span><span>JavaScript</span><span>a11y</span></div>
+            <div class="card-links"><a href="https://github.com/lenodrips-create/zay-website" target="_blank" rel="noopener">code ↗</a></div>
+          </div>
+        </article>
+        <article class="project wood">
+          <div class="frame">
+            <div class="art"><img src="./work/portfolio.jpg" alt="The last frame of this site's HyperFrames intro" loading="lazy" /></div>
+          </div>
+          <div class="card-body">
+            <div class="meta">05 · this site</div>
+            <h3>This portfolio</h3>
+            <p>The intro is an HTML composition rendered to video with HyperFrames; everything else is scroll-driven with GSAP.</p>
+            <div class="tags"><span>HyperFrames</span><span>GSAP</span><span>ScrollTrigger</span><span>Vite</span></div>
+            <div class="card-links"><a href="https://github.com/lenodrips-create/lennon-sells" target="_blank" rel="noopener">code ↗</a></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="row" id="mq1">C++ <span>✦</span> Qt 6 <span>✦</span> Rust <span>✦</span> WebAssembly <span>✦</span> React <span>✦</span> JavaScript <span>✦</span> C++ <span>✦</span> Qt 6 <span>✦</span> Rust <span>✦</span> WebAssembly <span>✦</span></div>
+      <div class="row alt" id="mq2">GSAP <span>✦</span> HyperFrames <span>✦</span> Vite <span>✦</span> CMake <span>✦</span> GitHub Actions <span>✦</span> HTML &amp; CSS <span>✦</span> GSAP <span>✦</span> HyperFrames <span>✦</span> Vite <span>✦</span></div>
+    </div>
+
+    <section class="stack" id="stack">
+      <span class="label">stack</span>
+      <h2 class="split">On rotation.</h2>
+      <div class="shelves">
+        <div class="shelf">
+          <div class="lp" tabindex="0" data-now="C++ → Kepler's whole browser core" style="--lbl: var(--terracotta)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve terracotta"><small>lang</small><b>C++</b></div></div>
+          <div class="lp" tabindex="0" data-now="Qt 6 → Kepler's UI and WebEngine" style="--lbl: #7d8a3f"><div class="disc"><div class="vinyl"></div></div><div class="sleeve olive"><small>framework</small><b>Qt 6</b></div></div>
+          <div class="lp" tabindex="0" data-now="Rust → the keplerbrowser.org release server" style="--lbl: var(--mustard)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve blue"><small>lang</small><b>Rust</b></div></div>
+          <div class="lp" tabindex="0" data-now="C → CTerm Studio's shell and file system" style="--lbl: var(--blue)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve mustard"><small>lang</small><b>C</b></div></div>
+          <div class="lp" tabindex="0" data-now="WebAssembly → running CTerm's C core in the browser" style="--lbl: var(--terracotta)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve paper"><small>runtime</small><b>WASM</b></div></div>
+          <div class="lp" tabindex="0" data-now="JavaScript → every site on this page" style="--lbl: var(--olive)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve terracotta"><small>lang</small><b>JS</b></div></div>
+        </div>
+        <div class="shelf">
+          <div class="lp" tabindex="0" data-now="React → the CTerm Studio landing page" style="--lbl: var(--blue)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve olive"><small>library</small><b>React</b></div></div>
+          <div class="lp" tabindex="0" data-now="Vite → builds for CTerm and this site" style="--lbl: var(--terracotta)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve mustard"><small>tooling</small><b>Vite</b></div></div>
+          <div class="lp" tabindex="0" data-now="GSAP → all the scroll animation you're seeing" style="--lbl: #7d8a3f"><div class="disc"><div class="vinyl"></div></div><div class="sleeve paper"><small>motion</small><b>GSAP</b></div></div>
+          <div class="lp" tabindex="0" data-now="HyperFrames → the intro video at the top" style="--lbl: var(--mustard)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve terracotta"><small>video</small><b>Hyper­Frames</b></div></div>
+          <div class="lp" tabindex="0" data-now="CMake → building Kepler on every platform" style="--lbl: var(--terracotta)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve blue"><small>build</small><b>CMake</b></div></div>
+          <div class="lp" tabindex="0" data-now="GitHub Actions → Kepler releases and site deploys" style="--lbl: var(--olive)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve mustard"><small>CI/CD</small><b>Actions</b></div></div>
+        </div>
+      </div>
+      <p class="now" id="now" aria-live="polite">hover a record to see where I use it</p>
+    </section>
+
+    <section class="process room" id="process">
+      <span class="label">process</span>
+      <h2 class="split">How I ship.</h2>
+      <div class="steps" id="steps">
+        <svg class="wire" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+          <path id="wire" d="M 760 40 C 760 200, 240 180, 240 330 S 760 480, 760 620 S 240 780, 240 960" fill="none" stroke="#d9622b" stroke-width="4" stroke-dasharray="1" vector-effect="non-scaling-stroke" />
+        </svg>
+        <div class="step"><div class="n">01</div><h3>Sketch it</h3><p>Figure out how it should feel before writing a line. Then pick the stack that fits, not the one that's trending.</p></div>
+        <div class="step"><div class="n">02</div><h3>Build it</h3><p>Get the core working first: a browser that loads pages, a shell that runs commands, a cart that adds up.</p></div>
+        <div class="step"><div class="n">03</div><h3>Polish it</h3><p>Animations, keyboard support, small screens, reduced motion. The details are what make people stay.</p></div>
+        <div class="step"><div class="n">04</div><h3>Ship it</h3><p>CI builds, release pages and GitHub Pages deploys. If it isn't shipped, it doesn't count.</p></div>
+      </div>
+      <div class="plant left" data-speed="0.2"><svg viewBox="0 0 260 420" aria-hidden="true">
         <path d="M130 420 C120 300 60 260 10 230 C70 230 120 270 132 330 Z" fill="#3f4f22" />
         <path d="M130 420 C140 280 200 210 255 190 C210 240 160 300 138 360 Z" fill="#56692c" />
         <path d="M130 420 C110 260 120 120 150 20 C160 140 150 280 140 400 Z" fill="#4a5c26" />
         <path d="M130 420 C90 330 40 330 0 330 C50 350 100 370 126 410 Z" fill="#33421b" />
         <rect x="70" y="360" width="120" height="60" rx="10" fill="#b8742f" />
-      </svg>
-    </section>
-
-    <section class="records" id="records">
-      <span class="label hand">on rotation</span>
-      <h2>The record shelf.</h2>
-      <div class="shelf">
-        <div class="lp" tabindex="0" data-now="late nights, lamp on, music up" style="--lbl: var(--terracotta)">
-          <div class="disc"></div>
-          <div class="sleeve terracotta"><span class="side">vol. 1</span><span class="title">Late Nights</span></div>
-        </div>
-        <div class="lp" tabindex="0" data-now="putting fits together" style="--lbl: var(--mustard)">
-          <div class="disc"></div>
-          <div class="sleeve olive"><span class="side">vol. 2</span><span class="title">Good Fits</span></div>
-        </div>
-        <div class="lp" tabindex="0" data-now="sketching the next big thing" style="--lbl: #2f4f6f">
-          <div class="disc"></div>
-          <div class="sleeve mustard"><span class="side">vol. 3</span><span class="title">Big Ideas</span></div>
-        </div>
-        <div class="lp" tabindex="0" data-now="the drip, always" style="--lbl: var(--olive)">
-          <div class="disc"></div>
-          <div class="sleeve paper"><span class="side">vol. 4</span><span class="title">The Drip</span></div>
-        </div>
-      </div>
-      <p class="now hand" id="now" aria-live="polite">hover a record to pull it out</p>
+      </svg></div>
     </section>
 
     <div class="rug-zone" aria-hidden="true"><div class="rug" id="rug"></div></div>
 
-    <section class="hi room" id="hi">
-      <span class="label hand">pull up a seat</span>
-      <h2>
-        <span class="line"><span>Come hang,</span></span>
-        <span class="line"><span>say hi.</span></span>
-      </h2>
-      <p>Got an idea, a collab, or just want to talk records and room setups? My door's open.</p>
+    <section class="contact room" id="contact">
+      <span class="label">contact</span>
+      <h2 class="split">Let's build <span class="accent">something.</span></h2>
+      <p>Got a project, an idea or a bug that needs squashing? I'm always down to talk code.</p>
       <div class="links">
-        <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.instagram.com/lenodrips/" target="_blank" rel="noopener">Instagram</a>
-        <a href="https://www.tiktok.com/@lenodrips" target="_blank" rel="noopener">TikTok</a>
+        <a class="mag" href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub</a>
+        <a class="mag" href="https://www.instagram.com/lenodrips/" target="_blank" rel="noopener">Instagram</a>
+        <a class="mag" href="https://www.tiktok.com/@lenodrips" target="_blank" rel="noopener">TikTok</a>
       </div>
-      <svg class="plant left" viewBox="0 0 260 420" aria-hidden="true">
+      <div class="plant left" data-speed="0.25"><svg viewBox="0 0 260 420" aria-hidden="true">
         <path d="M130 420 C120 300 60 260 10 230 C70 230 120 270 132 330 Z" fill="#3f4f22" />
         <path d="M130 420 C140 280 200 210 255 190 C210 240 160 300 138 360 Z" fill="#56692c" />
         <path d="M130 420 C110 260 120 120 150 20 C160 140 150 280 140 400 Z" fill="#4a5c26" />
         <rect x="70" y="360" width="120" height="60" rx="10" fill="#d9622b" />
-      </svg>
-      <svg class="plant right" viewBox="0 0 260 420" aria-hidden="true">
+      </svg></div>
+      <div class="plant right" data-speed="0.35"><svg viewBox="0 0 260 420" aria-hidden="true">
         <path d="M130 420 C140 300 200 250 250 220 C190 230 140 270 128 330 Z" fill="#3f4f22" />
         <path d="M130 420 C120 270 60 200 8 180 C50 230 100 300 122 360 Z" fill="#56692c" />
         <path d="M130 420 C150 250 140 110 110 30 C100 150 110 280 120 400 Z" fill="#4a5c26" />
         <rect x="70" y="360" width="120" height="60" rx="10" fill="#b8742f" />
-      </svg>
+      </svg></div>
     </section>
 
     <footer>
-      <span>© 2026 Lennon</span>
-      <span>Intro animated with HyperFrames</span>
+      <span>© 2026 Lennon · @lenodrips</span>
+      <span>intro rendered with HyperFrames · motion by GSAP</span>
     </footer>
 
     <script src="./js/gsap.min.js"></script>
@@ -828,15 +1074,10 @@
         video.play();
       });
 
-      const nav = document.getElementById("nav");
-      const onScroll = () => nav.classList.toggle("solid", window.scrollY > window.innerHeight * 0.8);
-      window.addEventListener("scroll", onScroll, { passive: true });
-      onScroll();
-
       // record shelf: pull a record out on hover / focus / tap
       const now = document.getElementById("now");
       document.querySelectorAll(".lp").forEach((lp) => {
-        const show = () => (now.textContent = "now spinning: " + lp.dataset.now);
+        const show = () => (now.textContent = "▶ " + lp.dataset.now);
         lp.addEventListener("pointerenter", show);
         lp.addEventListener("focus", show);
         lp.addEventListener("click", () => {
@@ -847,33 +1088,102 @@
       });
 
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) {
-        video.removeAttribute("autoplay");
-        video.addEventListener("loadedmetadata", () => (video.currentTime = video.duration - 0.05), { once: true });
-      }
-
-      if (window.gsap && !reduce) {
+      if (reduce || !window.gsap) {
+        if (reduce) {
+          video.removeAttribute("autoplay");
+          video.addEventListener("loadedmetadata", () => (video.currentTime = video.duration - 0.05), { once: true });
+        }
+        document.querySelectorAll("[data-count]").forEach((el) => (el.textContent = el.dataset.count + (el.dataset.suffix || "")));
+      } else {
         gsap.registerPlugin(ScrollTrigger);
 
-        // about: each word switches on like a lamp as you scroll
+        // split headings into words and letters
+        const splitInto = (el) => {
+          const walk = (node) => {
+            [...node.childNodes].forEach((child) => {
+              if (child.nodeType === 3) {
+                const frag = document.createDocumentFragment();
+                child.textContent.split(/(\s+)/).forEach((part) => {
+                  if (!part) return;
+                  if (/^\s+$/.test(part)) return frag.appendChild(document.createTextNode(" "));
+                  const wd = document.createElement("span");
+                  wd.className = "wd";
+                  [...part].forEach((c) => {
+                    const ch = document.createElement("span");
+                    ch.className = "ch";
+                    ch.textContent = c;
+                    wd.appendChild(ch);
+                  });
+                  frag.appendChild(wd);
+                });
+                child.replaceWith(frag);
+              } else if (child.nodeType === 1) walk(child);
+            });
+          };
+          walk(el);
+        };
+
+        // ---- global: progress bar, nav, cursor light ----
+        gsap.to("#progress", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
+        const nav = document.getElementById("nav");
+        ScrollTrigger.create({
+          start: 0,
+          end: "max",
+          onUpdate: (self) => {
+            nav.classList.toggle("solid", self.scroll() > window.innerHeight * 0.8);
+            nav.classList.toggle("hide", self.direction === 1 && self.scroll() > window.innerHeight * 1.2);
+          },
+        });
+        const light = document.getElementById("lamplight");
+        const lx = gsap.quickTo(light, "x", { duration: 0.6, ease: "power3" });
+        const ly = gsap.quickTo(light, "y", { duration: 0.6, ease: "power3" });
+        window.addEventListener("pointermove", (e) => {
+          light.style.opacity = 1;
+          lx(e.clientX);
+          ly(e.clientY);
+        });
+
+        // ---- hero sinks back ----
+        gsap.to("#intro", {
+          scale: 0.9,
+          borderRadius: 28,
+          opacity: 0.3,
+          ease: "none",
+          scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
+        });
+
+        // ---- headings: letters rise in ----
+        document.querySelectorAll("h2.split").forEach((h) => {
+          splitInto(h);
+          gsap.from(h.querySelectorAll(".ch"), {
+            yPercent: 110,
+            rotate: 8,
+            duration: 0.8,
+            ease: "power4.out",
+            stagger: 0.025,
+            scrollTrigger: { trigger: h, start: "top 85%" },
+          });
+        });
+        gsap.utils.toArray(".label").forEach((el) =>
+          gsap.from(el, { x: -30, opacity: 0, duration: 0.6, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 90%" } })
+        );
+
+        // ---- about: pendant swing, words light up, code types itself, counters ----
+        gsap.fromTo("#pendant", { rotate: -4 }, { rotate: 4, duration: 3, ease: "sine.inOut", yoyo: true, repeat: -1 });
         const about = document.getElementById("about-text");
         [...about.childNodes].forEach((child) => {
           if (child.nodeType === 3) {
             const frag = document.createDocumentFragment();
             child.textContent.split(/(\s+)/).forEach((part) => {
               if (!part) return;
-              if (/^\s+$/.test(part)) frag.appendChild(document.createTextNode(part));
-              else {
-                const s = document.createElement("span");
-                s.className = "word";
-                s.textContent = part;
-                frag.appendChild(s);
-              }
+              if (/^\s+$/.test(part)) return frag.appendChild(document.createTextNode(" "));
+              const s = document.createElement("span");
+              s.className = "word";
+              s.textContent = part;
+              frag.appendChild(s);
             });
             child.replaceWith(frag);
-          } else if (child.nodeType === 1) {
-            child.classList.add("word");
-          }
+          } else if (child.nodeType === 1) child.classList.add("word");
         });
         gsap.to("#about-text .word", {
           opacity: 1,
@@ -882,83 +1192,150 @@
           scrollTrigger: { trigger: about, start: "top 80%", end: "bottom 50%", scrub: true },
         });
 
-        // the pendant lamp swings gently
-        gsap.fromTo("#pendant", { rotate: -4 }, { rotate: 4, duration: 3, ease: "sine.inOut", yoyo: true, repeat: -1 });
+        const code = document.getElementById("code");
+        const chars = [];
+        const typeWalk = (node) => {
+          [...node.childNodes].forEach((child) => {
+            if (child.nodeType === 3) {
+              const frag = document.createDocumentFragment();
+              [...child.textContent].forEach((c) => {
+                if (c === "\n") return frag.appendChild(document.createTextNode("\n"));
+                const s = document.createElement("span");
+                s.textContent = c;
+                s.style.display = "none";
+                chars.push(s);
+                frag.appendChild(s);
+              });
+              child.replaceWith(frag);
+            } else if (child.nodeType === 1) typeWalk(child);
+          });
+        };
+        typeWalk(code);
+        gsap.from(".monitor", { y: 80, rotate: 3, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".monitor", start: "top 85%" } });
+        ScrollTrigger.create({
+          trigger: ".monitor",
+          start: "top 70%",
+          once: true,
+          onEnter: () => {
+            const state = { i: 0 };
+            gsap.to(state, {
+              i: chars.length,
+              duration: chars.length * 0.022,
+              ease: "none",
+              onUpdate: () => {
+                const n = Math.floor(state.i);
+                for (let j = 0; j < n; j++) chars[j].style.display = "";
+              },
+            });
+          },
+        });
 
-        // hero video sinks back as you leave it
-        gsap.to("#intro", {
-          scale: 0.92,
-          borderRadius: 28,
-          opacity: 0.35,
+        document.querySelectorAll("[data-count]").forEach((el) => {
+          const obj = { v: 0 };
+          gsap.to(obj, {
+            v: +el.dataset.count,
+            duration: 1.6,
+            ease: "power2.out",
+            onUpdate: () => (el.textContent = Math.round(obj.v) + (el.dataset.suffix || "")),
+            scrollTrigger: { trigger: el, start: "top 90%" },
+          });
+        });
+        gsap.from(".stat", { y: 40, opacity: 0, duration: 0.7, stagger: 0.1, ease: "power3.out", scrollTrigger: { trigger: ".stats", start: "top 90%" } });
+
+        // ---- work: pinned sideways scroll on wide screens, frames swing with your scroll speed ----
+        const projects = gsap.utils.toArray(".project");
+        const swing = gsap.quickTo(projects, "rotate", { duration: 0.8, ease: "elastic.out(1, 0.35)" });
+        const mm = gsap.matchMedia();
+        mm.add("(min-width: 900px)", () => {
+          const track = document.getElementById("track");
+          const dist = () => track.scrollWidth - window.innerWidth;
+          gsap.to(track, {
+            x: () => -dist(),
+            ease: "none",
+            scrollTrigger: {
+              trigger: "#work",
+              start: "top top",
+              end: () => "+=" + dist(),
+              pin: true,
+              scrub: 1,
+              invalidateOnRefresh: true,
+              onUpdate: (self) => {
+                swing(gsap.utils.clamp(-6, 6, self.getVelocity() / -250));
+                clearTimeout(window.__settle);
+                window.__settle = setTimeout(() => swing(0), 120);
+              },
+            },
+          });
+        });
+        mm.add("(max-width: 899px)", () => {
+          projects.forEach((p, i) => {
+            gsap.fromTo(
+              p,
+              { y: -80, opacity: 0, rotate: i % 2 ? -10 : 10 },
+              { y: 0, opacity: 1, rotate: 0, duration: 1.4, ease: "elastic.out(1, 0.45)", scrollTrigger: { trigger: p, start: "top 90%" } }
+            );
+          });
+        });
+
+        // ---- marquee rows move with the scroll, in opposite directions ----
+        gsap.fromTo("#mq1", { xPercent: 0 }, { xPercent: -35, ease: "none", scrollTrigger: { trigger: ".marquee", start: "top bottom", end: "bottom top", scrub: true } });
+        gsap.fromTo("#mq2", { xPercent: -35 }, { xPercent: 0, ease: "none", scrollTrigger: { trigger: ".marquee", start: "top bottom", end: "bottom top", scrub: true } });
+
+        // ---- stack: records pop onto the shelf and spin as you scroll ----
+        gsap.utils.toArray(".shelf").forEach((shelf) => {
+          gsap.from(shelf.querySelectorAll(".lp"), {
+            y: 70,
+            opacity: 0,
+            rotate: () => gsap.utils.random(-12, 12),
+            duration: 0.9,
+            ease: "back.out(1.6)",
+            stagger: 0.07,
+            scrollTrigger: { trigger: shelf, start: "top 85%" },
+          });
+        });
+        gsap.to(".vinyl", { rotate: 1080, ease: "none", scrollTrigger: { trigger: "#stack", start: "top bottom", end: "bottom top", scrub: true } });
+
+        // ---- process: the wire draws itself and notes stick on ----
+        const wire = document.getElementById("wire");
+        const len = wire.getTotalLength();
+        gsap.fromTo(wire, { strokeDasharray: len, strokeDashoffset: len }, {
+          strokeDashoffset: 0,
           ease: "none",
-          scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
+          scrollTrigger: { trigger: "#steps", start: "top 70%", end: "bottom 70%", scrub: true },
         });
-
-        // headings rise in
-        gsap.utils.toArray(".gallery h2, .records h2, .label").forEach((el) => {
-          gsap.from(el, { y: 50, opacity: 0, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 88%" } });
-        });
-
-        // frames drop onto the wall and swing to rest
-        gsap.utils.toArray(".frame").forEach((f, i) => {
-          const rest = [-1.5, 1, -0.5, 1.5, -6, 1, -1][i] || 0;
+        gsap.utils.toArray(".step").forEach((s, i) => {
           gsap.fromTo(
-            f,
-            { y: -120, opacity: 0, rotate: rest + (i % 2 ? -14 : 14) },
-            {
-              y: 0,
-              opacity: 1,
-              rotate: rest,
-              duration: 1.6,
-              ease: "elastic.out(1, 0.4)",
-              delay: (i % 4) * 0.08,
-              scrollTrigger: { trigger: f, start: "top 92%" },
-            }
+            s,
+            { opacity: 0, scale: 0.6, rotate: i % 2 ? 12 : -12, x: i % 2 ? -80 : 80 },
+            { opacity: 1, scale: 1, rotate: i % 2 ? 1.5 : -1.5, x: 0, duration: 0.9, ease: "back.out(1.7)", scrollTrigger: { trigger: s, start: "top 80%" } }
           );
         });
 
-        // records slide onto the shelf
-        gsap.from(".lp", {
-          y: 60,
-          opacity: 0,
-          duration: 0.8,
-          ease: "back.out(1.6)",
-          stagger: 0.1,
-          scrollTrigger: { trigger: ".shelf", start: "top 85%" },
+        // ---- plants drift at their own speed (parallax) ----
+        gsap.utils.toArray(".plant[data-speed]").forEach((p) => {
+          gsap.fromTo(p, { y: 120 * p.dataset.speed }, { y: -120 * p.dataset.speed, ease: "none", scrollTrigger: { trigger: p.parentElement, start: "top bottom", end: "bottom top", scrub: true } });
         });
 
-        // the rug unrolls as it comes into view
-        gsap.fromTo(
-          "#rug",
-          { rotateX: 75, scaleX: 0.8 },
-          { rotateX: 58, scaleX: 1, ease: "none", scrollTrigger: { trigger: ".rug-zone", start: "top bottom", end: "center center", scrub: true } }
-        );
+        // ---- rug unrolls, contact pops ----
+        gsap.fromTo("#rug", { rotateX: 75, scaleX: 0.8 }, { rotateX: 58, scaleX: 1, ease: "none", scrollTrigger: { trigger: ".rug-zone", start: "top bottom", end: "center center", scrub: true } });
+        gsap.from(".contact p, .links a", { y: 30, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.08, scrollTrigger: { trigger: ".contact p", start: "top 90%" } });
 
-        gsap.from(".hi h2 .line > span", {
-          yPercent: 110,
-          duration: 1,
-          ease: "power4.out",
-          stagger: 0.12,
-          scrollTrigger: { trigger: ".hi h2", start: "top 85%" },
-        });
-        gsap.from(".hi p, .links a", {
-          y: 30,
-          opacity: 0,
-          duration: 0.7,
-          ease: "power3.out",
-          stagger: 0.08,
-          scrollTrigger: { trigger: ".hi p", start: "top 90%" },
+        // magnetic contact buttons
+        document.querySelectorAll(".mag").forEach((btn) => {
+          const mx = gsap.quickTo(btn, "x", { duration: 0.4, ease: "power3" });
+          const my = gsap.quickTo(btn, "y", { duration: 0.4, ease: "power3" });
+          btn.addEventListener("pointermove", (e) => {
+            const r = btn.getBoundingClientRect();
+            mx((e.clientX - r.left - r.width / 2) * 0.35);
+            my((e.clientY - r.top - r.height / 2) * 0.35);
+          });
+          btn.addEventListener("pointerleave", () => {
+            mx(0);
+            my(0);
+          });
         });
 
-        // the cursor carries a pool of warm lamp light
-        const light = document.getElementById("lamplight");
-        const xTo = gsap.quickTo(light, "x", { duration: 0.6, ease: "power3" });
-        const yTo = gsap.quickTo(light, "y", { duration: 0.6, ease: "power3" });
-        window.addEventListener("pointermove", (e) => {
-          light.style.opacity = 1;
-          xTo(e.clientX);
-          yTo(e.clientY);
-        });
+        window.addEventListener("load", () => ScrollTrigger.refresh());
       }
     </script>
   </body>

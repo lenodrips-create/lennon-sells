@@ -165,6 +165,14 @@
       .s1-letter {
         display: block;
       }
+      #s1-role {
+        margin-top: 26px;
+        font-size: 44px;
+        font-weight: 500;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(244, 230, 204, 0.8);
+      }
       #s1-under {
         width: 760px;
         height: 14px;
@@ -220,38 +228,30 @@
         font-size: 42px;
       }
       .poster .big {
-        font-size: 64px;
+        font-size: 56px;
         font-weight: 800;
         line-height: 0.95;
         letter-spacing: -0.02em;
       }
-      .poster .shape {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        align-self: center;
+      .poster .shot {
+        display: block;
+        width: 100%;
+        height: 230px;
+        object-fit: cover;
+        object-position: top center;
+        border: 3px solid #1c120c;
       }
       #p1 {
         background: #d9622b;
         color: #1c120c;
       }
-      #p1 .shape {
-        background: #f4e6cc;
-      }
       #p2 {
         background: #4f5a2a;
         color: #f4e6cc;
       }
-      #p2 .shape {
-        background: #e9b44c;
-        border-radius: 12px;
-      }
       #p3 {
         background: #efe2c8;
         color: #1c120c;
-      }
-      #p3 .shape {
-        background: #2f4f6f;
       }
 
       /* ---------- scene 3: vinyl ---------- */
@@ -427,30 +427,31 @@
           <span class="s1-letter">n</span>
         </div>
         <div id="s1-under"></div>
+        <div id="s1-role">software developer</div>
       </section>
 
       <section id="s2" class="clip" data-start="3.4" data-duration="3.6" data-track-index="1">
-        <div id="s2-label" class="hand">on my wall:</div>
+        <div id="s2-label" class="hand">things i've built:</div>
         <div id="s2-wall">
           <div id="f1" class="frame">
             <div id="p1" class="poster">
-              <div class="small">no. 01</div>
-              <div class="shape"></div>
-              <div class="big">Creator</div>
+              <div class="small">C++ · Qt 6</div>
+              <img class="shot" src="assets/kepler.jpg" alt="Kepler browser" />
+              <div class="big">Kepler</div>
             </div>
           </div>
           <div id="f2" class="frame wood">
             <div id="p2" class="poster">
-              <div class="small">no. 02</div>
-              <div class="shape"></div>
-              <div class="big">Builder</div>
+              <div class="small">C · WASM</div>
+              <img class="shot" src="assets/cterm-studio.jpg" alt="CTerm Studio" />
+              <div class="big">CTerm Studio</div>
             </div>
           </div>
           <div id="f3" class="frame">
             <div id="p3" class="poster">
-              <div class="small">no. 03</div>
-              <div class="shape"></div>
-              <div class="big">Dreamer</div>
+              <div class="small">HTML · JS</div>
+              <img class="shot" src="assets/forgivn.jpg" alt="FORGIVN storefront" />
+              <div class="big">FORGIVN</div>
             </div>
           </div>
         </div>
@@ -462,19 +463,19 @@
             <div id="record"><div id="record-label">@lenodrips</div></div>
           </div>
           <div id="sleeve">
-            <div class="t2">side A</div>
-            <div class="t1">Always Dripping</div>
+            <div class="t2">side A · lenodrips</div>
+            <div class="t1">Ship It.</div>
           </div>
         </div>
-        <div id="s3-caption" class="hand">now spinning</div>
+        <div id="s3-caption" class="hand">now compiling...</div>
       </section>
 
       <section id="s4" class="clip" data-start="9.6" data-duration="2.4" data-track-index="1">
         <div id="rug-persp" data-layout-allow-overflow><div id="rug"></div></div>
         <div id="s4-text">
           <div id="s4-name">Lennon<span id="s4-dot">.</span></div>
-          <div id="s4-tag" class="hand">make yourself at home</div>
-          <div id="s4-cta">come on in ↓</div>
+          <div id="s4-tag" class="hand">developer · browsers, studios &amp; the web</div>
+          <div id="s4-cta">see my work ↓</div>
         </div>
       </section>
     </div>
@@ -500,7 +501,8 @@
         0.9
       );
       tl.fromTo("#s1-under", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power3.inOut" }, 1.6);
-      tl.to(["#s1-hey", "#s1-name", "#s1-under"], { opacity: 0, y: -40, duration: 0.4, ease: "power2.in", stagger: 0.04 }, 3.0);
+      tl.fromTo("#s1-role", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 2.0);
+      tl.to(["#s1-hey", "#s1-name", "#s1-under", "#s1-role"], { opacity: 0, y: -40, duration: 0.4, ease: "power2.in", stagger: 0.04 }, 3.0);
 
       // scene 2: frames drop onto the wall and swing to rest
       tl.fromTo("#s2-label", { opacity: 0, y: 20, rotate: -3 }, { opacity: 1, y: 0, rotate: -3, duration: 0.5, ease: "power3.out" }, 3.45);
