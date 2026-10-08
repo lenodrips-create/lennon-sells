@@ -462,6 +462,7 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
           <li><span>Handle</span><span>@lenodrips</span></li>
           <li><span>Focus</span><span>Browsers, dev tools, the web</span></li>
           <li><span>Shipped</span><span>5 projects</span></li>
+          <li><span>Email</span><span><a href="mailto:lenodrips@gmail.com" style="color:inherit">lenodrips@gmail.com</a></span></li>
           <li><span>Code</span><span><a href="https://github.com/lenodrips-create" target="_blank" rel="noopener" style="color:inherit">github.com/lenodrips-create</a></span></li>
         </ul>
         <div class="chips">
@@ -551,9 +552,9 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
     <a href="#" data-grid>The Archive</a>
     <a href="https://keplerbrowser.org" target="_blank" rel="noopener" data-external>Kepler</a>
     <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener" data-external>GitHub</a>
-    <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener" data-external>Contact</a>
+    <a href="mailto:lenodrips@gmail.com" data-external>Contact</a>
   </nav>
-  <div class="addr">Lennon · @lenodrips<br>github.com/lenodrips-create</div>
+  <div class="addr">Lennon · @lenodrips<br>lenodrips@gmail.com</div>
 </div>
 
 <div id="lit" aria-hidden="true">
@@ -1058,8 +1059,8 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
     }, 100);
   });
 
-  // email bar: opens a pre-filled email to Lennon (or GitHub until an address is set)
-  var CONTACT_EMAIL = "";
+  // email bar: opens a pre-filled email to Lennon
+  var CONTACT_EMAIL = "lenodrips@gmail.com";
   $("mailForm").addEventListener("submit", function(e){
     e.preventDefault();
     var v = $("mailInput").value.trim(), note = $("mailNote");
