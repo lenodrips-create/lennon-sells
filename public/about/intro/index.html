@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Lennon Intro</title>
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0b0b0f;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0b0b0f;
+        color: #f5f3ee;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* shared background */
+      #bg-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(245, 243, 238, 0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(245, 243, 238, 0.05) 1px, transparent 1px);
+        background-size: 120px 120px;
+      }
+      #glow {
+        position: absolute;
+        left: 560px;
+        top: 140px;
+        width: 800px;
+        height: 800px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(198, 255, 61, 0.22), rgba(198, 255, 61, 0) 65%);
+      }
+
+      /* scene 1: name */
+      #s1-hey {
+        font-size: 44px;
+        font-weight: 600;
+        letter-spacing: 0.4em;
+        color: #c6ff3d;
+        margin-bottom: 12px;
+      }
+      #s1-name {
+        display: flex;
+        font-size: 300px;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .s1-letter {
+        display: block;
+      }
+      #s1-line {
+        width: 1100px;
+        height: 10px;
+        margin-top: 36px;
+        background: #c6ff3d;
+        border-radius: 5px;
+        transform-origin: left center;
+      }
+
+      /* scene 2: roles */
+      #s2-label {
+        font-size: 40px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        color: rgba(245, 243, 238, 0.6);
+        margin-bottom: 30px;
+      }
+      #s2-stack {
+        position: relative;
+        width: 1600px;
+        height: 240px;
+        overflow: hidden;
+      }
+      .s2-word {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 210px;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+      #s2-w1 {
+        color: #f5f3ee;
+      }
+      #s2-w2 {
+        color: #c6ff3d;
+      }
+      #s2-w3 {
+        color: #ff4fd8;
+      }
+
+      /* scene 3: drips */
+      #s3-handle {
+        position: relative;
+        font-size: 220px;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        color: #c6ff3d;
+      }
+      #s3-drips {
+        position: relative;
+        width: 1300px;
+        height: 260px;
+        margin-top: -46px;
+      }
+      .drip {
+        position: absolute;
+        top: 0;
+        width: 34px;
+        height: 200px;
+        border-radius: 0 0 17px 17px;
+        background: #c6ff3d;
+        transform-origin: top center;
+      }
+      .drop {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #c6ff3d;
+      }
+      #s3-sub {
+        font-size: 40px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        color: rgba(245, 243, 238, 0.7);
+      }
+
+      /* scene 4: outro */
+      #s4-name {
+        font-size: 200px;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      #s4-dot {
+        color: #c6ff3d;
+      }
+      #s4-tag {
+        margin-top: 30px;
+        font-size: 44px;
+        font-weight: 500;
+        color: rgba(245, 243, 238, 0.75);
+      }
+      #s4-cta {
+        margin-top: 70px;
+        padding: 22px 48px;
+        border: 3px solid #c6ff3d;
+        border-radius: 999px;
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        color: #c6ff3d;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="12"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="bg" class="clip" data-start="0" data-duration="12" data-track-index="0">
+        <div id="bg-grid"></div>
+        <div id="glow"></div>
+      </div>
+
+      <section id="s1" class="clip" data-start="0" data-duration="3.2" data-track-index="1">
+        <div id="s1-hey">HEY, I'M</div>
+        <div id="s1-name">
+          <span class="s1-letter">L</span>
+          <span class="s1-letter">E</span>
+          <span class="s1-letter">N</span>
+          <span class="s1-letter">N</span>
+          <span class="s1-letter">O</span>
+          <span class="s1-letter">N</span>
+        </div>
+        <div id="s1-line"></div>
+      </section>
+
+      <section id="s2" class="clip" data-start="3.2" data-duration="3.4" data-track-index="1">
+        <div id="s2-label">I'M A</div>
+        <div id="s2-stack" data-layout-allow-overlap data-layout-allow-overflow>
+          <div id="s2-w1" class="s2-word">CREATOR</div>
+          <div id="s2-w2" class="s2-word">BUILDER</div>
+          <div id="s2-w3" class="s2-word">DREAMER</div>
+        </div>
+      </section>
+
+      <section id="s3" class="clip" data-start="6.6" data-duration="2.9" data-track-index="1">
+        <div id="s3-handle">@lenodrips</div>
+        <div id="s3-drips">
+          <div class="drip" style="left: 110px"></div>
+          <div class="drip" style="left: 330px"></div>
+          <div class="drip" style="left: 560px"></div>
+          <div class="drip" style="left: 780px"></div>
+          <div class="drip" style="left: 1010px"></div>
+          <div class="drop" style="left: 112px; top: 200px"></div>
+          <div class="drop" style="left: 562px; top: 200px"></div>
+          <div class="drop" style="left: 1012px; top: 200px"></div>
+        </div>
+        <div id="s3-sub">ALWAYS DRIPPING</div>
+      </section>
+
+      <section id="s4" class="clip" data-start="9.5" data-duration="2.5" data-track-index="1">
+        <div id="s4-name">LENNON<span id="s4-dot">.</span></div>
+        <div id="s4-tag">Making things that make people feel something.</div>
+        <div id="s4-cta">SCROLL TO MEET ME</div>
+      </section>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // background: slow glow drift for the whole film
+      tl.fromTo("#glow", { x: -260, y: 40, scale: 0.8 }, { x: 260, y: -40, scale: 1.15, duration: 12, ease: "sine.inOut" }, 0);
+      tl.fromTo("#bg-grid", { opacity: 0 }, { opacity: 1, duration: 1.2, ease: "power2.out" }, 0);
+
+      // scene 1: name slam
+      tl.fromTo("#s1-hey", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.2);
+      tl.fromTo(
+        ".s1-letter",
+        { opacity: 0, yPercent: 60, scale: 1.4 },
+        { opacity: 1, yPercent: 0, scale: 1, duration: 0.55, ease: "back.out(2)", stagger: 0.08 },
+        0.5
+      );
+      tl.fromTo("#s1-line", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power4.inOut" }, 1.2);
+      tl.to("#s1-name", { scale: 1.06, duration: 1.2, ease: "sine.inOut" }, 1.6);
+      tl.to(["#s1-hey", "#s1-name", "#s1-line"], { opacity: 0, y: -60, duration: 0.4, ease: "power2.in", stagger: 0.05 }, 2.75);
+
+      // scene 2: role rotator
+      tl.fromTo("#s2-label", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 3.25);
+      tl.fromTo("#s2-w1", { yPercent: 110 }, { yPercent: 0, duration: 0.45, ease: "power4.out" }, 3.35);
+      tl.to("#s2-w1", { yPercent: -110, duration: 0.4, ease: "power4.in" }, 4.3);
+      tl.fromTo("#s2-w2", { yPercent: 110 }, { yPercent: 0, duration: 0.45, ease: "power4.out" }, 4.6);
+      tl.to("#s2-w2", { yPercent: -110, duration: 0.4, ease: "power4.in" }, 5.4);
+      tl.fromTo("#s2-w3", { yPercent: 110 }, { yPercent: 0, duration: 0.45, ease: "power4.out" }, 5.7);
+      tl.to(["#s2-label", "#s2-stack"], { opacity: 0, duration: 0.3, ease: "power2.in" }, 6.25);
+
+      // scene 3: handle + drips
+      tl.fromTo("#s3-handle", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }, 6.65);
+      tl.fromTo(
+        ".drip",
+        { scaleY: 0 },
+        { scaleY: 1, duration: 0.9, ease: "power2.in", stagger: { each: 0.12, from: "center" } },
+        7.0
+      );
+      tl.fromTo(".drop", { opacity: 0, y: 0 }, { opacity: 1, y: 0, duration: 0.01 }, 7.8);
+      tl.to(".drop", { y: 160, opacity: 0, duration: 0.6, ease: "power2.in", stagger: 0.1 }, 7.85);
+      tl.fromTo("#s3-sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 7.6);
+      tl.to(["#s3-handle", "#s3-drips", "#s3-sub"], { opacity: 0, duration: 0.3, ease: "power2.in" }, 9.15);
+
+      // scene 4: outro card
+      tl.fromTo("#s4-name", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 9.55);
+      tl.fromTo("#s4-dot", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 10.0);
+      tl.fromTo("#s4-tag", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 10.0);
+      tl.fromTo("#s4-cta", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, 10.4);
+      tl.to("#s4-cta", { scale: 1.05, duration: 0.5, ease: "sine.inOut", yoyo: true, repeat: 1 }, 10.95);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
