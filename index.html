@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ethan Vale — I See Through the Wild</title>
-<meta name="description" content="Wildlife photography archive by Ethan Vale. Field notes from natural encounters, captured without intervention.">
+<title>Lennon — I Build What I Imagine</title>
+<meta name="description" content="Developer portfolio of Lennon (@lenodrips). Kepler, CTerm Studio, keplerbrowser.org and FORGIVN: real projects, built and shipped.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap">
@@ -57,7 +57,6 @@ a{-webkit-tap-highlight-color:transparent}
   font-size:clamp(28px, 4.4vw, 52px);letter-spacing:.005em;color:#f4f2ef;
   opacity:0;animation:riseIn 1.25s ease .15s forwards;
 }
-#splash .mark em,.wordmark em{font-style:normal}
 #splash .bar{width:clamp(120px, 17vw, 210px);height:1px;background:rgba(244,242,239,.16);overflow:hidden}
 #splash .bar s{display:block;width:100%;height:100%;background:#f4f2ef;transform:scaleX(0);transform-origin:left center;transition:transform .55s ease}
 #splash .tag{
@@ -373,7 +372,7 @@ body.lit #lit{opacity:1;pointer-events:auto}
 <div id="stage">
   <div id="world">
     <div id="orb"></div>
-    <h1 id="headline"><span class="inner"><span style="--i:0">I</span> <span style="--i:1">See</span> <span style="--i:2">Through</span> <span style="--i:3">the</span> <span style="--i:4">Wild</span></span></h1>
+    <h1 id="headline"><span class="inner"><span style="--i:0">I</span> <span style="--i:1">Build</span> <span style="--i:2">What</span> <span style="--i:3">I</span> <span style="--i:4">Imagine</span></span></h1>
   </div>
 </div>
 
@@ -382,7 +381,7 @@ body.lit #lit{opacity:1;pointer-events:auto}
 <div id="grid"><div class="rows"></div></div>
 
 <header class="chrome">
-  <a class="wordmark" href="#" aria-label="Ethan Vale">Ethan<em>Vale</em></a>
+  <a class="wordmark" href="#" aria-label="Lennon">Lennon</a>
   <button id="menuBtn" class="menu-btn" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
     <span class="menu-label">Menu</span>
     <span class="bars"><i></i><i></i></span>
@@ -391,13 +390,13 @@ body.lit #lit{opacity:1;pointer-events:auto}
 
 <div class="bio chrome">
   <div class="who">
-    <img id="avatar" alt="Ethan Vale">
-    <b>Ethan Vale</b>
+    <img id="avatar" alt="Lennon">
+    <b>Lennon</b>
   </div>
-  <p>Wildlife photography is less about taking pictures and more about learning when not to move. Every frame in this archive was captured in natural conditions without intervention.</p>
+  <p>Developer building browsers, studios and the web. Every frame in this archive is a real project: designed, built and shipped by me.</p>
 </div>
 
-<div class="colophon chrome">Field Notes 2026</div>
+<div class="colophon chrome">@lenodrips · 2026</div>
 
 <button id="gridBtn" class="gridbtn" aria-label="Toggle grid view"><b></b><b></b><b></b><b></b></button>
 
@@ -406,11 +405,11 @@ body.lit #lit{opacity:1;pointer-events:auto}
 <div id="menu" aria-hidden="true">
   <nav>
     <a href="#" data-grid>The Archive</a>
-    <a href="#">Field Notes</a>
-    <a href="#">Studio</a>
-    <a href="#" data-close-menu>Contact</a>
+    <a href="https://keplerbrowser.org" target="_blank" rel="noopener" data-external>Kepler</a>
+    <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener" data-external>GitHub</a>
+    <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener" data-external>Contact</a>
   </nav>
-  <div class="addr">Nairobi · Cape Town · Reykjavík<br>studio@ethanvale.photo</div>
+  <div class="addr">Lennon · @lenodrips<br>github.com/lenodrips-create</div>
 </div>
 
 <div id="lit" aria-hidden="true">
@@ -438,9 +437,9 @@ body.lit #lit{opacity:1;pointer-events:auto}
 </div>
 
 <div id="splash">
-  <div class="mark">Ethan<em>Vale</em></div>
+  <div class="mark">Lennon</div>
   <div class="bar"><s id="bar"></s></div>
-  <div class="tag">Field Notes 2026</div>
+  <div class="tag">Portfolio 2026</div>
 </div>
 
 <div id="dot"></div>
@@ -449,10 +448,7 @@ body.lit #lit{opacity:1;pointer-events:auto}
 (function(){
   "use strict";
 
-  var CDN = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/";
-  var AVATAR = "hf_20260922_194417_a455843c-d8db-461c-8ef6-74a325d2472c";
-
-  // The archive: Lennon's project screenshots in place of the wildlife stills.
+  // The archive: Lennon's projects.
   var SHOTS = [
     ["01", "A Browser From Another Orbit", "Kepler · C++ / Qt 6", "A full desktop web browser built on Qt WebEngine, here with the AI side panel open: Claude, ChatGPT, Gemini, Copilot and Perplexity one click away."],
     ["02", "The Start Page", "Kepler · kepler://start", "Starfield with parallax, shooting stars, a floating logo, a clock and bookmark tiles. The first thing every new tab shows."],
@@ -583,7 +579,7 @@ body.lit #lit{opacity:1;pointer-events:auto}
       ci.src = url; gi.src = url;
     });
   });
-  downscale(CDN + AVATAR + "_min.webp", 160, function(url){ $("avatar").src = url; });
+  $("avatar").src = "work/avatar.jpg";
 
   var filmReported = false;
   function filmIn(){ if (filmReported) return; filmReported = true; report(); }
@@ -819,6 +815,7 @@ body.lit #lit{opacity:1;pointer-events:auto}
   menuBtn.addEventListener("click", function(){ setMenu(!body.classList.contains("menuopen")); });
   menu.querySelectorAll("nav a").forEach(function(a){
     a.addEventListener("click", function(e){
+      if (a.hasAttribute("data-external")) { setMenu(false); return; }
       e.preventDefault();
       setMenu(false);
       if (a.hasAttribute("data-grid")) setGrid(true);
