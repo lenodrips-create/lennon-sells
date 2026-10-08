@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Collect the static site
-        run: mkdir _site && cp index.html _site/ && cp -r work _site/
+        run: mkdir _site && cp index.html privacy.html terms.html accessibility.html legal.css _site/ && cp -r work fonts .well-known _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

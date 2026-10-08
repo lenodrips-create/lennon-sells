@@ -5,10 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lennon — I Build What I Imagine</title>
 <meta name="description" content="Developer portfolio of Lennon (@lenodrips). Kepler, CTerm Studio, keplerbrowser.org and FORGIVN: real projects, built and shipped.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap">
 <style>
+/* fonts are self-hosted (SIL Open Font License, see fonts/), so no visitor data goes to a font CDN */
+@font-face{font-family:"Playfair Display";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/playfair-display-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Playfair Display";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/playfair-display-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Playfair Display";font-style:italic;font-weight:400;font-display:swap;src:url("fonts/playfair-display-latin-400-italic.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:300;font-display:swap;src:url("fonts/inter-latin-300-normal.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/inter-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:500;font-display:swap;src:url("fonts/inter-latin-500-normal.woff2") format("woff2")}
 :root{
   --bg:#000;
   --ink:#f4f2ef;
@@ -45,25 +49,6 @@ img{display:block;max-width:100%}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 a{-webkit-tap-highlight-color:transparent}
 
-/* ---------- splash ---------- */
-#splash{
-  position:fixed;inset:0;z-index:250;background:#000;
-  display:grid;place-items:center;align-content:center;gap:26px;
-  transition:opacity .6s ease;
-}
-#splash.out{opacity:0;pointer-events:none}
-#splash .mark{
-  font-family:var(--serif);font-weight:400;
-  font-size:clamp(28px, 4.4vw, 52px);letter-spacing:.005em;color:#f4f2ef;
-  opacity:0;animation:riseIn 1.25s ease .15s forwards;
-}
-#splash .bar{width:clamp(120px, 17vw, 210px);height:1px;background:rgba(244,242,239,.16);overflow:hidden}
-#splash .bar s{display:block;width:100%;height:100%;background:#f4f2ef;transform:scaleX(0);transform-origin:left center;transition:transform .55s ease}
-#splash .tag{
-  font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(244,242,239,.38);
-  opacity:0;animation:riseIn .9s ease .7s forwards;
-}
-@keyframes riseIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
 
 /* ---------- intro film ---------- */
 #intro{position:fixed;inset:0;z-index:200;background:#000;display:grid;place-items:center;overflow:hidden}
@@ -179,17 +164,17 @@ body.gridview .vig,body.lit .vig{opacity:0}
 body.gridview #grid{opacity:1;pointer-events:auto}
 body.gridview #stage{opacity:0;filter:blur(14px);pointer-events:none}
 #grid .rows{display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:clamp(10px, 1.4vw, 20px);max-width:1680px;margin:0 auto}
-#grid figure{position:relative;aspect-ratio:3/2;border-radius:3px;overflow:hidden;background:#0b0b0b;cursor:pointer}
+#grid .gitem{position:relative;aspect-ratio:3/2;border-radius:3px;overflow:hidden;background:#0b0b0b;cursor:pointer}
 #grid img{width:100%;height:100%;object-fit:cover;opacity:.82;transition:transform .8s var(--ease), opacity .8s var(--ease)}
-#grid figure:hover img{transform:scale(1.05);opacity:1}
-#grid figcaption{
+#grid .gitem:hover img,#grid .gitem:focus-visible img{transform:scale(1.05);opacity:1}
+#grid .gcap{
   position:absolute;left:0;right:0;bottom:0;
   font-family:var(--serif);font-size:15px;
   background:linear-gradient(to bottom, transparent, rgba(0,0,0,.82));
   padding:26px 14px 12px;opacity:0;transform:translateY(6px);
   transition:opacity .5s var(--ease), transform .5s var(--ease);
 }
-#grid figure:hover figcaption{opacity:1;transform:none}
+#grid .gitem:hover .gcap,#grid .gitem:focus-visible .gcap{opacity:1;transform:none}
 
 /* ---------- chrome ---------- */
 .chrome{opacity:0;transition:opacity 1.2s var(--ease) .15s, transform .5s var(--ease)}
@@ -252,7 +237,7 @@ body.gridview .gridbtn b:last-child{transform:translate(-3px, -3px)}
   position:fixed;left:50%;bottom:calc(var(--pad) + var(--safe-bottom) + 4px);
   transform:translateX(-50%);z-index:54;
   display:flex;align-items:center;gap:10px;
-  font-size:10px;text-transform:uppercase;letter-spacing:.24em;color:rgba(244,242,239,.42);white-space:nowrap;
+  font-size:10px;text-transform:uppercase;letter-spacing:.24em;color:rgba(244,242,239,.66);white-space:nowrap;
 }
 .cue s{position:relative;display:block;width:44px;height:1px;background:rgba(244,242,239,.28);overflow:hidden}
 .cue s::after{content:"";position:absolute;inset:0;background:#f4f2ef;transform:translateX(-100%);animation:sweep 2.6s ease infinite}
@@ -318,7 +303,7 @@ body.lit #lit{opacity:1;pointer-events:auto}
 /* ---------- after the sphere: about, projects, contact (all over the night sky) ---------- */
 .after{position:relative;z-index:14}
 .sec{max-width:1100px;margin:0 auto;padding:clamp(90px, 14vh, 160px) calc(var(--pad) + var(--safe-right)) clamp(60px, 10vh, 120px) calc(var(--pad) + var(--safe-left))}
-.eyebrow{display:block;font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(244,242,239,.45);margin-bottom:22px}
+.eyebrow{display:block;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:rgba(244,242,239,.66);margin-bottom:22px}
 .sec h2{font-family:var(--serif);font-weight:400;font-size:clamp(38px, 6vw, 84px);line-height:1.02;letter-spacing:-.01em;margin-bottom:clamp(28px, 4vw, 48px)}
 .sec h2 em{font-style:italic;color:rgba(244,242,239,.7)}
 .about-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:clamp(28px, 5vw, 80px)}
@@ -326,19 +311,27 @@ body.lit #lit{opacity:1;pointer-events:auto}
 .about-grid p:first-child{font-family:var(--serif);font-size:clamp(22px, 2.2vw, 30px);line-height:1.35;color:var(--ink)}
 .facts{list-style:none;border-top:1px solid var(--line)}
 .facts li{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);font-size:13px}
-.facts li span:first-child{color:rgba(244,242,239,.5)}
+.facts li span:first-child{color:rgba(244,242,239,.66)}
 .facts li span:last-child{text-align:right}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
 .chips span{padding:7px 13px;border-radius:999px;font-size:12px;color:rgba(244,242,239,.85)}
 .plist{list-style:none;border-top:1px solid var(--line)}
 .plist li{border-bottom:1px solid var(--line)}
 .plist a.row{display:grid;grid-template-columns:52px minmax(0,1.1fr) minmax(0,1.4fr) 132px;gap:clamp(14px, 2.4vw, 32px);align-items:center;padding:clamp(18px, 2.6vw, 28px) 0;color:inherit;text-decoration:none;transition:padding .5s var(--ease)}
-.plist a.row:hover{padding-left:12px}
-.plist .n{font-size:12px;color:rgba(244,242,239,.4);letter-spacing:.1em}
+.plist a.row:hover,.plist a.row:focus-visible{padding-left:12px}
+.skiplink{position:fixed;left:12px;top:-60px;z-index:400;padding:10px 16px;border-radius:6px;background:#f4f2ef;color:#000;font-size:13px;text-decoration:none;transition:top .2s ease}
+.skiplink:focus{top:12px}
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid #f4f2ef;outline-offset:3px}
+.card:focus-visible{outline:none}
+.card:focus-visible figure{transform:scale(1.045);box-shadow:0 0 0 2px #f4f2ef}
+.legal-foot{position:relative;z-index:10;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;padding:0 24px calc(28px + var(--safe-bottom));font-size:12.5px;color:rgba(244,242,239,.72)}
+.legal-foot a{color:inherit;text-underline-offset:3px}
+.legal-foot a:hover{color:#fff}
+.plist .n{font-size:12px;color:rgba(244,242,239,.66);letter-spacing:.1em}
 .plist h3{font-family:var(--serif);font-weight:400;font-size:clamp(24px, 2.6vw, 36px);line-height:1.08}
-.plist .kind{display:block;margin-top:6px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(244,242,239,.45)}
+.plist .kind{display:block;margin-top:6px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(244,242,239,.66)}
 .plist p{font-size:14px;line-height:1.6;color:rgba(244,242,239,.75)}
-.plist .tags{display:block;margin-top:8px;font-size:12px;color:rgba(244,242,239,.45)}
+.plist .tags{display:block;margin-top:8px;font-size:12px;color:rgba(244,242,239,.66)}
 .plist .thumb{width:132px;aspect-ratio:3/2;border-radius:3px;overflow:hidden;background:#0b0b0b;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .plist .thumb img{width:100%;height:100%;object-fit:cover;opacity:.85;transition:transform .8s var(--ease), opacity .6s ease}
 .plist a.row:hover .thumb img{transform:scale(1.08);opacity:1}
@@ -369,7 +362,7 @@ body.lit #lit{opacity:1;pointer-events:auto}
 }
 .mailbar{width:100%;max-width:36rem;border-radius:9999px;padding:8px 8px 8px 24px;display:flex;align-items:center;gap:12px}
 .mailbar input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:#fff;font:inherit;font-size:16px;line-height:1.5}
-.mailbar input::placeholder{color:rgba(255,255,255,.4)}
+.mailbar input::placeholder{color:rgba(255,255,255,.62)}
 .mailbar button{flex:none;display:grid;place-items:center;background:#fff;color:#000;border-radius:9999px;padding:12px}
 .mailbar button svg{display:block}
 .mailnote{min-height:1.6em;margin-top:14px;font-size:13px;color:rgba(244,242,239,.7)}
@@ -410,7 +403,7 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
   #litNote{font-size:12.5px;line-height:1.58}
   .close{top:8px;right:8px}
   #grid .rows{grid-template-columns:repeat(2, 1fr);gap:8px}
-  #grid figcaption{opacity:1;transform:none;font-size:13px}
+  #grid .gcap{opacity:1;transform:none;font-size:13px}
   #grid{padding:calc(var(--pad) * 2.8 + var(--safe-top)) calc(var(--pad) + var(--safe-right)) calc(var(--pad) * 4 + var(--safe-bottom)) calc(var(--pad) + var(--safe-left))}
 }
 @media (max-width:380px){
@@ -435,10 +428,11 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
 </style>
 </head>
 <body class="locked">
+<a class="skiplink" href="#about">Skip to content</a>
 
 <canvas id="sky" aria-hidden="true"></canvas>
 <div id="scrolltrack"></div>
-<div id="stage">
+<div id="stage" role="region" aria-label="Project archive">
   <div id="world">
     <div id="orb"></div>
     <h1 id="headline"><span class="inner"><span style="--i:0">I</span> <span style="--i:1">Build</span> <span style="--i:2">What</span> <span style="--i:3">I</span> <span style="--i:4">Imagine</span></span></h1>
@@ -455,13 +449,13 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
       <div class="reveal">
         <p>I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it.</p>
         <p>Most of my work starts as a question. Could I make my own web browser? That became Kepler, written in C++ on Qt and Chromium. Could a full code studio run inside a browser tab? That became CTerm Studio, with a C core compiled to WebAssembly.</p>
-        <p>I care about how software feels as much as what it does: fast, private, and a little bit cinematic. Everything in the archive above is real, open source, and shipped.</p>
+        <p>I care about how software feels as much as what it does: fast, private, and a little bit cinematic. Everything in the archive above is a real project, and its code is public on GitHub.</p>
       </div>
       <div class="reveal">
         <ul class="facts">
           <li><span>Handle</span><span>@lenodrips</span></li>
           <li><span>Focus</span><span>Browsers, dev tools, the web</span></li>
-          <li><span>Shipped</span><span>5 projects</span></li>
+          <li><span>Public projects</span><span>5</span></li>
           <li><span>Email</span><span><a href="mailto:lenodrips@gmail.com" style="color:inherit">lenodrips@gmail.com</a></span></li>
           <li><span>Code</span><span><a href="https://github.com/lenodrips-create" target="_blank" rel="noopener" style="color:inherit">github.com/lenodrips-create</a></span></li>
         </ul>
@@ -520,6 +514,13 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
       </form>
       <p class="mailnote" id="mailNote" aria-live="polite"></p>
     </div>
+    <footer class="legal-foot">
+      <span>© 2026 Lennon</span>
+      <a href="mailto:lenodrips@gmail.com">lenodrips@gmail.com</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="accessibility.html">Accessibility</a>
+    </footer>
   </section>
 </main>
 
@@ -533,31 +534,31 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
   </button>
 </header>
 
-<div class="bio chrome">
+<div class="bio chrome" role="complementary" aria-label="About Lennon">
   <div class="who">
     <img id="avatar" alt="Lennon">
     <b>Lennon</b>
   </div>
-  <p>Developer building browsers, studios and the web. Every frame in this archive is a real project: designed, built and shipped by me.</p>
+  <p>Developer building browsers, studios and the web. Every frame in this archive is a real project I built.</p>
 </div>
 
-<div class="colophon chrome">@lenodrips · 2026</div>
+<div class="colophon chrome" aria-hidden="true">@lenodrips · 2026</div>
 
 <button id="gridBtn" class="gridbtn" aria-label="Toggle grid view"><b></b><b></b><b></b><b></b></button>
 
-<div class="cue chrome"><s></s>Drag to rotate</div>
+<div class="cue chrome" aria-hidden="true"><s></s>Drag to rotate</div>
 
-<div id="menu" aria-hidden="true">
+<div id="menu" aria-hidden="true" inert>
   <nav>
     <a href="#" data-grid>The Archive</a>
     <a href="https://keplerbrowser.org" target="_blank" rel="noopener" data-external>Kepler</a>
     <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener" data-external>GitHub</a>
     <a href="mailto:lenodrips@gmail.com" data-external>Contact</a>
   </nav>
-  <div class="addr">Lennon · @lenodrips<br>lenodrips@gmail.com</div>
+  <div class="addr">Lennon · @lenodrips<br>lenodrips@gmail.com<br><a href="privacy.html" style="color:inherit">Privacy</a> · <a href="terms.html" style="color:inherit">Terms</a> · <a href="accessibility.html" style="color:inherit">Accessibility</a></div>
 </div>
 
-<div id="lit" aria-hidden="true">
+<div id="lit" aria-hidden="true" inert role="dialog" aria-modal="true" aria-labelledby="litTitle">
   <div class="scrim" data-close></div>
   <div class="plate">
     <div class="shot">
@@ -581,10 +582,6 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
   <button class="skip" id="skip">Skip</button>
 </div>
 
-<div id="splash">
-  <div class="mark">Lennon</div>
-  <div class="bar"><s id="bar"></s></div>
-  <div class="tag">Portfolio 2026</div>
 </div>
 
 <div id="dot"></div>
@@ -624,7 +621,7 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
   var $ = function(id){ return document.getElementById(id); };
   var stage = $("stage"), world = $("world"), orb = $("orb"), headline = $("headline");
   var gridRows = document.querySelector("#grid .rows"), gridEl = $("grid");
-  var intro = $("intro"), film = $("film"), splash = $("splash"), bar = $("bar");
+  var intro = $("intro"), film = $("film");
   var lit = $("lit"), plate = lit.querySelector(".plate"), litImg = $("litImg");
   var N = SHOTS.length;
   var finePointer = matchMedia("(hover:hover) and (pointer:fine)").matches;
@@ -646,18 +643,27 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
     var card = document.createElement("div");
     card.className = "card" + (s[4] ? " tall" : "");
     card.dataset.idx = i;
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", "Open " + s[1]);
     var fig = document.createElement("figure");
     var img = document.createElement("img");
-    img.alt = s[1];
+    img.alt = "";   // the card itself carries the label
     img.decoding = "async";
     fig.appendChild(img); card.appendChild(fig); orb.appendChild(card);
     cards.push({ el: card, img: img, op: -1, d: -1 });
 
-    var gf = document.createElement("figure");
+    var gf = document.createElement("div");
+    gf.className = "gitem";
     gf.dataset.idx = i;
+    gf.tabIndex = 0;
+    gf.setAttribute("role", "button");
+    gf.setAttribute("aria-label", "Open " + s[1]);
     var gi = document.createElement("img");
-    gi.alt = s[1]; gi.loading = "lazy";
-    var cap = document.createElement("figcaption");
+    gi.alt = ""; gi.loading = "lazy";   // the item itself carries the label
+    var cap = document.createElement("span");
+    cap.className = "gcap";
+    cap.setAttribute("aria-hidden", "true");
     cap.textContent = s[1];
     gf.appendChild(gi); gf.appendChild(cap); gridRows.appendChild(gf);
     gridFigs.push({ el: gf, img: gi });
@@ -692,14 +698,8 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
     visualViewport.addEventListener("scroll", function(){ layout(true); });
   }
 
-  // ---------- image decoding + splash progress ----------
-  var total = N + 1, done = 0, born = performance.now(), splashGone = false, filmPending = false;
+  // ---------- image decoding (runs while the intro film plays) ----------
   function decodeCap(){ var w = innerWidth; return w <= 380 ? 420 : w <= 640 ? 520 : w <= 900 ? 640 : 760; }
-  function report(){
-    done++;
-    bar.style.transform = "scaleX(" + Math.min(1, done / total) + ")";
-    if (done >= total) finishSplash();
-  }
   function downscale(src, cap, cb){
     var probe = new Image();
     probe.crossOrigin = "anonymous";
@@ -719,39 +719,16 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
     downscale(thumbURL(s), decodeCap(), function(url){
       decoded[i] = url;
       var ci = cards[i].img, gi = gridFigs[i].img;
-      ci.onload = function(){ ci.classList.add("in"); report(); };
-      ci.onerror = function(){ report(); };
+      ci.onload = function(){ ci.classList.add("in"); };
       ci.src = url; gi.src = url;
     });
   });
   $("avatar").src = "work/avatar.jpg";
 
-  var filmReported = false;
-  function filmIn(){ if (filmReported) return; filmReported = true; report(); }
-  film.addEventListener("loadeddata", filmIn);
-  film.addEventListener("canplay", filmIn);
-  film.addEventListener("error", filmIn);
-  if (film.readyState >= 2) filmIn();
-
-  function finishSplash(){
-    if (splashGone) return;
-    var wait = Math.max(0, 1150 - (performance.now() - born));
-    setTimeout(function(){
-      if (splashGone) return;
-      splashGone = true;
-      bar.style.transform = "scaleX(1)";
-      splash.classList.add("out");
-      setTimeout(function(){ splash.remove(); }, 950);
-      startFilm();
-    }, wait);
-  }
-  setTimeout(function(){ done = total; finishSplash(); }, 9000);
-
   // ---------- intro film ----------
   var revealed = false, revealTimer = 0;
   film.muted = true; film.defaultMuted = true; film.playsInline = true;
   film.setAttribute("muted", ""); film.setAttribute("playsinline", ""); film.setAttribute("webkit-playsinline", "");
-  try { film.pause(); } catch (e) {}
 
   function tryPlay(){
     if (film.currentTime > 0.05) { try { film.currentTime = 0; } catch (e) {} }
@@ -761,7 +738,6 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
   }
   function startFilm(){
     if (revealed) return;
-    if (filmPending) { setTimeout(reveal, 1300); return; }
     tryPlay();
     setTimeout(function(){ reveal(); }, 14000);
     setTimeout(function(){ if (film.paused && !revealed) reveal(); }, 2600);
@@ -776,11 +752,12 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
   film.addEventListener("ended", reveal);
   film.addEventListener("error", function(){
     intro.classList.add("novideo");
-    if (splashGone) setTimeout(reveal, 1300); else filmPending = true;
+    setTimeout(reveal, 1300);
   });
-  function kick(){ if (!revealed && splashGone && film.paused) tryPlay(); }
+  function kick(){ if (!revealed && film.paused) tryPlay(); }
   ["pointerdown", "keydown", "touchstart"].forEach(function(ev){ addEventListener(ev, kick, { once: true, passive: true }); });
   $("skip").addEventListener("click", reveal);
+  startFilm();   // no loading screen: the eye film starts right away
 
   function reveal(){
     if (revealed) return;
@@ -890,13 +867,15 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
       twinklers.push({ x: R() * D - D / 2, y: R() * D - D / 2, b: mag, k: pickI(), ph: R() * 6.283, sp: 0.7 + R() * 1.6, sp2: 3 + R() * 5 });
     }
     skyLayer = L;
+    skyLast = null;   // force a redraw at the new size
   }
   var skyLast = null, skyOdd = false;
+  var skyCalm = matchMedia("(prefers-reduced-motion: reduce)").matches;   // no drift or twinkle
   function skyTick(spinDeg){
     if (!skyLayer) return;
     // twinkling is slow, so while the sky is not turning it only needs every other frame
     skyOdd = !skyOdd;
-    if (skyLast !== null && Math.abs(spinDeg - skyLast) < 0.02 && skyOdd) return;
+    if (skyLast !== null && Math.abs(spinDeg - skyLast) < 0.02 && (skyOdd || skyCalm)) return;
     skyLast = spinDeg;
     var w = sky.width / skyDpr, h = sky.height / skyDpr, now = performance.now() / 1000;
     var ctx = skyCtx;
@@ -904,11 +883,11 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
     ctx.globalAlpha = 1;
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, w, h);
     ctx.translate(w / 2, h / 2);
-    ctx.rotate((spinDeg * 0.08 + now * 0.05) * Math.PI / 180);
+    ctx.rotate((spinDeg * 0.08 + (skyCalm ? 0 : now * 0.05)) * Math.PI / 180);
     ctx.drawImage(skyLayer, -skyD / 2, -skyD / 2, skyD, skyD);
     for (var i = 0; i < twinklers.length; i++) {
       var s = twinklers[i];
-      var flick = 0.8 + 0.14 * Math.sin(now * s.sp + s.ph) + 0.06 * Math.sin(now * s.sp2 + s.ph * 1.7);
+      var flick = skyCalm ? 0.9 : 0.8 + 0.14 * Math.sin(now * s.sp + s.ph) + 0.06 * Math.sin(now * s.sp2 + s.ph * 1.7);
       var size = 7 + s.b * 15;
       ctx.globalAlpha = Math.min(1, (0.45 + s.b * 0.55) * flick);
       ctx.drawImage(glows[s.k], s.x - size / 2, s.y - size / 2, size, size);
@@ -1080,8 +1059,16 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
   }
   $("gridBtn").addEventListener("click", function(){ setGrid(!body.classList.contains("gridview")); });
   gridRows.addEventListener("click", function(e){
-    var f = e.target.closest("figure");
+    var f = e.target.closest(".gitem");
     if (f) openShot(+f.dataset.idx, f);
+  });
+  // Enter or Space opens a focused photo, on the sphere or in the grid
+  addEventListener("keydown", function(e){
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var t = document.activeElement;
+    if (!t || !t.matches || !t.matches(".card, #grid .gitem")) return;
+    e.preventDefault();
+    openShot(+t.dataset.idx, t);
   });
 
   // ---------- lightbox ----------
@@ -1100,7 +1087,9 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
     doc.style.overflow = "hidden";
     body.classList.add("lit");
     lit.setAttribute("aria-hidden", "false");
+    lit.inert = false;
     flipFrom(src);
+    setTimeout(function(){ var c = lit.querySelector(".close"); if (c) c.focus({ preventScroll: true }); }, 60);
   }
   function flipFrom(src){
     var a = src.getBoundingClientRect();
@@ -1120,7 +1109,9 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
     focused = -1; isLit = false; openToken++;
     body.classList.remove("lit");
     lit.setAttribute("aria-hidden", "true");
+    lit.inert = true;
     if (!body.classList.contains("menuopen")) doc.style.overflow = "";
+    if (sourceEl && sourceEl.focus) sourceEl.focus({ preventScroll: true });
     var src = body.classList.contains("gridview") ? gridFigs[i].el : cards[i].el;
     var a = src.getBoundingClientRect(), b = plate.getBoundingClientRect();
     var dx = (a.left + a.width / 2) - (b.left + b.width / 2);
@@ -1143,6 +1134,9 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
     menuBtn.setAttribute("aria-expanded", on ? "true" : "false");
     menuBtn.setAttribute("aria-label", on ? "Close menu" : "Open menu");
     menu.setAttribute("aria-hidden", on ? "false" : "true");
+    menu.inert = !on;
+    if (on) setTimeout(function(){ menu.querySelector("nav a").focus({ preventScroll: true }); }, 60);
+    else if (document.activeElement && menu.contains(document.activeElement)) menuBtn.focus({ preventScroll: true });
   }
   menuBtn.addEventListener("click", function(){ setMenu(!body.classList.contains("menuopen")); });
   menu.querySelectorAll("nav a").forEach(function(a){
@@ -1168,7 +1162,7 @@ body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gri
     addEventListener("pointermove", function(e){
       tx = e.clientX; ty = e.clientY;
       var t = e.target;
-      dot.classList.toggle("wide", !!(t.closest && t.closest(".card, a, button, #grid figure")));
+      dot.classList.toggle("wide", !!(t.closest && t.closest(".card, a, button, #grid .gitem")));
     }, { passive: true });
     (function loop(){
       cxp += (tx - cxp) * 0.2; cyp += (ty - cyp) * 0.2;
