@@ -1,1342 +1,855 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Lennon · Developer</title>
-    <meta name="description" content="Lennon (@lenodrips), software developer. Kepler, CTerm Studio, keplerbrowser.org and more." />
-    <meta name="theme-color" content="#1a100a" />
-    <style>
-      @font-face {
-        font-family: "Fraunces";
-        src: url("./fonts/fraunces-latin-full-normal.woff2") format("woff2");
-        font-weight: 100 900;
-        font-style: normal;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "Fraunces";
-        src: url("./fonts/fraunces-latin-full-italic.woff2") format("woff2");
-        font-weight: 100 900;
-        font-style: italic;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "Caveat";
-        src: url("./fonts/caveat-latin-700-normal.woff2") format("woff2");
-        font-weight: 700;
-        font-display: swap;
-      }
-      :root {
-        --night: #1a100a;
-        --wall: #3a2315;
-        --wall-2: #2b1a10;
-        --cream: #f4e6cc;
-        --paper: #efe2c8;
-        --amber: #ffb35c;
-        --terracotta: #d9622b;
-        --olive: #4f5a2a;
-        --mustard: #e9b44c;
-        --blue: #2f4f6f;
-        --leather: #b8742f;
-        --ink: #1c120c;
-        --muted: rgba(244, 230, 204, 0.72);
-        --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-      }
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        overflow-x: clip;
-      }
-      body {
-        background: var(--night);
-        color: var(--cream);
-        font-family: "Fraunces", Georgia, serif;
-        -webkit-font-smoothing: antialiased;
-      }
-      a {
-        color: inherit;
-      }
-      ::selection {
-        background: var(--amber);
-        color: var(--ink);
-      }
-      .hand {
-        font-family: "Caveat", cursive;
-        font-weight: 700;
-        color: var(--amber);
-      }
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ethan Vale — I See Through the Wild</title>
+<meta name="description" content="Wildlife photography archive by Ethan Vale. Field notes from natural encounters, captured without intervention.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap">
+<style>
+:root{
+  --bg:#000;
+  --ink:#f4f2ef;
+  --dim:#8c8783;
+  --line:rgba(244,242,239,.28);
+  --pad:clamp(14px, 2.6vw, 34px);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --hw:min(56vw, 640px);
+  --persp:1150px;
+  --safe-top:env(safe-area-inset-top, 0px);
+  --safe-right:env(safe-area-inset-right, 0px);
+  --safe-bottom:env(safe-area-inset-bottom, 0px);
+  --safe-left:env(safe-area-inset-left, 0px);
+  --tap:44px;
+  --serif:"Playfair Display", "Times New Roman", serif;
+  --sans:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{background:#000;scrollbar-gutter:stable}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-weight:300;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  min-height:100vh;
+  min-height:100dvh;
+  overscroll-behavior-y:none;
+}
+body.locked{overflow:hidden;height:100vh;height:100dvh}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+a{-webkit-tap-highlight-color:transparent}
 
-      .grain {
-        position: fixed;
-        inset: 0;
-        z-index: 60;
-        pointer-events: none;
-        opacity: 0.09;
-        mix-blend-mode: overlay;
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='4'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
-      }
-      .lamplight {
-        position: fixed;
-        left: 0;
-        top: 0;
-        z-index: 50;
-        width: 560px;
-        height: 560px;
-        margin: -280px 0 0 -280px;
-        border-radius: 50%;
-        pointer-events: none;
-        background: radial-gradient(circle, rgba(255, 179, 92, 0.16), rgba(255, 179, 92, 0) 65%);
-        mix-blend-mode: screen;
-        opacity: 0;
-      }
-      @media (hover: none) {
-        .lamplight {
-          display: none;
-        }
-      }
-      .progress {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 70;
-        height: 3px;
-        background: linear-gradient(90deg, var(--terracotta), var(--amber));
-        transform-origin: 0 50%;
-        transform: scaleX(0);
-      }
+/* ---------- splash ---------- */
+#splash{
+  position:fixed;inset:0;z-index:250;background:#000;
+  display:grid;place-items:center;align-content:center;gap:26px;
+  transition:opacity .6s ease;
+}
+#splash.out{opacity:0;pointer-events:none}
+#splash .mark{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(28px, 4.4vw, 52px);letter-spacing:.005em;color:#f4f2ef;
+  opacity:0;animation:riseIn 1.25s ease .15s forwards;
+}
+#splash .mark em,.wordmark em{font-style:normal}
+#splash .bar{width:clamp(120px, 17vw, 210px);height:1px;background:rgba(244,242,239,.16);overflow:hidden}
+#splash .bar s{display:block;width:100%;height:100%;background:#f4f2ef;transform:scaleX(0);transform-origin:left center;transition:transform .55s ease}
+#splash .tag{
+  font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(244,242,239,.38);
+  opacity:0;animation:riseIn .9s ease .7s forwards;
+}
+@keyframes riseIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
 
-      /* nav */
-      .nav {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 40;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px clamp(16px, 4vw, 48px);
-        transition:
-          background 0.4s,
-          transform 0.4s;
-      }
-      .nav.solid {
-        background: rgba(26, 16, 10, 0.85);
-        backdrop-filter: blur(10px);
-      }
-      .nav.hide {
-        transform: translateY(-100%);
-      }
-      .nav .logo {
-        font-size: 26px;
-        font-style: italic;
-        font-weight: 600;
-        text-decoration: none;
-      }
-      .nav .logo span {
-        color: var(--terracotta);
-      }
-      .nav ul {
-        display: flex;
-        gap: clamp(12px, 2.6vw, 30px);
-        list-style: none;
-      }
-      .nav ul a {
-        font-family: var(--mono);
-        font-size: 14px;
-        text-decoration: none;
-        white-space: nowrap;
-        color: var(--muted);
-      }
-      .nav ul a::before {
-        content: "./";
-        color: var(--terracotta);
-      }
-      .nav ul a:hover,
-      .nav ul a:focus-visible {
-        color: var(--amber);
-      }
-      @media (max-width: 640px) {
-        .nav ul li.wide {
-          display: none;
-        }
-      }
+/* ---------- intro film ---------- */
+#intro{position:fixed;inset:0;z-index:200;background:#000;display:grid;place-items:center;overflow:hidden}
+#intro video{width:100%;height:100%;object-fit:cover}
+#intro .veil{position:absolute;inset:0;background:#000;opacity:0;transition:opacity 1.15s ease;pointer-events:none}
+#intro.closing .veil{opacity:1}
+#intro.gone{opacity:0;pointer-events:none;transition:opacity .5s linear}
+#intro .fallback{position:absolute;inset:0;background:radial-gradient(circle at 50% 46%, #14301a 0%, #060c07 42%, #000 72%);opacity:0;pointer-events:none}
+#intro.novideo .fallback{opacity:1}
+.skip{
+  position:absolute;
+  right:calc(var(--pad) + var(--safe-right));
+  bottom:calc(var(--pad) + var(--safe-bottom));
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(244,242,239,.6);
+  min-height:44px;padding:10px 18px;border:1px solid rgba(244,242,239,.25);border-radius:999px;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  transition:color .3s ease, border-color .3s ease, opacity .3s ease;
+}
+.skip:hover{color:#fff;border-color:rgba(255,255,255,.7)}
+#intro.closing .skip{opacity:0}
 
-      /* hero */
-      .hero {
-        position: relative;
-        height: 100vh;
-        height: 100svh;
-        overflow: hidden;
-        background: var(--night);
-      }
-      .hero video {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .replay {
-        position: absolute;
-        right: clamp(16px, 4vw, 48px);
-        bottom: 26px;
-        z-index: 2;
-        padding: 8px 18px;
-        border: 1px solid rgba(244, 230, 204, 0.35);
-        border-radius: 999px;
-        background: rgba(26, 16, 10, 0.55);
-        color: var(--cream);
-        font: 13px var(--mono);
-        cursor: pointer;
-        backdrop-filter: blur(6px);
-      }
-      .replay:hover,
-      .replay:focus-visible {
-        border-color: var(--amber);
-        color: var(--amber);
-      }
-      @media (max-aspect-ratio: 4/3) {
-        .hero {
-          height: auto;
-          aspect-ratio: 16 / 9;
-          margin: 64px 0 56px;
-          overflow: visible;
-        }
-        .replay {
-          bottom: -46px;
-        }
-      }
+/* ---------- scroll + stage ---------- */
+#scrolltrack{height:116vh;pointer-events:none}
+#stage{
+  position:fixed;inset:0;z-index:10;
+  perspective:var(--persp);perspective-origin:50% 50%;
+  overflow:hidden;touch-action:none;
+  transition:opacity .6s var(--ease), filter .6s var(--ease);
+}
+@media (pointer:coarse){#stage{touch-action:pan-y}}
+#world{
+  position:absolute; top:50%; left:50%;
+  width:0; height:0;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+#orb{
+  position:absolute; top:0; left:0;
+  width:0; height:0;
+  transform-style:preserve-3d;
+  opacity:1;
+  transform:none;
+}
+#headline{
+  position:absolute; top:0; left:0;
+  width:var(--hw);
+  margin-left:calc(var(--hw) / -2);
+  text-align:center;
+  font-family:var(--serif);
+  font-weight:400;
+  font-size:clamp(25px, 3.7vw, 55px);
+  line-height:1.06;
+  letter-spacing:-.005em;
+  color:#fff;
+  text-shadow:0 2px 34px rgba(0,0,0,.55);
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+#headline .inner{
+  position:absolute; top:0; left:0;
+  width:100%;
+  transform:translateY(-50%);
+}
+#headline .inner span{
+  display:inline-block;
+  opacity:0;
+  transform:translateY(.42em);
+  filter:blur(7px);
+}
+body.revealed #headline .inner span{
+  opacity:1;transform:none;filter:blur(0);
+  transition:opacity 1.05s var(--ease), transform 1.15s var(--ease), filter 1.05s var(--ease);
+  transition-delay:calc(.9s + var(--i) * .085s);
+}
+.card{
+  position:absolute;top:0;left:0;
+  width:var(--cw, 200px);
+  height:calc(var(--cw, 200px) / 1.5);
+  margin-left:calc(var(--cw, 200px) / -2);
+  margin-top:calc(var(--cw, 200px) / -3);
+  transform-style:preserve-3d;
+  cursor:pointer;
+}
+.card.tall{height:calc(var(--cw, 200px) * 1.25);margin-top:calc(var(--cw, 200px) * -0.625)}
+.card figure{position:relative;width:100%;height:100%;overflow:hidden;border-radius:3px;background:#0a0a0a;transition:transform .5s ease}
+.card:hover figure{transform:scale(1.045)}
+.card img{width:100%;height:100%;object-fit:cover;opacity:0}
+.card img.in{opacity:1}
+body.revealed .card img{transition:opacity .8s ease-out}
+.card figure::after{
+  content:"";position:absolute;inset:0;
+  background:rgba(0,0,0,var(--d,0));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);
+  border-radius:3px;pointer-events:none;
+}
 
-      section {
-        position: relative;
-        padding: clamp(80px, 12vw, 160px) clamp(16px, 6vw, 96px);
-      }
-      .room {
-        background:
-          radial-gradient(ellipse 70% 60% at 20% 0%, rgba(255, 160, 70, 0.2), transparent 70%),
-          linear-gradient(180deg, var(--wall-2), var(--wall));
-      }
-      .label {
-        display: inline-block;
-        margin-bottom: 14px;
-        font-family: var(--mono);
-        font-size: 14px;
-        letter-spacing: 0.08em;
-        color: var(--amber);
-      }
-      .label::before {
-        content: "// ";
-        color: var(--terracotta);
-      }
-      h2 {
-        font-size: clamp(44px, 7.5vw, 110px);
-        font-style: italic;
-        font-weight: 600;
-        line-height: 1.02;
-        letter-spacing: -0.02em;
-      }
-      .split .ch {
-        display: inline-block;
-        will-change: transform;
-      }
-      .split .wd {
-        display: inline-block;
-        overflow: hidden;
-        vertical-align: top;
-        padding-bottom: 0.1em;
-      }
+.vig{
+  position:fixed;inset:0;z-index:12;pointer-events:none;
+  background:radial-gradient(ellipse 88% 92% at 50% 50%, transparent 48%, rgba(0,0,0,.26) 80%, rgba(0,0,0,.72) 100%);
+  transition:opacity .6s ease;
+}
+body.gridview .vig,body.lit .vig{opacity:0}
 
-      /* plants + pendant */
-      .plant {
-        position: absolute;
-        bottom: 0;
-        width: clamp(110px, 15vw, 210px);
-        pointer-events: none;
-      }
-      .plant svg {
-        display: block;
-        width: 100%;
-        transform-origin: 50% 100%;
-        animation: sway 6s ease-in-out infinite alternate;
-      }
-      .plant.left {
-        left: -10px;
-      }
-      .plant.right {
-        right: -10px;
-      }
-      .plant.right svg {
-        animation-duration: 7.5s;
-        animation-direction: alternate-reverse;
-      }
-      @keyframes sway {
-        from {
-          transform: rotate(-2.5deg);
-        }
-        to {
-          transform: rotate(2.5deg);
-        }
-      }
-      .pendant {
-        position: absolute;
-        top: 0;
-        right: clamp(30px, 10vw, 180px);
-        width: 110px;
-        transform-origin: 50% 0;
-        pointer-events: none;
-      }
-      .pendant .cord {
-        width: 2px;
-        height: clamp(50px, 8vw, 110px);
-        margin: 0 auto;
-        background: #120b07;
-      }
-      .pendant .shade {
-        width: 110px;
-        height: 60px;
-        border-radius: 55px 55px 8px 8px;
-        background: linear-gradient(180deg, #e9c27a, var(--leather));
-      }
-      .pendant .bulb {
-        width: 44px;
-        height: 22px;
-        margin: -4px auto 0;
-        border-radius: 0 0 22px 22px;
-        background: #fff2c8;
-        box-shadow: 0 0 60px 30px rgba(255, 179, 92, 0.35);
-      }
+/* ---------- grid ---------- */
+#grid{
+  position:fixed;inset:0;z-index:20;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:calc(var(--pad) * 3.4) var(--pad) calc(var(--pad) * 4);
+  background:#000;opacity:0;pointer-events:none;transition:opacity .6s var(--ease);
+}
+body.gridview #grid{opacity:1;pointer-events:auto}
+body.gridview #stage{opacity:0;filter:blur(14px);pointer-events:none}
+#grid .rows{display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:clamp(10px, 1.4vw, 20px);max-width:1680px;margin:0 auto}
+#grid figure{position:relative;aspect-ratio:3/2;border-radius:3px;overflow:hidden;background:#0b0b0b;cursor:pointer}
+#grid img{width:100%;height:100%;object-fit:cover;opacity:.82;transition:transform .8s var(--ease), opacity .8s var(--ease)}
+#grid figure:hover img{transform:scale(1.05);opacity:1}
+#grid figcaption{
+  position:absolute;left:0;right:0;bottom:0;
+  font-family:var(--serif);font-size:15px;
+  background:linear-gradient(to bottom, transparent, rgba(0,0,0,.82));
+  padding:26px 14px 12px;opacity:0;transform:translateY(6px);
+  transition:opacity .5s var(--ease), transform .5s var(--ease);
+}
+#grid figure:hover figcaption{opacity:1;transform:none}
 
-      /* about */
-      .about-grid {
-        display: grid;
-        grid-template-columns: 1.1fr 1fr;
-        gap: clamp(30px, 5vw, 80px);
-        align-items: center;
-        margin-top: 10px;
-      }
-      .about p.big {
-        font-size: clamp(24px, 3vw, 42px);
-        font-weight: 500;
-        line-height: 1.25;
-      }
-      .about .word {
-        display: inline-block;
-        opacity: 0.16;
-      }
-      .about em {
-        color: var(--amber);
-      }
-      .monitor {
-        position: relative;
-        padding: 18px;
-        border-radius: 22px;
-        background: linear-gradient(135deg, #a8672e, #5e3314);
-        box-shadow:
-          0 40px 60px rgba(0, 0, 0, 0.5),
-          inset 0 2px 0 rgba(255, 255, 255, 0.15);
-      }
-      .monitor::after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        bottom: -46px;
-        width: 120px;
-        height: 46px;
-        margin-left: -60px;
-        background: linear-gradient(180deg, #5e3314, #3d200c);
-        clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%);
-      }
-      .screen {
-        min-height: 300px;
-        padding: 22px 22px 26px;
-        border-radius: 10px;
-        background: #120c08;
-        box-shadow: inset 0 0 60px rgba(255, 150, 60, 0.12);
-        font: clamp(12px, 1.25vw, 16px) / 1.7 var(--mono);
-        color: var(--cream);
-        white-space: pre;
-        overflow: hidden;
-      }
-      .screen .bar {
-        display: flex;
-        gap: 7px;
-        margin-bottom: 14px;
-      }
-      .screen .bar i {
-        width: 11px;
-        height: 11px;
-        border-radius: 50%;
-        background: var(--terracotta);
-      }
-      .screen .bar i:nth-child(2) {
-        background: var(--mustard);
-      }
-      .screen .bar i:nth-child(3) {
-        background: #7d8a3f;
-      }
-      .k {
-        color: var(--terracotta);
-      }
-      .s {
-        color: var(--mustard);
-      }
-      .f {
-        color: #9fb05a;
-      }
-      .c {
-        color: rgba(244, 230, 204, 0.4);
-      }
-      .caret {
-        display: inline-block;
-        width: 0.6em;
-        height: 1.1em;
-        vertical-align: -0.2em;
-        background: var(--amber);
-        animation: blink 1s steps(1) infinite;
-      }
-      @keyframes blink {
-        50% {
-          opacity: 0;
-        }
-      }
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 18px;
-        margin-top: clamp(60px, 8vw, 110px);
-      }
-      .stat {
-        padding: 22px 20px;
-        border-top: 2px solid rgba(244, 230, 204, 0.18);
-      }
-      .stat b {
-        display: block;
-        font-size: clamp(40px, 5vw, 72px);
-        font-weight: 700;
-        font-style: italic;
-        line-height: 1;
-        color: var(--amber);
-      }
-      .stat span {
-        display: block;
-        margin-top: 10px;
-        font: 13px/1.5 var(--mono);
-        color: var(--muted);
-      }
-      @media (max-width: 860px) {
-        .about-grid {
-          grid-template-columns: 1fr;
-        }
-        .stats {
-          grid-template-columns: repeat(2, 1fr);
-        }
-        .monitor {
-          margin-bottom: 40px;
-        }
-      }
+/* ---------- chrome ---------- */
+.chrome{opacity:0;transition:opacity 1.2s var(--ease) .15s, transform .5s var(--ease)}
+body.revealed .chrome{opacity:1}
+header.chrome{
+  position:fixed;top:0;left:0;width:100%;z-index:60;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:calc(var(--pad) * .8 + var(--safe-top)) calc(var(--pad) + var(--safe-right)) calc(var(--pad) * .35) calc(var(--pad) + var(--safe-left));
+  mix-blend-mode:difference;
+}
+.wordmark{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(19px, 2.1vw, 27px);letter-spacing:.005em;line-height:1;
+  color:#fff;text-decoration:none;white-space:nowrap;
+}
+.menu-btn{display:flex;flex-direction:column;align-items:flex-end;gap:5px;min-width:44px;min-height:44px;padding:8px 0 4px}
+.menu-label{font-size:clamp(12px, 1.25vw, 15px);letter-spacing:.01em;color:#fff;transition:opacity .35s ease}
+.bars{position:relative;display:block;width:clamp(42px, 4.4vw, 62px);height:clamp(16px, 2vw, 22px)}
+.bars i{position:absolute;left:0;right:0;top:50%;height:1px;background:#fff;transition:transform .5s var(--ease), width .5s var(--ease), background .35s ease}
+.bars i:first-child{transform:translateY(-5px)}
+.bars i:last-child{left:auto;width:clamp(34px, 3.6vw, 50px);transform:translateY(5px)}
+.menu-btn:hover .bars i:last-child{transform:translateY(5px) translateX(-8px)}
+body.menuopen header.chrome{z-index:90;mix-blend-mode:normal}
+body.menuopen .wordmark{color:#f4f2ef}
+body.menuopen .menu-label{opacity:0}
+body.menuopen .bars i{width:100%;background:#f4f2ef}
+body.menuopen .bars i:first-child{transform:translateY(0) rotate(45deg)}
+body.menuopen .bars i:last-child,body.menuopen .menu-btn:hover .bars i:last-child{transform:translateY(0) rotate(-45deg)}
 
-      /* work: a gallery wall you scroll sideways through */
-      .work {
-        padding-left: 0;
-        padding-right: 0;
-        overflow: hidden;
-      }
-      .work-head {
-        padding: 0 clamp(16px, 6vw, 96px);
-      }
-      .work-head p {
-        max-width: 560px;
-        margin-top: 18px;
-        font-size: 19px;
-        line-height: 1.55;
-        color: var(--muted);
-      }
-      .track {
-        display: flex;
-        gap: clamp(28px, 4vw, 60px);
-        width: max-content;
-        padding: clamp(50px, 6vw, 80px) clamp(16px, 6vw, 96px) 20px;
-      }
-      .project {
-        width: min(80vw, 470px);
-        flex-shrink: 0;
-        transform-origin: 50% -40px;
-      }
-      .project .frame {
-        padding: 16px;
-        background: var(--ink);
-        box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5);
-      }
-      .project.wood .frame {
-        background: linear-gradient(135deg, #a8672e, #6d3d18);
-      }
-      .project.gold .frame {
-        background: linear-gradient(135deg, #e9c27a, #9c6a24);
-      }
-      .art {
-        position: relative;
-        height: 270px;
-        overflow: hidden;
-        border: 5px solid var(--paper);
-      }
-      .card-body {
-        padding: 24px 6px 0;
-      }
-      .card-body .meta {
-        font: 13px var(--mono);
-        color: var(--amber);
-      }
-      .card-body h3 {
-        margin: 8px 0 10px;
-        font-size: clamp(30px, 3vw, 40px);
-        font-style: italic;
-        font-weight: 700;
-        line-height: 1.05;
-      }
-      .card-body p {
-        font-size: 17px;
-        line-height: 1.55;
-        color: var(--muted);
-      }
-      .tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: 16px 0;
-      }
-      .tags span {
-        padding: 5px 11px;
-        border: 1px solid rgba(244, 230, 204, 0.25);
-        border-radius: 999px;
-        font: 12px var(--mono);
-        color: var(--cream);
-      }
-      .card-links {
-        display: flex;
-        gap: 18px;
-        font: 14px var(--mono);
-      }
-      .card-links a {
-        text-decoration: none;
-        color: var(--amber);
-        border-bottom: 1px solid transparent;
-      }
-      .card-links a:hover,
-      .card-links a:focus-visible {
-        border-color: var(--amber);
-      }
-      .art img {
-        display: block;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: top center;
-        transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-      }
-      .project:hover .art img {
-        transform: scale(1.06);
-      }
-      .work-hint {
-        padding: 10px clamp(16px, 6vw, 96px) 0;
-        font: 13px var(--mono);
-        color: var(--muted);
-      }
-      @media (max-width: 899px) {
-        .track {
-          flex-direction: column;
-          width: auto;
-          align-items: center;
-        }
-        .project {
-          width: min(100%, 520px);
-        }
-        .work-hint {
-          display: none;
-        }
-      }
+.bio{
+  position:fixed;left:calc(var(--pad) + var(--safe-left));bottom:calc(var(--pad) + var(--safe-bottom));
+  z-index:55;max-width:min(320px, 46vw);
+}
+.bio .who{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.bio img{width:52px;height:52px;border-radius:3px;object-fit:cover;filter:grayscale(.15)}
+.bio b{font-family:var(--serif);font-weight:400;font-size:19px;letter-spacing:.01em}
+.bio p{font-size:12.5px;line-height:1.62;color:rgba(244,242,239,.72)}
+body.deep .bio,body.gridview .bio,body.lit .bio{opacity:0;transform:translateY(10px);pointer-events:none}
 
-      /* stack: the record shelf */
-      .marquee {
-        overflow: hidden;
-        padding: 18px 0;
-        white-space: nowrap;
-        border-block: 1px solid rgba(244, 230, 204, 0.12);
-        background: var(--ink);
-      }
-      .marquee .row {
-        display: inline-block;
-        font-size: clamp(34px, 5vw, 70px);
-        font-style: italic;
-        font-weight: 700;
-        will-change: transform;
-      }
-      .marquee .row span {
-        margin: 0 0.4em;
-        color: var(--terracotta);
-        font-style: normal;
-      }
-      .marquee .row.alt {
-        display: block;
-        color: transparent;
-        -webkit-text-stroke: 1px rgba(244, 230, 204, 0.5);
-      }
-      .stack {
-        background: linear-gradient(180deg, var(--wall), #2e1b10);
-      }
-      .shelves {
-        max-width: 1200px;
-        margin: clamp(40px, 6vw, 80px) auto 0;
-      }
-      .shelf {
-        position: relative;
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: clamp(10px, 2vw, 24px);
-        padding-bottom: 24px;
-        margin-bottom: clamp(60px, 7vw, 90px);
-      }
-      .shelf::after {
-        content: "";
-        position: absolute;
-        left: -3%;
-        right: -3%;
-        bottom: 0;
-        height: 24px;
-        border-radius: 4px;
-        background: linear-gradient(180deg, #8a4b22, #4e2810);
-        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.5);
-      }
-      .lp {
-        position: relative;
-        aspect-ratio: 1;
-        cursor: pointer;
-        outline: none;
-      }
-      .lp .disc {
-        position: absolute;
-        top: 5%;
-        left: 5%;
-        width: 90%;
-        aspect-ratio: 1;
-        transition: transform 0.6s cubic-bezier(0.3, 1.3, 0.5, 1);
-      }
-      .lp .vinyl {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        background: repeating-radial-gradient(circle, #141414 0 2px, #222 2px 4px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .lp .vinyl::after {
-        content: "";
-        width: 36%;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        background: conic-gradient(from 0deg, var(--lbl, var(--terracotta)) 0 75%, var(--paper) 75% 80%, var(--lbl, var(--terracotta)) 80%);
-      }
-      .lp .sleeve {
-        position: relative;
-        z-index: 1;
-        width: 100%;
-        height: 100%;
-        padding: clamp(8px, 1.2vw, 16px);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        box-shadow: 0 14px 24px rgba(0, 0, 0, 0.45);
-      }
-      .lp .sleeve small {
-        font: clamp(9px, 0.9vw, 12px) var(--mono);
-        opacity: 0.8;
-      }
-      .lp .sleeve b {
-        font-size: clamp(15px, 1.9vw, 26px);
-        font-style: italic;
-        line-height: 1;
-      }
-      .lp:hover .disc,
-      .lp:focus-visible .disc,
-      .lp.out .disc {
-        transform: translateY(-48%);
-      }
-      .lp:focus-visible .sleeve {
-        outline: 3px solid var(--amber);
-        outline-offset: 4px;
-      }
-      .terracotta {
-        background: var(--terracotta);
-        color: var(--ink);
-      }
-      .olive {
-        background: var(--olive);
-        color: var(--cream);
-      }
-      .paper {
-        background: var(--paper);
-        color: var(--ink);
-      }
-      .mustard {
-        background: var(--mustard);
-        color: var(--ink);
-      }
-      .blue {
-        background: var(--blue);
-        color: var(--cream);
-      }
-      .now {
-        text-align: center;
-        font: clamp(14px, 1.4vw, 17px) var(--mono);
-        color: var(--amber);
-        min-height: 1.5em;
-      }
-      @media (max-width: 760px) {
-        .shelf {
-          grid-template-columns: repeat(3, 1fr);
-          row-gap: 70px;
-        }
-      }
+.colophon{
+  position:fixed;right:calc(var(--pad) + var(--safe-right));bottom:calc(var(--pad) + var(--safe-bottom));
+  z-index:55;font-size:12.5px;color:rgba(244,242,239,.72);
+}
+body.gridview .colophon,body.lit .colophon{opacity:0;pointer-events:none}
 
-      /* process */
-      .process {
-        overflow: hidden;
-      }
-      .steps {
-        position: relative;
-        max-width: 1100px;
-        margin: clamp(50px, 7vw, 90px) auto 0;
-      }
-      .steps svg.wire {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: visible;
-        pointer-events: none;
-      }
-      .step {
-        position: relative;
-        width: min(46%, 420px);
-        padding: 26px 26px 30px;
-        margin-bottom: clamp(40px, 6vw, 70px);
-        background: var(--paper);
-        color: var(--ink);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-      }
-      .step:nth-child(odd of .step) {
-        margin-left: auto;
-      }
-      .step::before {
-        content: "";
-        position: absolute;
-        top: -10px;
-        left: 50%;
-        width: 70px;
-        height: 22px;
-        margin-left: -35px;
-        background: rgba(233, 180, 76, 0.75);
-        transform: rotate(-3deg);
-      }
-      .step .n {
-        font: 13px var(--mono);
-        color: var(--terracotta);
-      }
-      .step h3 {
-        margin: 6px 0 8px;
-        font-size: 34px;
-        font-style: italic;
-      }
-      .step p {
-        font-size: 17px;
-        line-height: 1.5;
-      }
-      @media (max-width: 700px) {
-        .step {
-          width: 88%;
-        }
-      }
+.gridbtn{
+  position:fixed;left:calc(var(--pad) + var(--safe-left));bottom:calc(var(--pad) + var(--safe-bottom));
+  z-index:56;width:44px;height:44px;padding:5px;
+  display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:4px;
+  opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:opacity .5s var(--ease), transform .5s var(--ease);
+}
+.gridbtn b{background:#f4f2ef;border-radius:2px;transition:transform .45s var(--ease), background .3s ease}
+.gridbtn:hover b{background:#fff;transform:scale(.86)}
+body.revealed.deep .gridbtn,body.revealed.gridview .gridbtn{opacity:1;transform:none;pointer-events:auto}
+body.gridview .gridbtn b:first-child{transform:translate(3px, 3px)}
+body.gridview .gridbtn b:last-child{transform:translate(-3px, -3px)}
 
-      /* rug + contact */
-      .rug-zone {
-        position: relative;
-        height: clamp(220px, 30vw, 380px);
-        padding: 0;
-        overflow: hidden;
-        perspective: 800px;
-        background: linear-gradient(180deg, #4e2810, #6b3818 40%, #8a4b22);
-      }
-      .rug-zone::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0 2px, transparent 2px 180px);
-      }
-      .rug {
-        position: absolute;
-        left: 12%;
-        right: 12%;
-        top: 8%;
-        height: 140%;
-        border: clamp(8px, 1.2vw, 16px) solid var(--paper);
-        border-radius: 16px;
-        background: repeating-conic-gradient(var(--ink) 0 25%, var(--paper) 0 50%) 0 0 / clamp(50px, 7vw, 100px) clamp(50px, 7vw, 100px);
-        transform: rotateX(58deg);
-        transform-origin: 50% 0;
-      }
-      .contact {
-        text-align: center;
-        overflow: hidden;
-      }
-      .contact h2 {
-        font-size: clamp(52px, 11vw, 170px);
-      }
-      .contact h2 .accent {
-        color: var(--amber);
-      }
-      .contact p {
-        max-width: 560px;
-        margin: 26px auto 44px;
-        color: var(--muted);
-        font-size: 20px;
-        line-height: 1.55;
-      }
-      .links {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 14px;
-      }
-      .links a {
-        display: inline-block;
-        padding: 14px 28px;
-        border-radius: 999px;
-        background: var(--leather);
-        color: var(--ink);
-        font: 600 15px var(--mono);
-        text-decoration: none;
-        box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2);
-      }
-      .links a:hover,
-      .links a:focus-visible {
-        background: var(--amber);
-      }
-      footer {
-        padding: 34px clamp(16px, 6vw, 96px);
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 10px;
-        color: var(--muted);
-        font: 13px var(--mono);
-      }
+.cue{
+  position:fixed;left:50%;bottom:calc(var(--pad) + var(--safe-bottom) + 4px);
+  transform:translateX(-50%);z-index:54;
+  display:flex;align-items:center;gap:10px;
+  font-size:10px;text-transform:uppercase;letter-spacing:.24em;color:rgba(244,242,239,.42);white-space:nowrap;
+}
+.cue s{position:relative;display:block;width:44px;height:1px;background:rgba(244,242,239,.28);overflow:hidden}
+.cue s::after{content:"";position:absolute;inset:0;background:#f4f2ef;transform:translateX(-100%);animation:sweep 2.6s ease infinite}
+@keyframes sweep{0%{transform:translateX(-100%)}55%{transform:translateX(0)}100%{transform:translateX(100%)}}
+body.revealed.deep .cue,body.revealed.gridview .cue,body.revealed.lit .cue{opacity:0;pointer-events:none}
 
-      @media (prefers-reduced-motion: reduce) {
-        .plant svg,
-        .caret {
-          animation: none;
-        }
-        .about .word {
-          opacity: 1;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="progress" id="progress" aria-hidden="true"></div>
-    <div class="grain" aria-hidden="true"></div>
-    <div class="lamplight" id="lamplight" aria-hidden="true"></div>
+/* ---------- menu ---------- */
+#menu{
+  position:fixed;inset:0;z-index:80;background:#050505;
+  display:grid;place-items:center;
+  clip-path:inset(0 0 100% 0);transition:clip-path .85s var(--ease);
+  pointer-events:none;
+}
+body.menuopen #menu{clip-path:inset(0);pointer-events:auto}
+#menu nav{display:flex;flex-direction:column;gap:clamp(4px, 1vw, 10px);text-align:center}
+#menu nav a{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(34px, 7.6vw, 78px);line-height:1.08;color:#f4f2ef;text-decoration:none;opacity:.55;
+  transition:opacity .4s ease, letter-spacing .4s ease;
+}
+#menu nav a:hover{opacity:1;letter-spacing:.012em}
+#menu .addr{
+  position:absolute;left:calc(var(--pad) + var(--safe-left));right:calc(var(--pad) + var(--safe-right));bottom:calc(var(--pad) + var(--safe-bottom));
+  font-size:12.5px;color:var(--dim);line-height:1.7;
+}
 
-    <nav class="nav" id="nav">
-      <a class="logo" href="#top">Lennon<span>.</span></a>
-      <ul>
-        <li class="wide"><a href="#about">about</a></li>
-        <li><a href="#work">work</a></li>
-        <li><a href="#stack">stack</a></li>
-        <li class="wide"><a href="#process">process</a></li>
-        <li><a href="#contact">contact</a></li>
-      </ul>
-    </nav>
+/* ---------- lightbox ---------- */
+#lit{
+  position:fixed;inset:0;z-index:90;
+  display:grid;place-items:center;
+  padding:clamp(56px, 8vh, 84px) var(--pad);
+  opacity:0;pointer-events:none;transition:opacity .42s ease;
+}
+body.lit #lit{opacity:1;pointer-events:auto}
+#lit .scrim{position:absolute;inset:0}
+.plate{position:relative;width:min(72vw, 860px, calc((100vh - 230px) * 1.5));transition:transform .62s var(--ease), opacity .42s ease;transform-origin:50% 50%}
+.shot{position:relative;width:100%;aspect-ratio:3/2;border-radius:2px;background:#0b0b0b;box-shadow:0 30px 90px rgba(0,0,0,.75)}
+.shot img{width:100%;height:100%;object-fit:cover;border-radius:2px}
+.close{
+  position:absolute;top:12px;right:14px;
+  font-size:12.5px;min-width:44px;min-height:44px;padding:10px 14px;
+  border:1px solid rgba(244,242,239,.78);border-radius:6px;background:rgba(0,0,0,.35);color:#f4f2ef;
+  transition:border-color .3s ease, background .3s ease;
+}
+.close:hover{border-color:#fff;background:rgba(0,0,0,.55)}
+.meta{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:clamp(22px, 3.2vw, 48px);padding-top:16px}
+#litTitle{font-family:var(--serif);font-weight:400;font-size:clamp(22px, 2.15vw, 32px);line-height:1.08;letter-spacing:-.01em;margin-bottom:6px}
+#litWhere{font-size:13px;color:rgba(244,242,239,.62)}
+#litNote{font-size:13.5px;line-height:1.55;color:rgba(244,242,239,.92)}
 
-    <header class="hero" id="top">
-      <!-- intro.mp4 / intro.webm are rendered with HyperFrames from intro/index.html -->
-      <video id="intro" autoplay muted playsinline preload="auto" aria-label="Animated intro: Hey, I'm Lennon, software developer.">
-        <source src="./intro.webm" type="video/webm" />
-        <source src="./intro.mp4" type="video/mp4" />
-      </video>
-      <button class="replay" id="replay" type="button">↻ replay intro</button>
-    </header>
+/* ---------- cursor ---------- */
+#dot{
+  position:fixed;left:0;top:0;z-index:300;
+  width:19px;height:19px;margin:-9.5px;border-radius:50%;
+  background:rgba(214,212,209,.9);mix-blend-mode:difference;border:1px solid transparent;
+  pointer-events:none;
+  transition:width .35s ease, height .35s ease, margin .35s ease, background .35s ease, border-color .35s ease;
+}
+#dot.wide{width:52px;height:52px;margin:-26px;background:rgba(244,242,239,.14);border-color:rgba(244,242,239,.75)}
+@media (hover:none), (pointer:coarse){#dot{display:none}}
 
-    <section class="about room" id="about">
-      <div class="pendant" id="pendant" aria-hidden="true">
-        <div class="cord"></div>
-        <div class="shade"></div>
-        <div class="bulb"></div>
-      </div>
-      <span class="label">about</span>
-      <h2 class="split">Hey, I'm Lennon.</h2>
-      <div class="about-grid">
-        <p class="big" id="about-text">
-          I'm a developer who builds things people actually use, from <em>Kepler</em>, a Chromium-based web browser written in C++,
-          to <em>CTerm Studio</em>, a code studio that runs right in your browser on WebAssembly. I care about how software
-          feels: fast, warm and a little bit fun.
-        </p>
-        <div class="monitor" aria-label="Code on a monitor describing Lennon">
-          <div class="screen" id="screen"><div class="bar"><i></i><i></i><i></i></div><code id="code"><span class="c">// lennon.js</span>
-<span class="k">const</span> lennon = {
-  role: <span class="s">"software developer"</span>,
-  builds: [<span class="s">"browsers"</span>, <span class="s">"studios"</span>, <span class="s">"sites"</span>],
-  stack: [<span class="s">"C++"</span>, <span class="s">"Qt"</span>, <span class="s">"Rust"</span>, <span class="s">"React"</span>],
-  setup: <span class="s">"lamp on, music up"</span>,
-};
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .bio{max-width:min(420px, calc(100vw - var(--pad) * 2 - var(--safe-left) - var(--safe-right)))}
+  .bio p{font-size:12px}
+  .colophon{font-size:11px}
+  .meta{grid-template-columns:1fr;gap:10px;padding-top:14px}
+  .plate{width:min(92vw, calc((100dvh - 220px) * 1.5))}
+  #grid .rows{grid-template-columns:repeat(auto-fill, minmax(150px, 1fr))}
+  #grid{padding-top:calc(var(--pad) * 2.8 + var(--safe-top))}
+}
+@media (max-width:768px){
+  .colophon{display:none}
+  .bio{max-width:calc(100vw - var(--pad) * 2 - var(--safe-left) - var(--safe-right))}
+  #headline{font-size:clamp(22px, 6.4vw, 34px)}
+  #menu nav a{font-size:clamp(28px, 9vw, 54px)}
+  #menu .addr{font-size:11.5px}
+}
+@media (max-width:640px){
+  :root{--hw:min(84vw, 360px);--pad:clamp(12px, 4vw, 18px)}
+  .bio img{width:42px;height:42px}
+  .bio b{font-size:17px}
+  .bio p{font-size:11.5px;line-height:1.55}
+  .cue{display:none}
+  #lit{display:block;overflow-y:auto;padding:calc(52px + var(--safe-top)) calc(var(--pad) + var(--safe-right)) calc(var(--pad) + var(--safe-bottom)) calc(var(--pad) + var(--safe-left))}
+  .plate{width:100%;max-width:560px;margin:0 auto}
+  #litTitle{font-size:clamp(20px, 5.6vw, 26px)}
+  #litNote{font-size:12.5px;line-height:1.58}
+  .close{top:8px;right:8px}
+  #grid .rows{grid-template-columns:repeat(2, 1fr);gap:8px}
+  #grid figcaption{opacity:1;transform:none;font-size:13px}
+  #grid{padding:calc(var(--pad) * 2.8 + var(--safe-top)) calc(var(--pad) + var(--safe-right)) calc(var(--pad) * 4 + var(--safe-bottom)) calc(var(--pad) + var(--safe-left))}
+}
+@media (max-width:380px){
+  :root{--hw:min(88vw, 320px)}
+  .bio .who{gap:10px;margin-bottom:10px}
+  .bio p{display:none}
+  #grid .rows{grid-template-columns:1fr}
+  #menu nav{gap:2px}
+  #menu nav a{font-size:clamp(24px, 10vw, 40px)}
+}
+@media (max-height:520px) and (orientation:landscape){
+  .bio,.colophon,.cue{display:none}
+  #headline{font-size:clamp(18px, 4.8vh, 28px)}
+  #lit{padding-top:calc(36px + var(--safe-top))}
+  .meta{padding-top:10px}
+  .plate{width:min(58vw, calc((100dvh - 80px) * 1.5))}
+  header.chrome{padding-top:calc(8px + var(--safe-top))}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.14s !important}
+}
+</style>
+</head>
+<body class="locked">
 
-<span class="f">ship</span>(lennon); <span class="c">// always</span></code><span class="caret"></span></div>
-        </div>
-      </div>
-      <div class="stats">
-        <div class="stat"><b data-count="5">0</b><span>projects shipped</span></div>
-        <div class="stat"><b data-count="12">0</b><span>tools in rotation</span></div>
-        <div class="stat"><b data-count="70" data-suffix="+">0</b><span>tracker networks Kepler blocks</span></div>
-        <div class="stat"><b data-count="3">0</b><span>languages: C++, Rust, JS</span></div>
-      </div>
-    </section>
+<div id="scrolltrack"></div>
 
-    <section class="work room" id="work">
-      <div class="work-head">
-        <span class="label">selected work</span>
-        <h2 class="split">On the wall.</h2>
-        <p>Things I've designed, built and shipped. Every one of them is open source.</p>
-      </div>
-      <div class="work-hint">scroll →</div>
-      <div class="track" id="track">
-        <article class="project">
-          <div class="frame">
-            <div class="art"><img src="./work/kepler.jpg" alt="Kepler browser with its AI side panel open" loading="lazy" /></div>
-          </div>
-          <div class="card-body">
-            <div class="meta">01 · desktop app</div>
-            <h3>Kepler</h3>
-            <p>A web browser from another orbit. Space-themed UI, a built-in ad and tracker blocker, private Orbit mode, session restore and an animated new tab page.</p>
-            <div class="tags"><span>C++17</span><span>Qt 6</span><span>Qt WebEngine</span><span>CMake</span><span>GitHub Actions</span></div>
-            <div class="card-links"><a href="https://github.com/lenodrips-create/kepler" target="_blank" rel="noopener">code ↗</a></div>
-          </div>
-        </article>
-        <article class="project wood">
-          <div class="frame">
-            <div class="art"><img src="./work/cterm-studio.jpg" alt="CTerm Studio with editor, live preview and two shells" loading="lazy" /></div>
-          </div>
-          <div class="card-body">
-            <div class="meta">02 · web app</div>
-            <h3>CTerm Studio</h3>
-            <p>A code studio that runs entirely in the browser: editor, live preview, file explorer and two shells, all powered by a C core compiled to WebAssembly.</p>
-            <div class="tags"><span>C</span><span>WebAssembly</span><span>React 19</span><span>Vite</span><span>motion</span></div>
-            <div class="card-links"><a href="https://github.com/lenodrips-create/cterm-studio" target="_blank" rel="noopener">code ↗</a></div>
-          </div>
-        </article>
-        <article class="project">
-          <div class="frame">
-            <div class="art"><img src="./work/keplerbrowser-org.jpg" alt="keplerbrowser.org home page" loading="lazy" /></div>
-          </div>
-          <div class="card-body">
-            <div class="meta">03 · website + server</div>
-            <h3>keplerbrowser.org</h3>
-            <p>The download site for Kepler: starfield, reveals and a docs page, served by a zero-dependency Rust release server with a JSON releases API.</p>
-            <div class="tags"><span>Rust</span><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
-            <div class="card-links">
-              <a href="https://keplerbrowser.org" target="_blank" rel="noopener">live ↗</a>
-              <a href="https://github.com/lenodrips-create/kepler-download-website" target="_blank" rel="noopener">code ↗</a>
-            </div>
-          </div>
-        </article>
-        <article class="project gold">
-          <div class="frame">
-            <div class="art"><img src="./work/forgivn.jpg" alt="FORGIVN storefront hero" loading="lazy" /></div>
-          </div>
-          <div class="card-body">
-            <div class="meta">04 · storefront</div>
-            <h3>FORGIVN</h3>
-            <p>A storefront for a Christian clothing brand: dove intro, filterable products, a saved cart, a contact form and scroll animations, all in one dependency-free file.</p>
-            <div class="tags"><span>HTML</span><span>CSS</span><span>JavaScript</span><span>a11y</span></div>
-            <div class="card-links"><a href="https://github.com/lenodrips-create/zay-website" target="_blank" rel="noopener">code ↗</a></div>
-          </div>
-        </article>
-        <article class="project wood">
-          <div class="frame">
-            <div class="art"><img src="./work/portfolio.jpg" alt="The last frame of this site's HyperFrames intro" loading="lazy" /></div>
-          </div>
-          <div class="card-body">
-            <div class="meta">05 · this site</div>
-            <h3>This portfolio</h3>
-            <p>The intro is an HTML composition rendered to video with HyperFrames; everything else is scroll-driven with GSAP.</p>
-            <div class="tags"><span>HyperFrames</span><span>GSAP</span><span>ScrollTrigger</span><span>Vite</span></div>
-            <div class="card-links"><a href="https://github.com/lenodrips-create/lennon-sells" target="_blank" rel="noopener">code ↗</a></div>
-          </div>
-        </article>
-      </div>
-    </section>
+<div id="stage">
+  <div id="world">
+    <div id="orb"></div>
+    <h1 id="headline"><span class="inner"><span style="--i:0">I</span> <span style="--i:1">See</span> <span style="--i:2">Through</span> <span style="--i:3">the</span> <span style="--i:4">Wild</span></span></h1>
+  </div>
+</div>
 
-    <div class="marquee" aria-hidden="true">
-      <div class="row" id="mq1">C++ <span>✦</span> Qt 6 <span>✦</span> Rust <span>✦</span> WebAssembly <span>✦</span> React <span>✦</span> JavaScript <span>✦</span> C++ <span>✦</span> Qt 6 <span>✦</span> Rust <span>✦</span> WebAssembly <span>✦</span></div>
-      <div class="row alt" id="mq2">GSAP <span>✦</span> HyperFrames <span>✦</span> Vite <span>✦</span> CMake <span>✦</span> GitHub Actions <span>✦</span> HTML &amp; CSS <span>✦</span> GSAP <span>✦</span> HyperFrames <span>✦</span> Vite <span>✦</span></div>
+<div class="vig"></div>
+
+<div id="grid"><div class="rows"></div></div>
+
+<header class="chrome">
+  <a class="wordmark" href="#" aria-label="Ethan Vale">Ethan<em>Vale</em></a>
+  <button id="menuBtn" class="menu-btn" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
+    <span class="menu-label">Menu</span>
+    <span class="bars"><i></i><i></i></span>
+  </button>
+</header>
+
+<div class="bio chrome">
+  <div class="who">
+    <img id="avatar" alt="Ethan Vale">
+    <b>Ethan Vale</b>
+  </div>
+  <p>Wildlife photography is less about taking pictures and more about learning when not to move. Every frame in this archive was captured in natural conditions without intervention.</p>
+</div>
+
+<div class="colophon chrome">Field Notes 2026</div>
+
+<button id="gridBtn" class="gridbtn" aria-label="Toggle grid view"><b></b><b></b><b></b><b></b></button>
+
+<div class="cue chrome"><s></s>Drag to rotate</div>
+
+<div id="menu" aria-hidden="true">
+  <nav>
+    <a href="#" data-grid>The Archive</a>
+    <a href="#">Field Notes</a>
+    <a href="#">Studio</a>
+    <a href="#" data-close-menu>Contact</a>
+  </nav>
+  <div class="addr">Nairobi · Cape Town · Reykjavík<br>studio@ethanvale.photo</div>
+</div>
+
+<div id="lit" aria-hidden="true">
+  <div class="scrim" data-close></div>
+  <div class="plate">
+    <div class="shot">
+      <img id="litImg" alt="">
+      <button class="close" data-close>Close</button>
     </div>
-
-    <section class="stack" id="stack">
-      <span class="label">stack</span>
-      <h2 class="split">On rotation.</h2>
-      <div class="shelves">
-        <div class="shelf">
-          <div class="lp" tabindex="0" data-now="C++ → Kepler's whole browser core" style="--lbl: var(--terracotta)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve terracotta"><small>lang</small><b>C++</b></div></div>
-          <div class="lp" tabindex="0" data-now="Qt 6 → Kepler's UI and WebEngine" style="--lbl: #7d8a3f"><div class="disc"><div class="vinyl"></div></div><div class="sleeve olive"><small>framework</small><b>Qt 6</b></div></div>
-          <div class="lp" tabindex="0" data-now="Rust → the keplerbrowser.org release server" style="--lbl: var(--mustard)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve blue"><small>lang</small><b>Rust</b></div></div>
-          <div class="lp" tabindex="0" data-now="C → CTerm Studio's shell and file system" style="--lbl: var(--blue)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve mustard"><small>lang</small><b>C</b></div></div>
-          <div class="lp" tabindex="0" data-now="WebAssembly → running CTerm's C core in the browser" style="--lbl: var(--terracotta)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve paper"><small>runtime</small><b>WASM</b></div></div>
-          <div class="lp" tabindex="0" data-now="JavaScript → every site on this page" style="--lbl: var(--olive)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve terracotta"><small>lang</small><b>JS</b></div></div>
-        </div>
-        <div class="shelf">
-          <div class="lp" tabindex="0" data-now="React → the CTerm Studio landing page" style="--lbl: var(--blue)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve olive"><small>library</small><b>React</b></div></div>
-          <div class="lp" tabindex="0" data-now="Vite → builds for CTerm and this site" style="--lbl: var(--terracotta)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve mustard"><small>tooling</small><b>Vite</b></div></div>
-          <div class="lp" tabindex="0" data-now="GSAP → all the scroll animation you're seeing" style="--lbl: #7d8a3f"><div class="disc"><div class="vinyl"></div></div><div class="sleeve paper"><small>motion</small><b>GSAP</b></div></div>
-          <div class="lp" tabindex="0" data-now="HyperFrames → the intro video at the top" style="--lbl: var(--mustard)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve terracotta"><small>video</small><b>Hyper­Frames</b></div></div>
-          <div class="lp" tabindex="0" data-now="CMake → building Kepler on every platform" style="--lbl: var(--terracotta)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve blue"><small>build</small><b>CMake</b></div></div>
-          <div class="lp" tabindex="0" data-now="GitHub Actions → Kepler releases and site deploys" style="--lbl: var(--olive)"><div class="disc"><div class="vinyl"></div></div><div class="sleeve mustard"><small>CI/CD</small><b>Actions</b></div></div>
-        </div>
+    <div class="meta">
+      <div>
+        <h2 id="litTitle"></h2>
+        <div class="where" id="litWhere"></div>
       </div>
-      <p class="now" id="now" aria-live="polite">hover a record to see where I use it</p>
-    </section>
+      <p class="note" id="litNote"></p>
+    </div>
+  </div>
+</div>
 
-    <section class="process room" id="process">
-      <span class="label">process</span>
-      <h2 class="split">How I ship.</h2>
-      <div class="steps" id="steps">
-        <svg class="wire" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
-          <path id="wire" d="M 760 40 C 760 200, 240 180, 240 330 S 760 480, 760 620 S 240 780, 240 960" fill="none" stroke="#d9622b" stroke-width="4" stroke-dasharray="1" vector-effect="non-scaling-stroke" />
-        </svg>
-        <div class="step"><div class="n">01</div><h3>Sketch it</h3><p>Figure out how it should feel before writing a line. Then pick the stack that fits, not the one that's trending.</p></div>
-        <div class="step"><div class="n">02</div><h3>Build it</h3><p>Get the core working first: a browser that loads pages, a shell that runs commands, a cart that adds up.</p></div>
-        <div class="step"><div class="n">03</div><h3>Polish it</h3><p>Animations, keyboard support, small screens, reduced motion. The details are what make people stay.</p></div>
-        <div class="step"><div class="n">04</div><h3>Ship it</h3><p>CI builds, release pages and GitHub Pages deploys. If it isn't shipped, it doesn't count.</p></div>
-      </div>
-      <div class="plant left" data-speed="0.2"><svg viewBox="0 0 260 420" aria-hidden="true">
-        <path d="M130 420 C120 300 60 260 10 230 C70 230 120 270 132 330 Z" fill="#3f4f22" />
-        <path d="M130 420 C140 280 200 210 255 190 C210 240 160 300 138 360 Z" fill="#56692c" />
-        <path d="M130 420 C110 260 120 120 150 20 C160 140 150 280 140 400 Z" fill="#4a5c26" />
-        <path d="M130 420 C90 330 40 330 0 330 C50 350 100 370 126 410 Z" fill="#33421b" />
-        <rect x="70" y="360" width="120" height="60" rx="10" fill="#b8742f" />
-      </svg></div>
-    </section>
+<div id="intro">
+  <video id="film" muted playsinline autoplay preload="auto" disablepictureinpicture src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260922_195107_ed3f055a-3a13-4a71-b743-e10310454246.mp4"></video>
+  <div class="fallback"></div>
+  <div class="veil"></div>
+  <button class="skip" id="skip">Skip</button>
+</div>
 
-    <div class="rug-zone" aria-hidden="true"><div class="rug" id="rug"></div></div>
+<div id="splash">
+  <div class="mark">Ethan<em>Vale</em></div>
+  <div class="bar"><s id="bar"></s></div>
+  <div class="tag">Field Notes 2026</div>
+</div>
 
-    <section class="contact room" id="contact">
-      <span class="label">contact</span>
-      <h2 class="split">Let's build <span class="accent">something.</span></h2>
-      <p>Got a project, an idea or a bug that needs squashing? I'm always down to talk code.</p>
-      <div class="links">
-        <a class="mag" href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub</a>
-        <a class="mag" href="https://www.instagram.com/lenodrips/" target="_blank" rel="noopener">Instagram</a>
-        <a class="mag" href="https://www.tiktok.com/@lenodrips" target="_blank" rel="noopener">TikTok</a>
-      </div>
-      <div class="plant left" data-speed="0.25"><svg viewBox="0 0 260 420" aria-hidden="true">
-        <path d="M130 420 C120 300 60 260 10 230 C70 230 120 270 132 330 Z" fill="#3f4f22" />
-        <path d="M130 420 C140 280 200 210 255 190 C210 240 160 300 138 360 Z" fill="#56692c" />
-        <path d="M130 420 C110 260 120 120 150 20 C160 140 150 280 140 400 Z" fill="#4a5c26" />
-        <rect x="70" y="360" width="120" height="60" rx="10" fill="#d9622b" />
-      </svg></div>
-      <div class="plant right" data-speed="0.35"><svg viewBox="0 0 260 420" aria-hidden="true">
-        <path d="M130 420 C140 300 200 250 250 220 C190 230 140 270 128 330 Z" fill="#3f4f22" />
-        <path d="M130 420 C120 270 60 200 8 180 C50 230 100 300 122 360 Z" fill="#56692c" />
-        <path d="M130 420 C150 250 140 110 110 30 C100 150 110 280 120 400 Z" fill="#4a5c26" />
-        <rect x="70" y="360" width="120" height="60" rx="10" fill="#b8742f" />
-      </svg></div>
-    </section>
+<div id="dot"></div>
 
-    <footer>
-      <span>© 2026 Lennon · @lenodrips</span>
-      <span>intro rendered with HyperFrames · motion by GSAP</span>
-    </footer>
+<script>
+(function(){
+  "use strict";
 
-    <script src="./js/gsap.min.js"></script>
-    <script src="./js/ScrollTrigger.min.js"></script>
-    <script>
-      const video = document.getElementById("intro");
-      document.getElementById("replay").addEventListener("click", () => {
-        video.currentTime = 0;
-        video.play();
-      });
+  var CDN = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/";
+  var AVATAR = "hf_20260922_194417_a455843c-d8db-461c-8ef6-74a325d2472c";
 
-      // record shelf: pull a record out on hover / focus / tap
-      const now = document.getElementById("now");
-      document.querySelectorAll(".lp").forEach((lp) => {
-        const show = () => (now.textContent = "▶ " + lp.dataset.now);
-        lp.addEventListener("pointerenter", show);
-        lp.addEventListener("focus", show);
-        lp.addEventListener("click", () => {
-          document.querySelectorAll(".lp.out").forEach((o) => o !== lp && o.classList.remove("out"));
-          lp.classList.toggle("out");
-          show();
-        });
-      });
+  // The archive: Lennon's project screenshots in place of the wildlife stills.
+  var SHOTS = [
+    ["01", "A Browser From Another Orbit", "Kepler · C++ / Qt 6", "A full desktop web browser built on Qt WebEngine, here with the AI side panel open: Claude, ChatGPT, Gemini, Copilot and Perplexity one click away."],
+    ["02", "The Start Page", "Kepler · kepler://start", "Starfield with parallax, shooting stars, a floating logo, a clock and bookmark tiles. The first thing every new tab shows."],
+    ["03", "Everyday Reading", "Kepler · Browsing", "Wikipedia in Kepler. Tabs reorder by drag, close on middle-click, and come back with Ctrl+Shift+T."],
+    ["04", "Browse Dark. Ship Clean.", "keplerbrowser.org · Home", "The download site's opening line. Black and white, a slow starfield, and one button that knows your platform."],
+    ["05", "Every Panel Accounted For", "keplerbrowser.org · Features", "Product shots of the browser, the start page and the AI panel, laid out as a gallery."],
+    ["06", "Engineered Like a Launch Vehicle", "keplerbrowser.org · Security", "The page that explains sealed tabs, fingerprint flattening and reproducible builds."],
+    ["07", "Point It at the Dark", "keplerbrowser.org · Footer", "The closing call to action, then a footer that links straight to the source."],
+    ["08", "Every Build We Publish", "keplerbrowser.org · Downloads", "The download page renders itself from a release manifest served by a zero-dependency Rust server."],
+    ["09", "How Kepler Works", "keplerbrowser.org · Docs", "Architecture, build instructions, the automation protocol and how to report a vulnerability, on one page."],
+    ["10", "Automation Protocol", "keplerbrowser.org · Docs", "A CDP-compatible protocol, documented command by command for people who would rather read than guess."],
+    ["11", "Hello, Lennon", "CTerm Studio · Editor", "Editor, live preview, file explorer and two shells in one page. All of it calls into a single C core compiled to WebAssembly."],
+    ["12", "The Windows Layer", "CTerm Studio · win11", "A Windows 11 desktop that boots inside the preview pane from one line: Lennon 'torvalds' {windows-command} body."],
+    ["13", "Press Enter", "CTerm Studio · Landing", "The landing page in front of the studio, built with React 19, Vite and motion. The Enter key opens the studio."],
+    ["14", "Faith, Grace, Forever", "FORGIVN · Home", "A storefront for a Christian clothing brand. The F in the logo is a cross, and the hero is a cross in the clouds."],
+    ["15", "Shop by Category", "FORGIVN · Categories", "Four round buttons that jump to the shop and filter it in place."],
+    ["16", "The Cross Collection", "FORGIVN · Drop 001", "Ten products with filters for hoodies, camo, tees, accessories and new arrivals."],
+    ["17", "Our Story", "FORGIVN · About", "A short bio of the brand's founder, Xay Carey, under the last row of products."],
+    ["18", "The Menu", "FORGIVN · Navigation", "Slides out from the left. Every panel closes on Escape, and the keyboard can reach everything."],
+    ["19", "Your Cart", "FORGIVN · Cart", "Quantities, removal and a subtotal, saved in the browser so it survives a refresh."],
+    ["20", "Pocket Size", "FORGIVN · Mobile", "The same store on a phone. The category row and the product grid drop to two columns.", true],
+    ["21", "Things I've Built", "Lennon · HyperFrames intro", "A frame from a portfolio intro rendered to video with HyperFrames: real project screenshots hung on a wall."]
+  ];
+  function thumbURL(s){ return "work/" + s[0] + "-min.jpg"; }
+  function fullURL(s){ return "work/" + s[0] + ".jpg"; }
 
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce || !window.gsap) {
-        if (reduce) {
-          video.removeAttribute("autoplay");
-          video.addEventListener("loadedmetadata", () => (video.currentTime = video.duration - 0.05), { once: true });
-        }
-        document.querySelectorAll("[data-count]").forEach((el) => (el.textContent = el.dataset.count + (el.dataset.suffix || "")));
-      } else {
-        gsap.registerPlugin(ScrollTrigger);
+  var doc = document.documentElement, body = document.body;
+  var $ = function(id){ return document.getElementById(id); };
+  var stage = $("stage"), world = $("world"), orb = $("orb"), headline = $("headline");
+  var gridRows = document.querySelector("#grid .rows"), gridEl = $("grid");
+  var intro = $("intro"), film = $("film"), splash = $("splash"), bar = $("bar");
+  var lit = $("lit"), plate = lit.querySelector(".plate"), litImg = $("litImg");
+  var N = SHOTS.length;
+  var finePointer = matchMedia("(hover:hover) and (pointer:fine)").matches;
+  var coarse = matchMedia("(pointer:coarse)").matches;
 
-        // split headings into words and letters
-        const splitInto = (el) => {
-          const walk = (node) => {
-            [...node.childNodes].forEach((child) => {
-              if (child.nodeType === 3) {
-                const frag = document.createDocumentFragment();
-                child.textContent.split(/(\s+)/).forEach((part) => {
-                  if (!part) return;
-                  if (/^\s+$/.test(part)) return frag.appendChild(document.createTextNode(" "));
-                  const wd = document.createElement("span");
-                  wd.className = "wd";
-                  [...part].forEach((c) => {
-                    const ch = document.createElement("span");
-                    ch.className = "ch";
-                    ch.textContent = c;
-                    wd.appendChild(ch);
-                  });
-                  frag.appendChild(wd);
-                });
-                child.replaceWith(frag);
-              } else if (child.nodeType === 1) walk(child);
-            });
-          };
-          walk(el);
-        };
+  doc.style.overflow = "hidden";
 
-        // ---- global: progress bar, nav, cursor light ----
-        gsap.to("#progress", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: 0.3 } });
-        const nav = document.getElementById("nav");
-        ScrollTrigger.create({
-          start: 0,
-          end: "max",
-          onUpdate: (self) => {
-            nav.classList.toggle("solid", self.scroll() > window.innerHeight * 0.8);
-            nav.classList.toggle("hide", self.direction === 1 && self.scroll() > window.innerHeight * 1.2);
-          },
-        });
-        const light = document.getElementById("lamplight");
-        const lx = gsap.quickTo(light, "x", { duration: 0.6, ease: "power3" });
-        const ly = gsap.quickTo(light, "y", { duration: 0.6, ease: "power3" });
-        window.addEventListener("pointermove", (e) => {
-          light.style.opacity = 1;
-          lx(e.clientX);
-          ly(e.clientY);
-        });
+  // ---------- build cards + grid ----------
+  var cards = [], gridFigs = [], units = [], decoded = new Array(N);
+  var GA = Math.PI * (3 - Math.sqrt(5));
+  for (var i = 0; i < N; i++) {
+    var y = 1 - (i / (N - 1)) * 2;
+    var rad = Math.sqrt(Math.max(0, 1 - y * y));
+    var theta = i * GA;
+    var x = Math.cos(theta) * rad, z = Math.sin(theta) * rad;
+    units.push({ x: x, y: y, z: z, lat: Math.asin(y) * 180 / Math.PI, lon: Math.atan2(x, z) * 180 / Math.PI });
 
-        // ---- hero sinks back ----
-        gsap.to("#intro", {
-          scale: 0.9,
-          borderRadius: 28,
-          opacity: 0.3,
-          ease: "none",
-          scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true },
-        });
+    var s = SHOTS[i];
+    var card = document.createElement("div");
+    card.className = "card" + (s[4] ? " tall" : "");
+    card.dataset.idx = i;
+    var fig = document.createElement("figure");
+    var img = document.createElement("img");
+    img.alt = s[1];
+    img.decoding = "async";
+    fig.appendChild(img); card.appendChild(fig); orb.appendChild(card);
+    cards.push({ el: card, img: img, op: -1, d: -1 });
 
-        // ---- headings: letters rise in ----
-        document.querySelectorAll("h2.split").forEach((h) => {
-          splitInto(h);
-          gsap.from(h.querySelectorAll(".ch"), {
-            yPercent: 110,
-            rotate: 8,
-            duration: 0.8,
-            ease: "power4.out",
-            stagger: 0.025,
-            scrollTrigger: { trigger: h, start: "top 85%" },
-          });
-        });
-        gsap.utils.toArray(".label").forEach((el) =>
-          gsap.from(el, { x: -30, opacity: 0, duration: 0.6, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 90%" } })
-        );
+    var gf = document.createElement("figure");
+    gf.dataset.idx = i;
+    var gi = document.createElement("img");
+    gi.alt = s[1]; gi.loading = "lazy";
+    var cap = document.createElement("figcaption");
+    cap.textContent = s[1];
+    gf.appendChild(gi); gf.appendChild(cap); gridRows.appendChild(gf);
+    gridFigs.push({ el: gf, img: gi });
+  }
 
-        // ---- about: pendant swing, words light up, code types itself, counters ----
-        gsap.fromTo("#pendant", { rotate: -4 }, { rotate: 4, duration: 3, ease: "sine.inOut", yoyo: true, repeat: -1 });
-        const about = document.getElementById("about-text");
-        [...about.childNodes].forEach((child) => {
-          if (child.nodeType === 3) {
-            const frag = document.createDocumentFragment();
-            child.textContent.split(/(\s+)/).forEach((part) => {
-              if (!part) return;
-              if (/^\s+$/.test(part)) return frag.appendChild(document.createTextNode(" "));
-              const s = document.createElement("span");
-              s.className = "word";
-              s.textContent = part;
-              frag.appendChild(s);
-            });
-            child.replaceWith(frag);
-          } else if (child.nodeType === 1) child.classList.add("word");
-        });
-        gsap.to("#about-text .word", {
-          opacity: 1,
-          stagger: 0.05,
-          ease: "none",
-          scrollTrigger: { trigger: about, start: "top 80%", end: "bottom 50%", scrub: true },
-        });
+  // ---------- layout ----------
+  var R = 300, persp = 1150, lastW = 0, lastH = 0;
+  function layout(force){
+    var w = innerWidth, h = innerHeight;
+    if (!force && Math.abs(w - lastW) < 20 && Math.abs(h - lastH) < 20) return;
+    lastW = w; lastH = h;
+    var hr = w <= 380 ? .38 : w <= 640 ? .42 : .46;
+    var wr = w <= 380 ? .48 : w <= 640 ? .52 : .58;
+    var floor = w <= 380 ? 108 : w <= 640 ? 120 : 155;
+    R = Math.max(floor, Math.min(480, h * hr, w * wr));
+    var sc = w <= 380 ? .44 : w <= 640 ? .46 : .47;
+    var cw = Math.round(Math.max(72, R * sc));
+    persp = w <= 380 ? 620 : w <= 640 ? 760 : w <= 900 ? 920 : 1150;
+    doc.style.setProperty("--persp", persp + "px");
+    doc.style.setProperty("--cw", cw + "px");
+    for (var i = 0; i < N; i++) {
+      var u = units[i];
+      cards[i].el.style.transform =
+        "translate3d(" + (u.x * R).toFixed(2) + "px," + (-u.y * R).toFixed(2) + "px," + (u.z * R).toFixed(2) + "px) rotateY(" + u.lon.toFixed(3) + "deg) rotateX(" + u.lat.toFixed(3) + "deg)";
+    }
+  }
+  layout(true);
+  addEventListener("resize", function(){ layout(false); });
+  addEventListener("orientationchange", function(){ setTimeout(function(){ layout(true); }, 220); });
+  if (window.visualViewport) {
+    visualViewport.addEventListener("resize", function(){ layout(true); });
+    visualViewport.addEventListener("scroll", function(){ layout(true); });
+  }
 
-        const code = document.getElementById("code");
-        const chars = [];
-        const typeWalk = (node) => {
-          [...node.childNodes].forEach((child) => {
-            if (child.nodeType === 3) {
-              const frag = document.createDocumentFragment();
-              [...child.textContent].forEach((c) => {
-                if (c === "\n") return frag.appendChild(document.createTextNode("\n"));
-                const s = document.createElement("span");
-                s.textContent = c;
-                s.style.display = "none";
-                chars.push(s);
-                frag.appendChild(s);
-              });
-              child.replaceWith(frag);
-            } else if (child.nodeType === 1) typeWalk(child);
-          });
-        };
-        typeWalk(code);
-        gsap.from(".monitor", { y: 80, rotate: 3, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".monitor", start: "top 85%" } });
-        ScrollTrigger.create({
-          trigger: ".monitor",
-          start: "top 70%",
-          once: true,
-          onEnter: () => {
-            const state = { i: 0 };
-            gsap.to(state, {
-              i: chars.length,
-              duration: chars.length * 0.022,
-              ease: "none",
-              onUpdate: () => {
-                const n = Math.floor(state.i);
-                for (let j = 0; j < n; j++) chars[j].style.display = "";
-              },
-            });
-          },
-        });
+  // ---------- image decoding + splash progress ----------
+  var total = N + 1, done = 0, born = performance.now(), splashGone = false, filmPending = false;
+  function decodeCap(){ var w = innerWidth; return w <= 380 ? 420 : w <= 640 ? 520 : w <= 900 ? 640 : 760; }
+  function report(){
+    done++;
+    bar.style.transform = "scaleX(" + Math.min(1, done / total) + ")";
+    if (done >= total) finishSplash();
+  }
+  function downscale(src, cap, cb){
+    var probe = new Image();
+    probe.crossOrigin = "anonymous";
+    probe.onload = function(){
+      if (probe.naturalWidth <= cap) return cb(src);
+      try {
+        var c = document.createElement("canvas");
+        c.width = cap; c.height = Math.round(probe.naturalHeight * cap / probe.naturalWidth);
+        c.getContext("2d").drawImage(probe, 0, 0, c.width, c.height);
+        c.toBlob(function(b){ cb(b ? URL.createObjectURL(b) : src); }, "image/webp", .88);
+      } catch (e) { cb(src); }
+    };
+    probe.onerror = function(){ cb(src); };
+    probe.src = src;
+  }
+  SHOTS.forEach(function(s, i){
+    downscale(thumbURL(s), decodeCap(), function(url){
+      decoded[i] = url;
+      var ci = cards[i].img, gi = gridFigs[i].img;
+      ci.onload = function(){ ci.classList.add("in"); report(); };
+      ci.onerror = function(){ report(); };
+      ci.src = url; gi.src = url;
+    });
+  });
+  downscale(CDN + AVATAR + "_min.webp", 160, function(url){ $("avatar").src = url; });
 
-        document.querySelectorAll("[data-count]").forEach((el) => {
-          const obj = { v: 0 };
-          gsap.to(obj, {
-            v: +el.dataset.count,
-            duration: 1.6,
-            ease: "power2.out",
-            onUpdate: () => (el.textContent = Math.round(obj.v) + (el.dataset.suffix || "")),
-            scrollTrigger: { trigger: el, start: "top 90%" },
-          });
-        });
-        gsap.from(".stat", { y: 40, opacity: 0, duration: 0.7, stagger: 0.1, ease: "power3.out", scrollTrigger: { trigger: ".stats", start: "top 90%" } });
+  var filmReported = false;
+  function filmIn(){ if (filmReported) return; filmReported = true; report(); }
+  film.addEventListener("loadeddata", filmIn);
+  film.addEventListener("canplay", filmIn);
+  film.addEventListener("error", filmIn);
+  if (film.readyState >= 2) filmIn();
 
-        // ---- work: pinned sideways scroll on wide screens, frames swing with your scroll speed ----
-        const projects = gsap.utils.toArray(".project");
-        const swing = gsap.quickTo(projects, "rotate", { duration: 0.8, ease: "elastic.out(1, 0.35)" });
-        const mm = gsap.matchMedia();
-        mm.add("(min-width: 900px)", () => {
-          const track = document.getElementById("track");
-          const dist = () => track.scrollWidth - window.innerWidth;
-          gsap.to(track, {
-            x: () => -dist(),
-            ease: "none",
-            scrollTrigger: {
-              trigger: "#work",
-              start: "top top",
-              end: () => "+=" + dist(),
-              pin: true,
-              scrub: 1,
-              invalidateOnRefresh: true,
-              onUpdate: (self) => {
-                swing(gsap.utils.clamp(-6, 6, self.getVelocity() / -250));
-                clearTimeout(window.__settle);
-                window.__settle = setTimeout(() => swing(0), 120);
-              },
-            },
-          });
-        });
-        mm.add("(max-width: 899px)", () => {
-          projects.forEach((p, i) => {
-            gsap.fromTo(
-              p,
-              { y: -80, opacity: 0, rotate: i % 2 ? -10 : 10 },
-              { y: 0, opacity: 1, rotate: 0, duration: 1.4, ease: "elastic.out(1, 0.45)", scrollTrigger: { trigger: p, start: "top 90%" } }
-            );
-          });
-        });
+  function finishSplash(){
+    if (splashGone) return;
+    var wait = Math.max(0, 1150 - (performance.now() - born));
+    setTimeout(function(){
+      if (splashGone) return;
+      splashGone = true;
+      bar.style.transform = "scaleX(1)";
+      splash.classList.add("out");
+      setTimeout(function(){ splash.remove(); }, 950);
+      startFilm();
+    }, wait);
+  }
+  setTimeout(function(){ done = total; finishSplash(); }, 9000);
 
-        // ---- marquee rows move with the scroll, in opposite directions ----
-        gsap.fromTo("#mq1", { xPercent: 0 }, { xPercent: -35, ease: "none", scrollTrigger: { trigger: ".marquee", start: "top bottom", end: "bottom top", scrub: true } });
-        gsap.fromTo("#mq2", { xPercent: -35 }, { xPercent: 0, ease: "none", scrollTrigger: { trigger: ".marquee", start: "top bottom", end: "bottom top", scrub: true } });
+  // ---------- intro film ----------
+  var revealed = false, revealTimer = 0;
+  film.muted = true; film.defaultMuted = true; film.playsInline = true;
+  film.setAttribute("muted", ""); film.setAttribute("playsinline", ""); film.setAttribute("webkit-playsinline", "");
+  try { film.pause(); } catch (e) {}
 
-        // ---- stack: records pop onto the shelf and spin as you scroll ----
-        gsap.utils.toArray(".shelf").forEach((shelf) => {
-          gsap.from(shelf.querySelectorAll(".lp"), {
-            y: 70,
-            opacity: 0,
-            rotate: () => gsap.utils.random(-12, 12),
-            duration: 0.9,
-            ease: "back.out(1.6)",
-            stagger: 0.07,
-            scrollTrigger: { trigger: shelf, start: "top 85%" },
-          });
-        });
-        gsap.to(".vinyl", { rotate: 1080, ease: "none", scrollTrigger: { trigger: "#stack", start: "top bottom", end: "bottom top", scrub: true } });
+  function tryPlay(){
+    if (film.currentTime > 0.05) { try { film.currentTime = 0; } catch (e) {} }
+    film.playbackRate = 2;
+    var pr = film.play();
+    if (pr && pr.catch) pr.catch(function(){});
+  }
+  function startFilm(){
+    if (revealed) return;
+    if (filmPending) { setTimeout(reveal, 1300); return; }
+    tryPlay();
+    setTimeout(function(){ reveal(); }, 14000);
+    setTimeout(function(){ if (film.paused && !revealed) reveal(); }, 2600);
+  }
+  film.addEventListener("play", function(){ film.playbackRate = 2; });
+  film.addEventListener("playing", function(){
+    var d = film.duration;
+    if (!isFinite(d) || !d) return;
+    clearTimeout(revealTimer);
+    revealTimer = setTimeout(reveal, Math.max(300, ((d - film.currentTime - 0.45) / 2) * 1000));
+  });
+  film.addEventListener("ended", reveal);
+  film.addEventListener("error", function(){
+    intro.classList.add("novideo");
+    if (splashGone) setTimeout(reveal, 1300); else filmPending = true;
+  });
+  function kick(){ if (!revealed && splashGone && film.paused) tryPlay(); }
+  ["pointerdown", "keydown", "touchstart"].forEach(function(ev){ addEventListener(ev, kick, { once: true, passive: true }); });
+  $("skip").addEventListener("click", reveal);
 
-        // ---- process: the wire draws itself and notes stick on ----
-        const wire = document.getElementById("wire");
-        const len = wire.getTotalLength();
-        gsap.fromTo(wire, { strokeDasharray: len, strokeDashoffset: len }, {
-          strokeDashoffset: 0,
-          ease: "none",
-          scrollTrigger: { trigger: "#steps", start: "top 70%", end: "bottom 70%", scrub: true },
-        });
-        gsap.utils.toArray(".step").forEach((s, i) => {
-          gsap.fromTo(
-            s,
-            { opacity: 0, scale: 0.6, rotate: i % 2 ? 12 : -12, x: i % 2 ? -80 : 80 },
-            { opacity: 1, scale: 1, rotate: i % 2 ? 1.5 : -1.5, x: 0, duration: 0.9, ease: "back.out(1.7)", scrollTrigger: { trigger: s, start: "top 80%" } }
-          );
-        });
+  function reveal(){
+    if (revealed) return;
+    revealed = true;
+    intro.classList.add("closing");
+    body.classList.remove("locked");
+    doc.style.overflow = "";
+    layout(true);
+    requestAnimationFrame(function(){ layout(true); });
+    setTimeout(function(){
+      layout(true);
+      body.classList.add("revealed");
+      intro.classList.add("gone");
+      try { film.pause(); } catch (e) {}
+      setTimeout(function(){ intro.remove(); }, 700);
+    }, 1000);
+  }
 
-        // ---- plants drift at their own speed (parallax) ----
-        gsap.utils.toArray(".plant[data-speed]").forEach((p) => {
-          gsap.fromTo(p, { y: 120 * p.dataset.speed }, { y: -120 * p.dataset.speed, ease: "none", scrollTrigger: { trigger: p.parentElement, start: "top bottom", end: "bottom top", scrub: true } });
-        });
+  // ---------- camera loop ----------
+  var spin = 0, tilt = -4, camZ = 0, dragX = 0, dragY = 0, velX = 0, velY = 0, PITCH = 32;
+  var focused = -1, dragging = false, isLit = false, p = 0;
+  var lastHeadOp = -1;
 
-        // ---- rug unrolls, contact pops ----
-        gsap.fromTo("#rug", { rotateX: 75, scaleX: 0.8 }, { rotateX: 58, scaleX: 1, ease: "none", scrollTrigger: { trigger: ".rug-zone", start: "top bottom", end: "center center", scrub: true } });
-        gsap.from(".contact p, .links a", { y: 30, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.08, scrollTrigger: { trigger: ".contact p", start: "top 90%" } });
+  function frame(){
+    if (!dragging && !isLit) {
+      dragX += velX; dragY += velY;
+      velX *= 0.94; velY *= 0.94;
+      if (Math.abs(velX) < 0.002) velX = 0;
+      if (Math.abs(velY) < 0.002) velY = 0;
+    }
+    if (tilt + dragY > PITCH) { dragY = PITCH - tilt; velY = 0; }
+    if (tilt + dragY < -PITCH) { dragY = -PITCH - tilt; velY = 0; }
 
-        // magnetic contact buttons
-        document.querySelectorAll(".mag").forEach((btn) => {
-          const mx = gsap.quickTo(btn, "x", { duration: 0.4, ease: "power3" });
-          const my = gsap.quickTo(btn, "y", { duration: 0.4, ease: "power3" });
-          btn.addEventListener("pointermove", (e) => {
-            const r = btn.getBoundingClientRect();
-            mx((e.clientX - r.left - r.width / 2) * 0.35);
-            my((e.clientY - r.top - r.height / 2) * 0.35);
-          });
-          btn.addEventListener("pointerleave", () => {
-            mx(0);
-            my(0);
-          });
-        });
+    var maxScroll = innerHeight * 0.16;
+    if (scrollY > maxScroll + 1) scrollTo(0, maxScroll);
+    p = Math.min(1, Math.max(0, scrollY / maxScroll));
+    body.classList.toggle("deep", p > 0.35);
 
-        window.addEventListener("load", () => ScrollTrigger.refresh());
-      }
-    </script>
-  </body>
+    var target = p * Math.min(64, R * 0.12);
+    camZ += (target - camZ) * 0.075;
+
+    var sx = tilt + dragY, sy = spin + dragX;
+    world.style.transform = "translateZ(" + camZ.toFixed(2) + "px) rotateY(" + sy.toFixed(3) + "deg) rotateX(" + sx.toFixed(3) + "deg)";
+    headline.style.transform = "rotateX(" + (-sx).toFixed(3) + "deg) rotateY(" + (-sy).toFixed(3) + "deg) translateZ(" + (R * 0.62).toFixed(2) + "px)";
+    var hop = Math.max(0, 1 - p * 0.55);
+    if (hop !== lastHeadOp) { headline.style.opacity = hop.toFixed(3); lastHeadOp = hop; }
+
+    var ax = sx * Math.PI / 180, ay = sy * Math.PI / 180;
+    var cx = Math.cos(ax), snx = Math.sin(ax), cy = Math.cos(ay), sny = Math.sin(ay);
+    var shade = 1 - Math.min(1, p * 1.6);
+    var near = persp * 0.66;
+    for (var i = 0; i < N; i++) {
+      var u = units[i];
+      var px = u.x, py = -u.y, pz = u.z;
+      // rotateX(sx) then rotateY(sy), in CSS axes (y down, z toward viewer)
+      var y1 = py * cx - pz * snx, z1 = py * snx + pz * cx;
+      var z2 = -px * sny + z1 * cy;
+      var zf = z2;
+      var base = 0.14 + 0.86 * Math.pow((zf + 1) / 2, 0.85);
+      var dim = shade * (1 - base);
+      var absZ = zf * R + camZ;
+      var fade = absZ > near ? Math.max(0, 1 - (absZ - near) / 190) : 1;
+      if (isLit) { dim = Math.min(1, dim + 0.78); if (i === focused) fade = 0; }
+      var c = cards[i];
+      var op = Math.round(fade * 1000) / 1000, d = Math.round(dim * 1000) / 1000;
+      if (op !== c.op) { c.el.style.opacity = op; c.op = op; }
+      if (d !== c.d) { c.el.style.setProperty("--d", d); c.d = d; }
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+
+  // ---------- drag ----------
+  var ptr = null;
+  stage.addEventListener("pointerdown", function(e){
+    if (isLit) return;
+    var hit = e.target.closest ? e.target.closest(".card") : null;
+    ptr = { id: e.pointerId, x0: e.clientX, y0: e.clientY, lx: e.clientX, ly: e.clientY, card: hit, type: e.pointerType, active: e.pointerType !== "touch", moved: 0 };
+    velX = velY = 0;
+    if (ptr.active) { dragging = true; try { stage.setPointerCapture(e.pointerId); } catch (er) {} }
+  });
+  stage.addEventListener("pointermove", function(e){
+    if (!ptr || e.pointerId !== ptr.id) return;
+    var dx = e.clientX - ptr.x0, dy = e.clientY - ptr.y0;
+    ptr.moved = Math.max(ptr.moved, Math.hypot(dx, dy));
+    if (!ptr.active) {
+      if (Math.hypot(dx, dy) < 10) return;
+      if (Math.abs(dy) > Math.abs(dx) * 1.15) { ptr = null; return; }
+      ptr.active = true; dragging = true;
+      try { stage.setPointerCapture(e.pointerId); } catch (er) {}
+    }
+    var mx = e.clientX - ptr.lx, my = e.clientY - ptr.ly;
+    ptr.lx = e.clientX; ptr.ly = e.clientY;
+    dragX += mx * 0.13; dragY -= my * 0.13;
+    velX = mx * 0.13; velY = -my * 0.13;
+  });
+  function endPtr(e){
+    if (!ptr || e.pointerId !== ptr.id) return;
+    var slop = coarse || ptr.type === "touch" ? 14 : 6;
+    var card = ptr.card, moved = ptr.moved;
+    dragging = false; ptr = null;
+    if (e.type === "pointerup" && card && moved <= slop) { velX = velY = 0; openShot(+card.dataset.idx, card); }
+  }
+  stage.addEventListener("pointerup", endPtr);
+  stage.addEventListener("pointercancel", endPtr);
+
+  // ---------- grid ----------
+  function setGrid(on){
+    body.classList.toggle("gridview", on);
+  }
+  $("gridBtn").addEventListener("click", function(){ setGrid(!body.classList.contains("gridview")); });
+  gridRows.addEventListener("click", function(e){
+    var f = e.target.closest("figure");
+    if (f) openShot(+f.dataset.idx, f);
+  });
+
+  // ---------- lightbox ----------
+  var openToken = 0, sourceEl = null;
+  function openShot(i, src){
+    var s = SHOTS[i], token = ++openToken;
+    focused = i; isLit = true; sourceEl = src;
+    litImg.src = decoded[i] || thumbURL(s);
+    litImg.alt = s[1];
+    $("litTitle").textContent = s[1];
+    $("litWhere").textContent = s[2];
+    $("litNote").textContent = s[3];
+    var full = new Image();
+    full.onload = function(){ if (token === openToken) litImg.src = full.src; };
+    full.src = fullURL(s);
+    doc.style.overflow = "hidden";
+    body.classList.add("lit");
+    lit.setAttribute("aria-hidden", "false");
+    flipFrom(src);
+  }
+  function flipFrom(src){
+    var a = src.getBoundingClientRect();
+    plate.style.transition = "none"; plate.style.transform = "none";
+    var b = plate.getBoundingClientRect();
+    var dx = (a.left + a.width / 2) - (b.left + b.width / 2);
+    var dy = (a.top + a.height / 2) - (b.top + b.height / 2);
+    var sc = Math.max(0.04, a.width / b.width);
+    plate.style.transform = "translate(" + dx + "px," + dy + "px) scale(" + sc + ")";
+    plate.style.opacity = "0";
+    void plate.offsetWidth;
+    plate.style.transition = ""; plate.style.transform = ""; plate.style.opacity = "";
+  }
+  function closeShot(){
+    if (!isLit) return;
+    var i = focused;
+    focused = -1; isLit = false; openToken++;
+    body.classList.remove("lit");
+    lit.setAttribute("aria-hidden", "true");
+    if (!body.classList.contains("menuopen")) doc.style.overflow = "";
+    var src = body.classList.contains("gridview") ? gridFigs[i].el : cards[i].el;
+    var a = src.getBoundingClientRect(), b = plate.getBoundingClientRect();
+    var dx = (a.left + a.width / 2) - (b.left + b.width / 2);
+    var dy = (a.top + a.height / 2) - (b.top + b.height / 2);
+    var sc = Math.max(0.04, a.width / b.width);
+    plate.style.transform = "translate(" + dx + "px," + dy + "px) scale(" + sc + ")";
+    plate.style.opacity = "0";
+    setTimeout(function(){
+      if (isLit) return;
+      plate.style.transition = "none"; plate.style.transform = ""; plate.style.opacity = "";
+      void plate.offsetWidth; plate.style.transition = "";
+    }, 640);
+  }
+  lit.addEventListener("click", function(e){ if (e.target.closest("[data-close]")) closeShot(); });
+
+  // ---------- menu ----------
+  var menuBtn = $("menuBtn"), menu = $("menu");
+  function setMenu(on){
+    body.classList.toggle("menuopen", on);
+    menuBtn.setAttribute("aria-expanded", on ? "true" : "false");
+    menuBtn.setAttribute("aria-label", on ? "Close menu" : "Open menu");
+    menu.setAttribute("aria-hidden", on ? "false" : "true");
+  }
+  menuBtn.addEventListener("click", function(){ setMenu(!body.classList.contains("menuopen")); });
+  menu.querySelectorAll("nav a").forEach(function(a){
+    a.addEventListener("click", function(e){
+      e.preventDefault();
+      setMenu(false);
+      if (a.hasAttribute("data-grid")) setGrid(true);
+    });
+  });
+  document.querySelector(".wordmark").addEventListener("click", function(e){ e.preventDefault(); });
+
+  addEventListener("keydown", function(e){
+    if (e.key !== "Escape") return;
+    if (isLit) closeShot();
+    else if (body.classList.contains("menuopen")) setMenu(false);
+    else if (body.classList.contains("gridview")) setGrid(false);
+  });
+
+  // ---------- custom cursor ----------
+  if (finePointer) {
+    var dot = $("dot"), tx = innerWidth / 2, ty = innerHeight / 2, cxp = tx, cyp = ty;
+    addEventListener("pointermove", function(e){
+      tx = e.clientX; ty = e.clientY;
+      var t = e.target;
+      dot.classList.toggle("wide", !!(t.closest && t.closest(".card, a, button, #grid figure")));
+    }, { passive: true });
+    (function loop(){
+      cxp += (tx - cxp) * 0.2; cyp += (ty - cyp) * 0.2;
+      dot.style.transform = "translate3d(" + cxp.toFixed(1) + "px," + cyp.toFixed(1) + "px,0)";
+      requestAnimationFrame(loop);
+    })();
+  } else {
+    $("dot").remove();
+  }
+})();
+</script>
+</body>
 </html>
