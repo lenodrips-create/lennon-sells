@@ -86,7 +86,7 @@ a{-webkit-tap-highlight-color:transparent}
 #intro.closing .skip{opacity:0}
 
 /* ---------- scroll + stage ---------- */
-#scrolltrack{height:420vh;pointer-events:none}
+#scrolltrack{height:300vh;pointer-events:none}
 /* the night sky behind the sphere; scrolling spins the sphere (and turns the sky a little) */
 #sky{position:fixed;inset:0;z-index:1;width:100%;height:100%;display:block;pointer-events:none;background:#000}
 #stage{
@@ -315,6 +315,73 @@ body.lit #lit{opacity:1;pointer-events:auto}
 @media (hover:none), (pointer:coarse){#dot{display:none}}
 
 /* ---------- responsive ---------- */
+/* ---------- after the sphere: about, projects, contact (all over the night sky) ---------- */
+.after{position:relative;z-index:14}
+.sec{max-width:1100px;margin:0 auto;padding:clamp(90px, 14vh, 160px) calc(var(--pad) + var(--safe-right)) clamp(60px, 10vh, 120px) calc(var(--pad) + var(--safe-left))}
+.eyebrow{display:block;font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(244,242,239,.45);margin-bottom:22px}
+.sec h2{font-family:var(--serif);font-weight:400;font-size:clamp(38px, 6vw, 84px);line-height:1.02;letter-spacing:-.01em;margin-bottom:clamp(28px, 4vw, 48px)}
+.sec h2 em{font-style:italic;color:rgba(244,242,239,.7)}
+.about-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:clamp(28px, 5vw, 80px)}
+.about-grid p{font-size:clamp(15px, 1.25vw, 18px);line-height:1.72;color:rgba(244,242,239,.82);margin-bottom:18px}
+.about-grid p:first-child{font-family:var(--serif);font-size:clamp(22px, 2.2vw, 30px);line-height:1.35;color:var(--ink)}
+.facts{list-style:none;border-top:1px solid var(--line)}
+.facts li{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);font-size:13px}
+.facts li span:first-child{color:rgba(244,242,239,.5)}
+.facts li span:last-child{text-align:right}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chips span{padding:7px 13px;border-radius:999px;font-size:12px;color:rgba(244,242,239,.85)}
+.plist{list-style:none;border-top:1px solid var(--line)}
+.plist li{border-bottom:1px solid var(--line)}
+.plist a.row{display:grid;grid-template-columns:52px minmax(0,1.1fr) minmax(0,1.4fr) 132px;gap:clamp(14px, 2.4vw, 32px);align-items:center;padding:clamp(18px, 2.6vw, 28px) 0;color:inherit;text-decoration:none;transition:padding .5s var(--ease)}
+.plist a.row:hover{padding-left:12px}
+.plist .n{font-size:12px;color:rgba(244,242,239,.4);letter-spacing:.1em}
+.plist h3{font-family:var(--serif);font-weight:400;font-size:clamp(24px, 2.6vw, 36px);line-height:1.08}
+.plist .kind{display:block;margin-top:6px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(244,242,239,.45)}
+.plist p{font-size:14px;line-height:1.6;color:rgba(244,242,239,.75)}
+.plist .tags{display:block;margin-top:8px;font-size:12px;color:rgba(244,242,239,.45)}
+.plist .thumb{width:132px;aspect-ratio:3/2;border-radius:3px;overflow:hidden;background:#0b0b0b;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.plist .thumb img{width:100%;height:100%;object-fit:cover;opacity:.85;transition:transform .8s var(--ease), opacity .6s ease}
+.plist a.row:hover .thumb img{transform:scale(1.08);opacity:1}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 1s var(--ease), transform 1.1s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+
+/* contact: the girl-with-the-stars film and the email bar, nothing else */
+#contact{position:relative;min-height:100vh;min-height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+#contact video{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:translateY(17%);opacity:0;
+  mix-blend-mode:screen;   /* the film's black lets the night sky through */
+  -webkit-mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+  mask-image:linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+}
+#contact .hero{position:relative;z-index:10;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;transform:translateY(-20%)}
+.liquid-glass{
+  background:rgba(255,255,255,0.01);background-blend-mode:luminosity;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  border:none;box-shadow:inset 0 1px 1px rgba(255,255,255,0.1);
+  position:relative;overflow:hidden;
+}
+.liquid-glass::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1.4px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  pointer-events:none;
+}
+.mailbar{width:100%;max-width:36rem;border-radius:9999px;padding:8px 8px 8px 24px;display:flex;align-items:center;gap:12px}
+.mailbar input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:#fff;font:inherit;font-size:16px;line-height:1.5}
+.mailbar input::placeholder{color:rgba(255,255,255,.4)}
+.mailbar button{flex:none;display:grid;place-items:center;background:#fff;color:#000;border-radius:9999px;padding:12px}
+.mailbar button svg{display:block}
+.mailnote{min-height:1.6em;margin-top:14px;font-size:13px;color:rgba(244,242,239,.7)}
+body.after-in .bio,body.after-in .colophon,body.after-in .cue,body.after-in .gridbtn{opacity:0 !important;pointer-events:none !important}
+
+@media (max-width:760px){
+  .about-grid{grid-template-columns:1fr}
+  .plist a.row{grid-template-columns:36px minmax(0,1fr) 92px;row-gap:8px}
+  .plist a.row p{grid-column:2 / 4}
+  .plist .thumb{width:92px;grid-row:1;grid-column:3}
+}
+
 @media (max-width:900px){
   .bio{max-width:min(420px, calc(100vw - var(--pad) * 2 - var(--safe-left) - var(--safe-right)))}
   .bio p{font-size:12px}
@@ -379,6 +446,81 @@ body.lit #lit{opacity:1;pointer-events:auto}
 </div>
 
 <div class="vig"></div>
+
+<main class="after" id="after">
+  <section class="sec" id="about">
+    <span class="eyebrow reveal">About me</span>
+    <h2 class="reveal">I'm Lennon. I build <em>what I imagine.</em></h2>
+    <div class="about-grid">
+      <div class="reveal">
+        <p>I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it.</p>
+        <p>Most of my work starts as a question. Could I make my own web browser? That became Kepler, written in C++ on Qt and Chromium. Could a full code studio run inside a browser tab? That became CTerm Studio, with a C core compiled to WebAssembly.</p>
+        <p>I care about how software feels as much as what it does: fast, private, and a little bit cinematic. Everything in the archive above is real, open source, and shipped.</p>
+      </div>
+      <div class="reveal">
+        <ul class="facts">
+          <li><span>Handle</span><span>@lenodrips</span></li>
+          <li><span>Focus</span><span>Browsers, dev tools, the web</span></li>
+          <li><span>Shipped</span><span>5 projects</span></li>
+          <li><span>Code</span><span><a href="https://github.com/lenodrips-create" target="_blank" rel="noopener" style="color:inherit">github.com/lenodrips-create</a></span></li>
+        </ul>
+        <div class="chips">
+          <span class="liquid-glass">C++</span><span class="liquid-glass">Qt 6</span><span class="liquid-glass">Rust</span><span class="liquid-glass">C</span><span class="liquid-glass">WebAssembly</span><span class="liquid-glass">JavaScript</span><span class="liquid-glass">React</span><span class="liquid-glass">Vite</span><span class="liquid-glass">CMake</span><span class="liquid-glass">HyperFrames</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="projects">
+    <span class="eyebrow reveal">Projects</span>
+    <h2 class="reveal">Things I've <em>built.</em></h2>
+    <ul class="plist">
+        <li class="reveal"><a class="row" href="https://github.com/lenodrips-create/kepler" target="_blank" rel="noopener">
+          <span class="n">01</span>
+          <span><h3>Kepler</h3><span class="kind">Desktop browser</span></span>
+          <p>A web browser from another orbit, written in C++ on Qt 6 and Chromium: a built-in tracker blocker, private Orbit windows, session restore and an animated new-tab page.<span class="tags">C++17 · Qt 6 · Qt WebEngine · CMake</span></p>
+          <span class="thumb"><img src="work/01-min.jpg" alt="Kepler" loading="lazy"></span>
+        </a></li>
+        <li class="reveal"><a class="row" href="https://keplerbrowser.org" target="_blank" rel="noopener">
+          <span class="n">02</span>
+          <span><h3>keplerbrowser.org</h3><span class="kind">Website + Rust server</span></span>
+          <p>The download and docs site for Kepler, served by a zero-dependency Rust release server with a JSON releases API.<span class="tags">Rust · HTML · CSS · JavaScript</span></p>
+          <span class="thumb"><img src="work/04-min.jpg" alt="keplerbrowser.org" loading="lazy"></span>
+        </a></li>
+        <li class="reveal"><a class="row" href="https://github.com/lenodrips-create/cterm-studio" target="_blank" rel="noopener">
+          <span class="n">03</span>
+          <span><h3>CTerm Studio</h3><span class="kind">Browser code studio</span></span>
+          <p>An editor, live preview, file explorer and two shells in one page, all running on a C core compiled to WebAssembly.<span class="tags">C · WebAssembly · React 19 · Vite</span></p>
+          <span class="thumb"><img src="work/11-min.jpg" alt="CTerm Studio" loading="lazy"></span>
+        </a></li>
+        <li class="reveal"><a class="row" href="https://github.com/lenodrips-create/zay-website" target="_blank" rel="noopener">
+          <span class="n">04</span>
+          <span><h3>FORGIVN</h3><span class="kind">Storefront</span></span>
+          <p>A clothing storefront in one dependency-free file: dove intro, filterable products, a saved cart, a contact form and scroll animations.<span class="tags">HTML · CSS · JavaScript</span></p>
+          <span class="thumb"><img src="work/14-min.jpg" alt="FORGIVN" loading="lazy"></span>
+        </a></li>
+        <li class="reveal"><a class="row" href="https://github.com/lenodrips-create/lennon-sells" target="_blank" rel="noopener">
+          <span class="n">05</span>
+          <span><h3>This portfolio</h3><span class="kind">Interactive site</span></span>
+          <p>A Fibonacci photo sphere that spins as you scroll, a hand-built night sky, and an intro rendered with HyperFrames.<span class="tags">JavaScript · Canvas · CSS 3D · HyperFrames</span></p>
+          <span class="thumb"><img src="work/21-min.jpg" alt="This portfolio" loading="lazy"></span>
+        </a></li>
+    </ul>
+  </section>
+
+  <section id="contact" aria-label="Contact">
+    <video id="girlFilm" muted playsinline autoplay preload="auto" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_115001_bcdaa3b4-03de-47e7-ad63-ae3e392c32d4.mp4"></video>
+    <div class="hero">
+      <form class="mailbar liquid-glass" id="mailForm" novalidate>
+        <input type="email" id="mailInput" placeholder="Enter your email" aria-label="Your email" autocomplete="email" required>
+        <button type="submit" aria-label="Send">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </form>
+      <p class="mailnote" id="mailNote" aria-live="polite"></p>
+    </div>
+  </section>
+</main>
 
 <div id="grid"><div class="rows"></div></div>
 
@@ -799,6 +941,14 @@ body.lit #lit{opacity:1;pointer-events:auto}
     // scrolling down spins the sphere: one full turn per 1.5 screens
     spin += (scrollY / (innerHeight * 1.5) * 360 - spin) * 0.1;
     body.classList.toggle("deep", p > 0.35);
+    if (after) {
+      var at = after.getBoundingClientRect().top, vhh = innerHeight;
+      var out = Math.min(1, Math.max(0, (vhh - at) / (vhh * 0.7)));
+      // inline only while fading, so grid view's CSS can still hide the stage
+      stage.style.opacity = out > 0 ? (1 - out).toFixed(3) : "";
+      stage.style.pointerEvents = out > 0.5 ? "none" : "";
+      body.classList.toggle("after-in", out > 0.2);
+    }
 
     var target = p * Math.min(64, R * 0.12);
     camZ += (target - camZ) * 0.075;
@@ -868,6 +1018,60 @@ body.lit #lit{opacity:1;pointer-events:auto}
   }
   stage.addEventListener("pointerup", endPtr);
   stage.addEventListener("pointercancel", endPtr);
+
+  // ---------- after the sphere ----------
+  var after = $("after");
+  // reveal on scroll
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(en){ if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } });
+    }, { threshold: 0.15 });
+    document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+  } else {
+    document.querySelectorAll(".reveal").forEach(function(el){ el.classList.add("in"); });
+  }
+
+  // contact film: JS fade loop (500ms rAF fades, fade out 0.55s before the end, restart after 100ms)
+  var girl = $("girlFilm"), fadeRaf = 0, fadingOut = false;
+  function fadeTo(target, ms){
+    cancelAnimationFrame(fadeRaf);
+    var from = parseFloat(girl.style.opacity) || 0, t0 = performance.now();
+    (function step(now){
+      var k = Math.min(1, (now - t0) / ms);
+      girl.style.opacity = (from + (target - from) * k).toFixed(3);
+      if (k < 1) fadeRaf = requestAnimationFrame(step);
+    })(t0);
+  }
+  girl.muted = true; girl.defaultMuted = true; girl.playsInline = true;
+  girl.addEventListener("loadeddata", function(){ fadingOut = false; fadeTo(1, 500); });
+  girl.addEventListener("timeupdate", function(){
+    if (!fadingOut && girl.duration && girl.duration - girl.currentTime <= 0.55) { fadingOut = true; fadeTo(0, 500); }
+  });
+  girl.addEventListener("ended", function(){
+    cancelAnimationFrame(fadeRaf);
+    girl.style.opacity = "0";
+    setTimeout(function(){
+      girl.currentTime = 0;
+      var pr = girl.play(); if (pr && pr.catch) pr.catch(function(){});
+      fadingOut = false;
+      fadeTo(1, 500);
+    }, 100);
+  });
+
+  // email bar: opens a pre-filled email to Lennon (or GitHub until an address is set)
+  var CONTACT_EMAIL = "";
+  $("mailForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var v = $("mailInput").value.trim(), note = $("mailNote");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) { note.textContent = "That email doesn't look right."; return; }
+    if (CONTACT_EMAIL) {
+      location.href = "mailto:" + CONTACT_EMAIL + "?subject=" + encodeURIComponent("Hey Lennon") + "&body=" + encodeURIComponent("Reply to me at " + v);
+      note.textContent = "Opening your email app…";
+    } else {
+      window.open("https://github.com/lenodrips-create", "_blank", "noopener");
+      note.textContent = "Thanks! Reach me on GitHub for now.";
+    }
+  });
 
   // ---------- grid ----------
   function setGrid(on){
