@@ -86,27 +86,9 @@ a{-webkit-tap-highlight-color:transparent}
 #intro.closing .skip{opacity:0}
 
 /* ---------- scroll + stage ---------- */
-#scrolltrack{height:116vh;pointer-events:none}
-/* the two slides, joined into one tower on black, scroll up over the spinning sphere */
-#tower{position:relative;z-index:15;margin-top:34vh;background:#000;box-shadow:0 -40px 80px 40px #000}
-#tower img{display:block;width:100%;height:auto}
-/* past the tower: the window film starts exactly on top of the tower picture,
-   plays with the scroll, then pulls back to the window on a white wall */
-#window{position:relative;z-index:16;height:420vh;margin-top:-100vh;margin-top:-100svh;pointer-events:none}
-#window .pin{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:transparent}
-#window canvas{
-  position:absolute;left:0;top:0;width:720px;height:1086px;max-width:none;
-  transform-origin:0 0;will-change:transform;opacity:0;
-  -webkit-mask-image:linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
-  -webkit-mask-composite:source-in;
-  mask-image:linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
-  mask-composite:intersect;
-}
-#window #winWhite{
-  -webkit-mask-image:linear-gradient(to right, transparent 2%, #000 22%, #000 78%, transparent 98%), linear-gradient(to bottom, transparent 1%, #000 12%, #000 88%, transparent 99%);
-  mask-image:linear-gradient(to right, transparent 2%, #000 22%, #000 78%, transparent 98%), linear-gradient(to bottom, transparent 1%, #000 12%, #000 88%, transparent 99%);
-}
-#window .pin img{position:absolute;left:0;bottom:0;width:100%;height:auto;max-width:none;opacity:0}
+#scrolltrack{height:420vh;pointer-events:none}
+/* the night sky behind the sphere; scrolling spins the sphere (and turns the sky a little) */
+#sky{position:fixed;inset:0;z-index:1;width:100%;height:100%;display:block;pointer-events:none;background:#000}
 #stage{
   position:fixed;inset:0;z-index:10;
   perspective:var(--persp);perspective-origin:50% 50%;
@@ -387,16 +369,8 @@ body.lit #lit{opacity:1;pointer-events:auto}
 </head>
 <body class="locked">
 
+<canvas id="sky" aria-hidden="true"></canvas>
 <div id="scrolltrack"></div>
-
-<section id="tower" aria-label="Lennon">
-  <img src="work/tower.jpg" alt="LENNON in white letters across Big Ben, the full tower on black" width="2400" height="2678">
-</section>
-
-<section id="window" aria-label="Big Ben seen through a window, pulling back until only a white wall is left">
-  <div class="pin"><img id="winTower" src="work/tower.jpg" alt="" width="2400" height="2678"><canvas id="winCanvas" width="720" height="1086"></canvas><canvas id="winWhite" width="720" height="1086"></canvas></div>
-</section>
-
 <div id="stage">
   <div id="world">
     <div id="orb"></div>
@@ -682,6 +656,129 @@ body.lit #lit{opacity:1;pointer-events:auto}
     }, 1000);
   }
 
+  // ---------- night sky ----------
+  // Baked once per size: a faint Milky Way band with dust lanes, unresolved star clouds and thousands of
+  // pin-point field stars whose brightness follows a steep magnitude curve and whose colours follow
+  // stellar temperatures. A few dozen bright stars are drawn live so they can scintillate.
+  // The sky turns slowly with the sphere.
+  var sky = $("sky"), skyCtx = sky.getContext("2d"), skyLayer = null, skyD = 0, skyDpr = 1, twinklers = [], glows = [];
+  var STAR_TEMPS = [[155,176,255],[170,191,255],[202,215,255],[248,247,255],[255,244,234],[255,222,180],[255,204,140]];
+  var STAR_WEIGHTS = [0.02, 0.1, 0.2, 0.24, 0.22, 0.14, 0.08];
+  function rng(seed){
+    return function(){
+      seed = seed + 0x6D2B79F5 | 0;
+      var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  // one small soft glow sprite per star colour, so bright stars cost a drawImage each
+  STAR_TEMPS.forEach(function(t){
+    var g = document.createElement("canvas"), S = 64; g.width = g.height = S;
+    var c = g.getContext("2d"), gr = c.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+    gr.addColorStop(0, "rgba(255,255,255,1)");
+    gr.addColorStop(0.08, "rgba(" + t.join(",") + ",0.9)");
+    gr.addColorStop(0.22, "rgba(" + t.join(",") + ",0.22)");
+    gr.addColorStop(1, "rgba(" + t.join(",") + ",0)");
+    c.fillStyle = gr; c.fillRect(0, 0, S, S);
+    glows.push(g);
+  });
+  function buildSky(){
+    var R = rng(20261008);
+    var gauss = function(){ return Math.sqrt(-2 * Math.log(R() + 1e-9)) * Math.cos(2 * Math.PI * R()); };
+    var pickI = function(){ var r = R(), a = 0; for (var i = 0; i < STAR_WEIGHTS.length; i++) { a += STAR_WEIGHTS[i]; if (r < a) return i; } return 3; };
+    var w = innerWidth, h = innerHeight;
+    skyDpr = Math.min(2, window.devicePixelRatio || 1);
+    sky.width = Math.round(w * skyDpr); sky.height = Math.round(h * skyDpr);
+    skyD = Math.ceil(Math.hypot(w, h));                 // big enough to rotate without showing corners
+    var L = document.createElement("canvas");
+    L.width = L.height = Math.ceil(skyD * skyDpr);
+    var c = L.getContext("2d"), D = skyD, i, x, y, r, g;
+    c.scale(skyDpr, skyDpr);
+    c.fillStyle = "#000"; c.fillRect(0, 0, D, D);
+    var band = function(x){ return Math.sin(x / D * 2.6) * D * 0.05; };
+
+    // Milky Way: a very faint glow along a tilted, gently curving band
+    c.save(); c.translate(D / 2, D / 2); c.rotate(-0.52);
+    c.globalCompositeOperation = "lighter";
+    for (i = 0; i < 260; i++) {
+      x = (R() - 0.5) * D * 1.3; y = gauss() * D * 0.05 + band(x);
+      r = D * (0.03 + R() * 0.07);
+      var col = R() > 0.55 ? "255,232,210" : "200,214,255";
+      g = c.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, "rgba(" + col + "," + (0.004 + R() * 0.008).toFixed(4) + ")");
+      g.addColorStop(1, "rgba(" + col + ",0)");
+      c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
+    }
+    // unresolved star clouds crowded into the band
+    var cloud = Math.round(D * D / 140);
+    for (i = 0; i < cloud; i++) {
+      x = (R() - 0.5) * D * 1.3; y = gauss() * D * 0.055 + band(x);
+      c.fillStyle = "rgba(" + STAR_TEMPS[pickI()].join(",") + "," + (0.04 + R() * 0.14).toFixed(3) + ")";
+      c.fillRect(x, y, 0.55, 0.55);
+    }
+    // dust lanes darken the core of the band
+    c.globalCompositeOperation = "source-over";
+    for (i = 0; i < 110; i++) {
+      x = (R() - 0.5) * D * 1.2; y = gauss() * D * 0.018 + band(x) + D * 0.004;
+      r = D * (0.01 + R() * 0.035);
+      g = c.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, "rgba(0,0,0," + (0.18 + R() * 0.25).toFixed(3) + ")");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
+    }
+    c.restore();
+
+    // field stars: sharp points, nearly all faint
+    var n = Math.round(D * D / 380);
+    for (i = 0; i < n; i++) {
+      x = R() * D; y = R() * D;
+      var b = Math.pow(R(), 7);
+      var rad = 0.32 + b * 0.9, a = 0.12 + Math.pow(R(), 1.5) * 0.35 + b * 0.9;
+      c.fillStyle = "rgba(" + STAR_TEMPS[pickI()].join(",") + "," + Math.min(1, a).toFixed(3) + ")";
+      c.beginPath(); c.arc(x, y, rad, 0, Math.PI * 2); c.fill();
+    }
+
+    // a few dozen bright stars, drawn live so they scintillate
+    twinklers = [];
+    var bright = Math.max(14, Math.round(D * D / 65000));
+    for (i = 0; i < bright; i++) {
+      var mag = Math.pow(R(), 2.2);
+      twinklers.push({ x: R() * D - D / 2, y: R() * D - D / 2, b: mag, k: pickI(), ph: R() * 6.283, sp: 0.7 + R() * 1.6, sp2: 3 + R() * 5 });
+    }
+    skyLayer = L;
+  }
+  var skyLast = null, skyOdd = false;
+  function skyTick(spinDeg){
+    if (!skyLayer) return;
+    // twinkling is slow, so while the sky is not turning it only needs every other frame
+    skyOdd = !skyOdd;
+    if (skyLast !== null && Math.abs(spinDeg - skyLast) < 0.02 && skyOdd) return;
+    skyLast = spinDeg;
+    var w = sky.width / skyDpr, h = sky.height / skyDpr, now = performance.now() / 1000;
+    var ctx = skyCtx;
+    ctx.setTransform(skyDpr, 0, 0, skyDpr, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, w, h);
+    ctx.translate(w / 2, h / 2);
+    ctx.rotate((spinDeg * 0.08 + now * 0.05) * Math.PI / 180);
+    ctx.drawImage(skyLayer, -skyD / 2, -skyD / 2, skyD, skyD);
+    for (var i = 0; i < twinklers.length; i++) {
+      var s = twinklers[i];
+      var flick = 0.8 + 0.14 * Math.sin(now * s.sp + s.ph) + 0.06 * Math.sin(now * s.sp2 + s.ph * 1.7);
+      var size = 7 + s.b * 15;
+      ctx.globalAlpha = Math.min(1, (0.45 + s.b * 0.55) * flick);
+      ctx.drawImage(glows[s.k], s.x - size / 2, s.y - size / 2, size, size);
+    }
+    ctx.globalAlpha = 1;
+  }
+  buildSky();
+  var skyW = innerWidth, skyH = innerHeight;
+  addEventListener("resize", function(){
+    if (Math.abs(innerWidth - skyW) < 20 && Math.abs(innerHeight - skyH) < 20) return;
+    skyW = innerWidth; skyH = innerHeight; buildSky();
+  });
+
   // ---------- camera loop ----------
   var spin = 0, tilt = -4, camZ = 0, dragX = 0, dragY = 0, velX = 0, velY = 0, PITCH = 32;
   var focused = -1, dragging = false, isLit = false, p = 0;
@@ -733,85 +830,10 @@ body.lit #lit{opacity:1;pointer-events:auto}
       if (op !== c.op) { c.el.style.opacity = op; c.op = op; }
       if (d !== c.d) { c.el.style.setProperty("--d", d); c.d = d; }
     }
-    winTick();
+    skyTick(sy);
     requestAnimationFrame(frame);
   }
   frame();
-
-  // ---------- window film ----------
-  // Frame 0 of the film shows the same tower base as the bottom of tower.jpg, so the film is placed
-  // exactly over it (same shaft width and centre), then grows to full height while it plays.
-  // After frame 120 it cross-fades to a whitened copy and pulls back: the window on a white wall.
-  var WIN_N = 121, WIN_W = 720, WIN_H = 1086, WIN_FADE = 0.05, WIN_SPLIT = 0.62, WIN_GROW = 0.08;
-  var IMG_W = 2400, IMG_SHAFT_C = 1190, IMG_SHAFT_W = 482;      // tower.jpg, shaft above the base flare
-  var VID_SHAFT_C = 424, VID_SHAFT_W = 464;                     // frame 0, same rows
-  var WIN_C = [378, 450];                                       // window centre in frame 120
-  var WIN_EDGE_L = [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[1,1,1],[2,2,2],[3,2,2],[7,6,6],[28,25,24],[64,59,56],[91,85,82],[114,107,103],[127,121,116],[132,125,120],[131,125,120],[131,125,121],[135,130,127],[138,136,134],[142,140,141],[144,145,147],[145,147,149],[144,147,149],[143,145,148],[142,143,146],[141,142,145],[140,141,143],[138,137,140],[134,133,133],[130,127,126],[128,123,122],[128,124,122],[134,130,129],[141,138,137],[146,143,143],[148,145,145],[147,143,143],[143,139,138],[141,135,134],[139,134,133],[140,134,133],[141,136,134],[143,137,135],[143,137,136],[143,137,136],[144,138,137],[144,138,136],[144,138,136],[143,138,136],[144,138,136],[144,138,136],[144,138,137],[144,138,137],[144,138,137],[144,138,137],[145,138,138],[145,139,138],[148,143,143],[150,146,147],[154,150,151],[156,153,154],[157,154,156],[157,155,156],[158,155,156],[157,155,156],[157,155,156],[157,155,155],[157,155,155],[157,155,155],[157,155,155],[157,155,155],[157,154,154],[157,154,154],[157,154,154],[157,154,154],[157,154,154],[156,154,153],[156,154,153],[156,154,153],[156,154,153],[156,154,153],[156,154,153],[156,154,153],[156,154,153],[156,154,153],[156,154,153],[156,154,153],[156,153,153],[156,153,153],[156,153,153],[156,153,153],[156,153,153],[156,153,153],[156,153,153],[156,153,153],[156,153,152],[156,153,152],[156,153,152],[156,153,152],[155,153,152],[155,153,152],[155,152,152],[155,153,152]];
-  var WIN_EDGE_R = [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[3,3,3],[11,10,10],[31,30,30],[68,68,68],[107,106,106],[130,129,129],[144,143,143],[152,151,151],[157,156,156],[157,157,157],[154,155,156],[151,152,154],[150,150,154],[148,149,153],[148,149,153],[147,148,152],[147,148,152],[146,147,152],[146,147,152],[146,147,151],[146,147,151],[145,147,149],[145,146,148],[144,146,147],[146,147,148],[148,149,149],[151,152,152],[154,154,154],[155,156,156],[156,156,156],[155,155,155],[154,153,153],[152,150,151],[150,147,148],[149,146,146],[149,145,145],[150,146,145],[150,146,145],[150,146,145],[150,146,145],[151,146,145],[151,146,144],[151,146,144],[151,145,144],[151,146,145],[151,146,145],[151,146,145],[151,146,145],[151,145,145],[151,145,144],[151,145,144],[151,145,144],[151,145,144],[150,144,143],[150,144,143],[149,144,142],[149,144,142],[149,144,142],[150,144,143],[151,145,144],[152,147,146],[154,149,148],[155,150,150],[156,152,151],[157,153,153],[157,154,153],[157,154,154],[157,154,154],[157,155,154],[157,154,154],[157,154,154],[157,155,154],[157,155,154],[158,155,154],[158,154,154],[158,154,154],[158,155,154],[158,155,154],[158,155,154],[158,155,154],[158,155,154],[158,154,154],[158,154,154],[157,154,154],[157,154,154],[157,154,153],[157,154,153],[157,154,153],[157,154,153],[157,154,153],[157,154,153],[157,154,153],[157,153,153],[157,153,153],[157,153,153],[157,153,153],[157,153,153],[157,153,153],[157,153,152],[157,153,152],[157,153,152],[156,153,152],[156,153,152],[156,153,152],[156,152,152],[156,152,151],[156,152,151],[156,152,151]];
-  var WALL_L = [251, 250, 250], WALL_R = [251, 250, 250];   // edge colours of the whitened last frame
-  var winSec = $("window"), winPin = winSec.querySelector(".pin");
-  var winCanvas = $("winCanvas"), winWhite = $("winWhite"), winCtx = winCanvas.getContext("2d");
-  var towerImg = $("winTower");   // a pinned copy of tower.jpg, sitting exactly where the real one ends
-  var winFrames = new Array(WIN_N), winLoading = false, winDrawn = -1, winState = "";
-  function winLoad(){
-    if (winLoading) return;
-    winLoading = true;
-    var white = new Image();
-    white.onload = function(){ winWhite.getContext("2d").drawImage(white, 0, 0, WIN_W, WIN_H); };
-    white.src = "work/window/120w.webp";
-    var next = 0, active = 0;
-    (function pump(){
-      while (active < 6 && next < WIN_N) {
-        (function(k){
-          var im = new Image();
-          active++;
-          im.onload = function(){ winFrames[k] = im; active--; winDrawn = -1; winState = ""; pump(); };
-          im.onerror = function(){ active--; pump(); };
-          im.src = "work/window/" + ("00" + k).slice(-3) + ".webp";
-        })(next++);
-      }
-    })();
-  }
-  function smooth(t){ t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); }
-  function winTick(){
-    if (!winSec) return; // the first camera frame runs before this block is set up
-    var r = winSec.getBoundingClientRect(), vh = winPin.clientHeight || innerHeight, vw = winPin.clientWidth;
-    if (r.top < vh * 3) winLoad();
-    if (r.bottom < 0 || r.top > vh) return;
-    var on = r.top <= 0;
-    var q = Math.min(1, Math.max(0, -r.top / (r.height - vh)));
-    var f = Math.round(Math.min(1, Math.max(0, (q - WIN_FADE) / (WIN_SPLIT - WIN_FADE))) * (WIN_N - 1));
-    var k = f; while (k > 0 && !winFrames[k]) k--;
-    if (winFrames[k] && k !== winDrawn) { winCtx.drawImage(winFrames[k], 0, 0, WIN_W, WIN_H); winDrawn = k; }
-
-    // anchor: on top of the tower picture's last screen
-    var ti = towerImg.getBoundingClientRect(), ks = ti.width / IMG_W;
-    var sA = ks * IMG_SHAFT_W / VID_SHAFT_W;
-    var xA = ti.left + IMG_SHAFT_C * ks - VID_SHAFT_C * sA, yA = vh - WIN_H * sA;
-    // full height, window centred
-    var sT = vh / WIN_H, xT = vw / 2 - WIN_C[0] * sT, yT = 0;
-    var c = smooth(q / WIN_FADE), g = smooth((q - WIN_FADE) / WIN_GROW);
-    var sc = sA + (sT - sA) * g, x = xA + (xT - xA) * g, y = yA + (yT - yA) * g;
-    // pull back onto the white wall, keeping the window centre in place
-    var t = smooth((q - WIN_SPLIT) / (1 - WIN_SPLIT));
-    if (t > 0) {
-      var sB = sT * (1 - 0.42 * t), cx = vw / 2, cy = WIN_C[1] * sT;
-      sc = sB; x = cx - WIN_C[0] * sB; y = cy - WIN_C[1] * sB;
-    }
-    // left and right halves of the page match the film's own left and right edges
-    var mix = function(edge, wall){ return edge.map(function(c, n){ return Math.round(c + (wall[n] - c) * t); }).join(","); };
-    var bgL = mix(WIN_EDGE_L[f], WALL_L), bgR = mix(WIN_EDGE_R[f], WALL_R);
-    var state = [on, f, q.toFixed(4), vw, vh, Math.round(ti.left)].join("|");
-    if (state === winState) return;
-    winState = state;
-    var tf = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) scale(" + sc.toFixed(5) + ")";
-    winCanvas.style.transform = tf; winWhite.style.transform = tf;
-    // the picture copy stays behind the film until the film has grown to full height
-    towerImg.style.opacity = on ? (1 - g).toFixed(3) : 0;
-    winCanvas.style.opacity = on ? (c * (1 - t)).toFixed(3) : 0;
-    winWhite.style.opacity = on ? t.toFixed(3) : 0;
-    winPin.style.background = on ? "linear-gradient(to right, rgb(" + bgL + ") 50%, rgb(" + bgR + ") 50%)" : "transparent";
-  }
 
   // ---------- drag ----------
   var ptr = null;
