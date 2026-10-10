@@ -11,38 +11,6 @@ window.Fold = (function () {
   const hint = root.querySelector(".fold-hint");
   const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
-  /* ---------- projects ---------- */
-  const PROJECTS = [
-    { num: "01", name: "Kepler", kind: "Desktop browser", shots: ["01", "02", "03"],
-      text: "A web browser from another orbit, written in C++ on Qt 6 and Chromium: a built-in tracker blocker, private Orbit windows, session restore and an animated new-tab page.",
-      tags: ["C++17", "Qt 6", "Qt WebEngine", "CMake"], href: "https://github.com/lenodrips-create/kepler", cta: "View on GitHub" },
-    { num: "02", name: "keplerbrowser.org", kind: "Website + Rust server", shots: ["04", "05", "06"],
-      text: "The download and docs site for Kepler, served by a zero-dependency Rust release server with a JSON releases API.",
-      tags: ["Rust", "HTML", "CSS", "JavaScript"], href: "https://keplerbrowser.org", cta: "Visit keplerbrowser.org" },
-    { num: "03", name: "CTerm Studio", kind: "Browser code studio", shots: ["11", "12", "13"],
-      text: "An editor, live preview, file explorer and two shells in one page, all running on a C core compiled to WebAssembly.",
-      tags: ["C", "WebAssembly", "React 19", "Vite"], href: "https://github.com/lenodrips-create/cterm-studio", cta: "View on GitHub" },
-    { num: "04", name: "FORGIVN", kind: "Storefront", shots: ["14", "16", "20"],
-      text: "A clothing storefront in one dependency-free file: dove intro, filterable products, a saved cart, a contact form and scroll animations.",
-      tags: ["HTML", "CSS", "JavaScript"], href: "https://github.com/lenodrips-create/zay-website", cta: "View on GitHub" },
-    { num: "05", name: "This portfolio", kind: "Interactive site", shots: ["21"],
-      text: "A HyperFrames showreel, a laptop with a living picture strip and this foldable phone, built in plain HTML, CSS and JavaScript.",
-      tags: ["HyperFrames", "GSAP", "CSS 3D", "JavaScript"], href: "https://github.com/lenodrips-create/lennon-sells", cta: "View on GitHub" },
-  ];
-  const grid = live.querySelector("#ff-grid");
-  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  grid.innerHTML = PROJECTS.map((p, i) => `
-    <button class="ff-card rv" style="--i:${i % 2}" data-i="${i}" aria-haspopup="dialog">
-      <span class="ff-media"><img src="fold/work/${p.shots[0]}.jpg" alt="" loading="lazy"></span>
-      <span class="ff-body">
-        <span class="ff-num">${p.num}</span>
-        <span class="ff-name">${esc(p.name)}</span>
-        <span class="ff-arrow" aria-hidden="true">↗</span>
-        <span class="ff-kind">${esc(p.kind)}</span>
-        <span class="ff-tags">${p.tags.map(t => `<span>${esc(t)}</span>`).join("")}</span>
-      </span>
-    </button>`).join("");
-
   /* ---------- the folding panes show copies of the display; the live one takes over when open ---------- */
   const clones = [];
   root.querySelectorAll(".pane").forEach(pane => {
@@ -114,37 +82,6 @@ window.Fold = (function () {
   const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add("in")), { root: scroller, threshold: 0.15 });
   scroller.querySelectorAll(".rv:not(.ff-hero .rv)").forEach(el => io.observe(el));
 
-  /* ---------- project detail sheet ---------- */
-  const detail = live.querySelector(".ff-detail"), sheet = detail.querySelector(".ff-sheet");
-  let opener = null;
-  function openDetail(i, from) {
-    const p = PROJECTS[i];
-    detail.querySelector(".ff-d-kicker").textContent = `${p.num} — ${p.kind}`;
-    detail.querySelector(".ff-d-title").textContent = p.name;
-    detail.querySelector(".ff-d-text").textContent = p.text;
-    detail.querySelector(".ff-d-tags").innerHTML = p.tags.map(t => `<span>${esc(t)}</span>`).join("");
-    detail.querySelector(".ff-gallery").innerHTML = p.shots.map(s => `<img src="fold/work/${s}.jpg" alt="${esc(p.name)} screenshot">`).join("");
-    const link = detail.querySelector(".ff-d-link");
-    link.href = p.href;
-    link.querySelector("span").textContent = p.cta;
-    sheet.scrollTop = 0;
-    opener = from;
-    detail.classList.add("open");
-    detail.removeAttribute("inert");
-    detail.querySelector(".ff-close").focus({ preventScroll: true });
-  }
-  function closeDetail() {
-    if (!detail.classList.contains("open")) return;
-    detail.classList.remove("open");
-    detail.inert = true;
-    if (opener && live.classList.contains("on")) opener.focus({ preventScroll: true });
-  }
-  detail.inert = true;
-  grid.addEventListener("click", e => { const c = e.target.closest(".ff-card"); if (c) openDetail(+c.dataset.i, c); });
-  detail.querySelector(".ff-close").addEventListener("click", closeDetail);
-  detail.addEventListener("click", e => { if (e.target === detail) closeDetail(); });
-  addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
-
   /* ---------- per-frame update ---------- */
   let isOn = false, lastRise = -1, lastOpen = -1, hintText = "", wasShut = null;
   const creases = Array.from(root.querySelectorAll(".crease")), hingeEl = root.querySelector(".hinge");
@@ -184,10 +121,7 @@ window.Fold = (function () {
       isOn = on;
       live.classList.toggle("on", on);
       live.inert = !on;
-      if (!on) {
-        closeDetail();
-        clones.forEach(c => (c.scrollTop = scroller.scrollTop));
-      }
+      if (!on) clones.forEach(c => (c.scrollTop = scroller.scrollTop));
     }
   }
 

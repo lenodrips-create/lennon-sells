@@ -14,11 +14,11 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 /* four full-screen stops (reel → laptop → folded phone → unfolded). The page itself never scrolls:
    each wheel gesture, swipe or key press moves one stop, and every layer animates with transforms only */
 
-/* 1. the showreel: the HyperFrames composition in reel/ rendered to video, so the device's video hardware plays it */
+/* 1. the showreel: the HyperFrames compositions in reel/ (16:9) and reel-portrait/ (9:16) rendered to video,
+   so the device's video hardware plays it; the page picks the one that matches the screen's shape */
 #reel{position:fixed;inset:0;overflow:hidden;background:#0a0a0a}
 #reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0a0a0a}
 /* portrait phones: show the whole frame rather than cropping most of it away */
-@media (orientation:portrait){#reel video{object-fit:contain}}
 #hint{position:absolute;left:50%;bottom:18px;width:2px;height:34px;margin-left:-1px;background:linear-gradient(#f5f3ee,rgba(245,243,238,0));animation:hint 1.6s ease-in-out infinite}
 @keyframes hint{0%{transform:translateY(-10px);opacity:0}40%{opacity:1}100%{transform:translateY(10px);opacity:0}}
 
@@ -37,7 +37,7 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 
 /* the laptop's screen, positioned over the photo's display (257,99)-(1191,685) of 1448x1086 */
 .screen{position:absolute;left:17.749%;top:9.116%;width:64.503%;height:53.959%;border-radius:1.1% / 1.6%;overflow:hidden;background:#151515;container-type:size;color:#f2f2f2}
-.screen-bg{position:absolute;inset:-4%;background:url("laptop/shot-4.jpg") center 30%/cover;filter:blur(6px) brightness(.32) saturate(.7)}
+.screen-bg{position:absolute;inset:-4%;background:url("fold/work/01.jpg") center 30%/cover;filter:blur(6px) brightness(.32) saturate(.7)}
 .notch{position:absolute;left:44.86%;top:0;width:10.92%;height:3.2%;background:#040404;border-radius:0 0 1.2cqw 1.2cqw;z-index:3}
 .bar{position:absolute;left:0;right:0;top:6.5%;display:flex;font-size:1.45cqw;line-height:1.2;letter-spacing:-.01em;z-index:2}
 .bar span{position:absolute;white-space:nowrap}
@@ -87,7 +87,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
 @media (prefers-reduced-motion: reduce){.menu,.menu li a,.menu-foot{transition:none}}
 
 </style>
-<link rel="stylesheet" href="fold/fold.css?v=4">
+<link rel="stylesheet" href="fold/fold.css?v=5">
 </head>
 <body>
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA. Dev reel 2026.</h1>
@@ -146,7 +146,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
         <div class="ff-scroll">
           <header class="ff-nav">
             <a class="ff-brand" href="#ff-top">Lennon Helman</a>
-            <nav aria-label="Portfolio"><a href="#ff-work">Work</a><a href="#ff-about">About</a><a href="#ff-contact">Contact</a></nav>
+            <nav aria-label="Portfolio"><a href="#ff-services">Services</a><a href="#ff-about">About</a><a href="#ff-contact">Contact</a></nav>
             <a class="ff-pill" href="mailto:lenodrips@gmail.com">Email ↗</a>
           </header>
 
@@ -156,9 +156,32 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
             <p class="ff-lede rv">Browsers, dev tools and the web: the engine, the interface and the page that tells people about it.</p>
           </section>
 
-          <section class="ff-sec" id="ff-work">
-            <div class="ff-head rv"><h3>Selected work</h3><span>05 projects</span></div>
-            <div class="ff-grid" id="ff-grid"></div>
+          <section class="ff-sec" id="ff-services">
+            <div class="ff-head rv"><h3>Services we offer</h3><span>03 services</span></div>
+            <div class="ff-services">
+              <article class="ff-svc rv">
+                <span class="ff-svc-num">01</span>
+                <h4>Custom websites</h4>
+                <p>Hand-built sites made to fit what you do: the design, the animation and fast, clean code. This site is one of them.</p>
+                <div class="ff-tags"><span>Design</span><span>Animation</span><span>Hosting</span></div>
+                <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Custom%20website">Ask about a website ↗</a>
+              </article>
+              <article class="ff-svc rv" style="--i:1">
+                <span class="ff-svc-num">02</span>
+                <h4>Bug fixes</h4>
+                <p>Something broken, slow or acting strange? I track down the cause and fix it, from layout glitches to crashes.</p>
+                <div class="ff-tags"><span>Debugging</span><span>Performance</span><span>Cleanup</span></div>
+                <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Bug%20fix">Report a bug ↗</a>
+              </article>
+              <article class="ff-svc rv" style="--i:2">
+                <span class="ff-svc-num">03</span>
+                <h4>Electronic projects</h4>
+                <p>Hardware and the code that runs it: circuits, microcontrollers, sensors and lights, planned and built with you.</p>
+                <div class="ff-tags"><span>Microcontrollers</span><span>Sensors</span><span>Prototypes</span></div>
+                <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Electronics%20project">Plan a build ↗</a>
+              </article>
+            </div>
+            <div class="ff-links rv"><a class="ff-pill" href="mailto:lenodrips@gmail.com?subject=New%20project">Start a project ↗</a></div>
           </section>
 
           <section class="ff-sec" id="ff-about">
@@ -194,19 +217,6 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
           <footer class="ff-foot"><span>© 2026 Lennon Helman</span><span>Greencastle, PA</span></footer>
         </div>
 
-        <div class="ff-detail" role="dialog" aria-modal="true" aria-label="Project">
-          <div class="ff-sheet">
-            <div class="ff-sheet-in">
-              <button class="ff-close" aria-label="Close project">✕</button>
-              <p class="ff-d-kicker"></p>
-              <h3 class="ff-d-title"></h3>
-              <p class="ff-d-text"></p>
-              <div class="ff-tags ff-d-tags"></div>
-              <div class="ff-links"><a class="ff-pill ff-d-link" href="#" target="_blank" rel="noopener"><span></span> ↗</a></div>
-              <div class="ff-gallery"></div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -232,7 +242,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     <div><a href="#top" data-go="home">Back to start</a><span>Lennon Helman · Greencastle, PA</span></div>
   </div>
 </nav>
-<script src="fold/fold.js?v=5"></script>
+<script src="fold/fold.js?v=6"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -249,16 +259,27 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   /* ---------- showreel: a rendered video, which the device's video hardware plays ---------- */
   const reelBox = document.getElementById("reel");
   const video = document.getElementById("reel-video");
-  if (reduce) {
-    video.poster = "media/reel-end.jpg";             // reduced motion: the end card, still
-    video.preload = "none";
-  } else {
-    // phones and small screens get the 720p file
+  const portraitMq = matchMedia("(orientation: portrait)");
+  const ext = video.canPlayType('video/webm; codecs="vp9"') ? "webm" : "mp4";   // VP9 where supported, H.264 elsewhere
+  function pickVideo() {
+    const tall = portraitMq.matches;
+    if (reduce) {                                      // reduced motion: the end card, still
+      video.preload = "none";
+      video.poster = tall ? "media/reel-portrait-end.jpg" : "media/reel-end.jpg";
+      return;
+    }
+    // upright phones get the vertical cut so it fills the screen; small landscape screens get 720p
     const px = Math.max(window.screen.width, window.screen.height) * (devicePixelRatio || 1);
-    const ext = video.canPlayType('video/webm; codecs="vp9"') ? "webm" : "mp4";   // VP9 where supported, H.264 elsewhere
-    video.src = `media/reel${px <= 1500 ? "-720" : ""}.${ext}`;
-    video.play().catch(() => {});
+    const src = tall ? `media/reel-portrait.${ext}` : `media/reel${px <= 1500 ? "-720" : ""}.${ext}`;
+    if (video.getAttribute("src") === src) return;
+    const t = video.currentTime || 0;
+    video.poster = tall ? "media/reel-portrait-poster.jpg" : "media/reel-poster.jpg";
+    video.src = src;
+    video.addEventListener("loadedmetadata", () => { video.currentTime = t % (video.duration || 1); }, { once: true });
+    if (reelBox.style.visibility !== "hidden") video.play().catch(() => {});   // not while a card covers it
   }
+  pickVideo();
+  portraitMq.addEventListener("change", pickVideo);
 
   /* ---------- four stops: 0 reel, 1 laptop, 2 folded phone, 3 unfolded phone ---------- */
   const LAST = 3;
@@ -318,12 +339,11 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
 
   // inside the unfolded phone the display and the project sheet scroll natively
   const liveScroll = document.querySelector("#fold .live .ff-scroll");
-  const liveSheet = document.querySelector("#fold .live .ff-sheet");
   let innerAt = 0;
-  [liveScroll, liveSheet].forEach(el => el.addEventListener("scroll", () => { innerAt = performance.now(); }, { passive: true }));
+  liveScroll.addEventListener("scroll", () => { innerAt = performance.now(); }, { passive: true });
   function innerScroller(node) {
     if (target !== LAST || !node || !node.closest || !node.closest("#fold .live.on")) return null;
-    return node.closest(".ff-detail.open .ff-sheet") || node.closest(".ff-scroll");
+    return node.closest(".ff-scroll");
   }
   const canScroll = (el, dy) => (dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0);
 
@@ -385,19 +405,20 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   /* ---------- pictures flow along a waving ribbon ---------- */
   const screen = document.querySelector(".screen");
   const ribbon = document.getElementById("ribbon");
-  // relative widths of the seven pictures, as laid out in the original screen
-  const SHOTS = [90, 117, 121, 188, 154, 126, 98];
-  const GAP = 6, TOTAL = SHOTS.reduce((a, w) => a + w + GAP, 0); // in 934-wide screen units
+  // Lennon's project screenshots, each card as wide as its picture's shape (in 934-wide screen units)
+  const SHOTS = [["01", 1.78], ["02", 1.02], ["03", 1.84], ["04", 1.5], ["05", 1.5], ["06", 1.5], ["11", 1.5],
+                 ["12", 1.5], ["13", 1.5], ["14", 1.5], ["16", 1.5], ["20", 0.8], ["21", 1.78]].map(([n, a]) => [n, Math.round(118 * a)]);
+  const COPIES = 2, GAP = 6, TOTAL = SHOTS.reduce((a, [, w]) => a + w + GAP, 0);
   const cards = [];
-  for (let copy = 0; copy < 3; copy++)
-    SHOTS.forEach((w, i) => {
+  for (let copy = 0; copy < COPIES; copy++)
+    SHOTS.forEach(([n, w], i) => {
       const img = document.createElement("img");
       img.className = "rb";
-      img.src = `laptop/shot-${i + 1}.jpg`;
+      img.src = `fold/work/${n}.jpg`;
       img.alt = "";
       img.decoding = "async";
       ribbon.appendChild(img);
-      cards.push({ img, w, start: copy * TOTAL + SHOTS.slice(0, i).reduce((a, v) => a + v + GAP, 0), shown: true });
+      cards.push({ img, w, start: copy * TOTAL + SHOTS.slice(0, i).reduce((a, [, v]) => a + v + GAP, 0), shown: true });
     });
   let cw = 0, ch = 0, baseH = 0;
   // each picture keeps a fixed size; only its transform changes per frame
@@ -432,9 +453,9 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     }
     const k = cw / 934;
     for (const c of cards) {
-      let x0 = c.start - offset;
-      if (x0 < -TOTAL) x0 += 3 * TOTAL;           // keep the three copies tiled across the screen
-      if (x0 > 2 * TOTAL) x0 -= 3 * TOTAL;
+      const span = COPIES * TOTAL;                 // keep the copies tiled across the screen
+      let x0 = ((c.start - offset) % span + span) % span;
+      if (x0 > 934) x0 -= span;
       const x1 = x0 + c.w;
       const on = x1 > 0 && x0 < 934;
       if (on !== c.shown) { c.shown = on; c.img.style.visibility = on ? "visible" : "hidden"; }
