@@ -7,12 +7,12 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA. Dev reel 2026.">
 <style>
-html,body{margin:0;background:#0a0a0a}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:#0a0a0a}
 body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* the page scrolls through three screens of distance: reel → laptop → folded phone → unfolded; every layer stays pinned */
-#track{height:400vh;height:400svh}
+/* four full-screen stops (reel → laptop → folded phone → unfolded). The page itself never scrolls:
+   each wheel gesture, swipe or key press moves one stop, and every layer animates with transforms only */
 
 /* 1. the showreel covers the whole screen; its 1920x1080 frame is scaled to cover and centered */
 #reel{position:fixed;inset:0;overflow:hidden;background:#0a0a0a}
@@ -21,14 +21,17 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 @keyframes hint{0%{transform:translateY(-10px);opacity:0}40%{opacity:1}100%{transform:translateY(10px);opacity:0}}
 
 /* 2. scrolling down slides a white screen up over the reel, and the laptop springs up from the bottom with it */
-#work{position:fixed;inset:0;background:#f5f9fc;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;transform:translateY(100%);transform-origin:50% 0;border-radius:56px;box-shadow:0 -30px 80px rgba(0,0,0,.45);will-change:transform,border-radius}
-.laptop{position:relative;width:min(1180px,96vw,calc(133vh));aspect-ratio:1448/1086;transform:translateY(100vh);will-change:transform}
+#work{--tb:clamp(84px,14vh,160px);position:fixed;inset:0;background:#f5f9fc;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;transform:translateY(100%);transform-origin:50% 0;border-radius:56px;box-shadow:0 -30px 80px rgba(0,0,0,.45);visibility:hidden;will-change:transform}
+/* a heavy, plain headline across the top of the laptop page */
+.work-title{position:absolute;left:0;right:0;top:calc(var(--tb) * .2);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#0a0a0a;z-index:2;will-change:transform}
+/* the laptop sits below the headline: its lid starts 7.5% down the photo, and the photo is 3:4 */
+.laptop{position:relative;width:min(1180px,96vw,calc((100vh - var(--tb)) * 1.44));width:min(1180px,96vw,calc((100svh - var(--tb)) * 1.44));aspect-ratio:1448/1086;transform:translateY(100vh);will-change:transform}
 .laptop>img{position:absolute;inset:0;width:100%;height:100%;display:block;
   /* the hand runs off the photo's left edge; fade that edge into the page */
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 92%,transparent 100%),linear-gradient(180deg,transparent 0,#000 7%);
   -webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 0,#000 14%,#000 92%,transparent 100%),linear-gradient(180deg,transparent 0,#000 7%);mask-composite:intersect}
 /* phones: centre the laptop and let the photo's empty margins run off the sides */
-@media (max-width:700px){#work{align-items:center}.laptop{width:118vw;flex:none}}
+@media (max-width:700px){#work{align-items:center}.laptop{width:118vw;flex:none}.work-title{top:clamp(28px,7vh,64px);font-size:15vw;padding:0 4vw}}
 
 /* the laptop's screen, positioned over the photo's display (257,99)-(1191,685) of 1448x1086 */
 .screen{position:absolute;left:17.749%;top:9.116%;width:64.503%;height:53.959%;border-radius:1.1% / 1.6%;overflow:hidden;background:#151515;container-type:size;color:#f2f2f2}
@@ -37,28 +40,27 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 .bar{position:absolute;left:0;right:0;top:6.5%;display:flex;font-size:1.45cqw;line-height:1.2;letter-spacing:-.01em;z-index:2}
 .bar span{position:absolute;white-space:nowrap}
 .foot{position:absolute;left:0;right:0;bottom:4.2%;text-align:center;font-size:1.3cqw;opacity:.9;z-index:2}
-.ribbon{position:absolute;inset:0;z-index:1}
-.card{position:absolute;top:0;height:100%;will-change:clip-path,transform}
-.card img{position:absolute;left:0;width:100%;object-fit:cover;display:block}
+/* the picture strip: each picture is mapped onto its slice of the curve with a perspective transform,
+   so the browser only moves layers on the GPU and never repaints them */
+.ribbon{position:absolute;inset:0;z-index:1;overflow:hidden}
+.rb{position:absolute;left:0;top:0;display:block;object-fit:cover;transform-origin:0 0;backface-visibility:hidden;will-change:transform}
 
 @media (prefers-reduced-motion: reduce){
   #hint{animation:none}
 }
 </style>
-<link rel="stylesheet" href="fold/fold.css?v=2">
+<link rel="stylesheet" href="fold/fold.css?v=3">
 </head>
 <body>
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA. Dev reel 2026.</h1>
 
-<div id="track"></div>
-
 <div id="reel" aria-hidden="true">
-  <iframe src="reel/index.html?v=6" title="Showreel" tabindex="-1"></iframe>
+  <iframe src="reel/index.html?v=7" title="Showreel" tabindex="-1"></iframe>
   <div id="hint"></div>
 </div>
 
-<section id="work" aria-label="Work">
-  <h2 class="sr-only">Work</h2>
+<section id="work" aria-label="Project gallery">
+  <h2 class="work-title">Project Gallery</h2>
   <div class="laptop" aria-hidden="true">
     <img src="laptop/laptop.jpg" alt="" width="1448" height="1086">
     <div class="screen">
@@ -179,10 +181,19 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
     <span class="fold-hint">Scroll to unfold</span>
   </div>
 </section>
-<script src="fold/fold.js?v=2"></script>
+<script src="fold/fold.js?v=3"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const clamp01 = x => Math.min(1, Math.max(0, x));
+  const smooth = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+  // write a style only when it changes, so idle frames cost nothing
+  const styled = new WeakMap();
+  function set(el, prop, value) {
+    let m = styled.get(el);
+    if (!m) styled.set(el, (m = {}));
+    if (m[prop] !== value) { m[prop] = value; el.style[prop] = value; }
+  }
 
   /* ---------- showreel ---------- */
   const reelBox = document.getElementById("reel");
@@ -195,128 +206,202 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
     frame.style.transform = `translate(${(w - 1920 * s) / 2}px, ${(h - 1080 * s) / 2}px) scale(${s})`;
   }
   fit();
-  addEventListener("resize", fit);
   // the composition registers a paused GSAP timeline; loop it, or show the end card for reduced motion
   frame.addEventListener("load", function find(tries = 50) {
     const tl = frame.contentWindow && frame.contentWindow.__timelines && frame.contentWindow.__timelines.reel;
     if (!tl) return tries > 0 && setTimeout(() => find(tries - 1), 100);
     if (reduce) return tl.progress(1);
     tl.eventCallback("onComplete", () => tl.play(0));
-    tl.play(0);
     reel = tl;
+    kick();
   });
 
-  /* ---------- scrolling raises the white screen, and the laptop springs up from the bottom ---------- */
+  /* ---------- four stops: 0 reel, 1 laptop, 2 folded phone, 3 unfolded phone ---------- */
+  const LAST = 3;
+  let target = 0, shown = 0, opened = 0;
+  let lockUntil = 0, acc = 0, lastWheel = 0, innerAt = 0;
+  function go(dir) {
+    const t = Math.min(LAST, Math.max(0, target + dir));
+    if (t === target) return;
+    target = t;
+    lockUntil = performance.now() + 700;
+    kick();
+  }
+  // inside the unfolded phone the display and the project sheet scroll natively
+  const liveScroll = document.querySelector("#fold .live .ff-scroll");
+  const liveSheet = document.querySelector("#fold .live .ff-sheet");
+  [liveScroll, liveSheet].forEach(el => el.addEventListener("scroll", () => (innerAt = performance.now()), { passive: true }));
+  function innerScroller(node) {
+    if (target !== LAST || !node || !node.closest || !node.closest("#fold .live.on")) return null;
+    return node.closest(".ff-detail.open .ff-sheet") || node.closest(".ff-scroll");
+  }
+  const canScroll = (el, dy) => (dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0);
+
+  addEventListener("wheel", e => {
+    const dy = e.deltaMode ? e.deltaY * 16 : e.deltaY;
+    const el = innerScroller(e.target);
+    if (el && canScroll(el, dy)) return;              // let the display scroll itself
+    e.preventDefault();
+    const now = performance.now();
+    if (el && now - innerAt < 300) { lockUntil = Math.max(lockUntil, now + 250); return; } // tail of an inner scroll
+    if (now < lockUntil) { lockUntil = Math.max(lockUntil, now + 220); return; }          // one gesture moves one stop
+    acc = (now - lastWheel > 250 ? 0 : acc) + dy;
+    lastWheel = now;
+    if (Math.abs(acc) > 24) { go(Math.sign(acc)); acc = 0; }
+  }, { passive: false });
+
+  let touchY = null, touchEl = null;
+  addEventListener("touchstart", e => { touchY = e.touches[0].clientY; touchEl = innerScroller(e.target); }, { passive: true });
+  addEventListener("touchmove", e => {
+    if (touchY === null) return;
+    if (touchEl && canScroll(touchEl, touchY - e.touches[0].clientY)) return;
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
+  addEventListener("touchend", e => {
+    if (touchY === null) return;
+    const dy = touchY - e.changedTouches[0].clientY, el = touchEl;
+    touchY = null;
+    if (Math.abs(dy) < 40 || performance.now() - innerAt < 300) return;
+    if (el && canScroll(el, dy)) return;
+    go(Math.sign(dy));
+  }, { passive: true });
+
+  addEventListener("keydown", e => {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    const a = document.activeElement;
+    const down = e.key === "ArrowDown" || e.key === "PageDown" || (e.key === " " && !(a && a.closest && a.closest("button, a")));
+    const up = e.key === "ArrowUp" || e.key === "PageUp";
+    if (e.key === "Home" || e.key === "End") { e.preventDefault(); go(e.key === "Home" ? -LAST : LAST); return; }
+    if (!down && !up) return;
+    const el = innerScroller(a) || (target === LAST && opened === 1 ? liveScroll : null);
+    if (el && canScroll(el, down ? 1 : -1)) return;
+    e.preventDefault();
+    go(down ? 1 : -1);
+  });
+
+  /* ---------- laptop page ---------- */
   const work = document.getElementById("work");
   const laptop = work.querySelector(".laptop");
+  const title = work.querySelector(".work-title");
   const hint = document.getElementById("hint");
-  let lapY = innerHeight, lapV = 0, shown = 0, opened = 0;
-  const stage = () => Math.min(3, Math.max(0, scrollY / innerHeight));
-  const clamp01 = x => Math.min(1, Math.max(0, x));
-  const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const foldEl = document.getElementById("fold");
+  let lapY = innerHeight, lapV = 0;
 
-  /* ---------- pictures flow along a waving ribbon on the laptop screen ---------- */
+  /* ---------- pictures flow along a waving ribbon ---------- */
   const screen = document.querySelector(".screen");
   const ribbon = document.getElementById("ribbon");
   // relative widths of the seven pictures, as laid out in the original screen
   const SHOTS = [90, 117, 121, 188, 154, 126, 98];
   const GAP = 6, TOTAL = SHOTS.reduce((a, w) => a + w + GAP, 0); // in 934-wide screen units
   const cards = [];
-  for (let copy = 0; copy < 3; copy++) {
+  for (let copy = 0; copy < 3; copy++)
     SHOTS.forEach((w, i) => {
-      const el = document.createElement("div");
-      el.className = "card";
       const img = document.createElement("img");
+      img.className = "rb";
       img.src = `laptop/shot-${i + 1}.jpg`;
       img.alt = "";
-      el.appendChild(img);
-      ribbon.appendChild(el);
-      cards.push({ el, img, w, start: copy * TOTAL + SHOTS.slice(0, i).reduce((a, v) => a + v + GAP, 0) });
+      img.decoding = "async";
+      ribbon.appendChild(img);
+      cards.push({ img, w, start: copy * TOTAL + SHOTS.slice(0, i).reduce((a, v) => a + v + GAP, 0), shown: true });
     });
+  let cw = 0, ch = 0, baseH = 0;
+  // each picture keeps a fixed size; only its transform changes per frame
+  function sizeRibbon() {
+    cw = screen.clientWidth; ch = screen.clientHeight;
+    const k = cw / 934;
+    baseH = Math.max(1, Math.round(ch * 0.36));
+    for (const c of cards) { c.bw = Math.max(1, Math.round(c.w * k)); c.img.style.width = c.bw + "px"; c.img.style.height = baseH + "px"; }
+  }
+  sizeRibbon();
+
+  // the 3D transform that maps a w×h box onto the quad (x0,y0) (x1,y1) (x2,y2) (x3,y3), clockwise from top-left
+  function quad(w, h, x0, y0, x1, y1, x2, y2, x3, y3) {
+    const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3;
+    const dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+    const det = dx1 * dy2 - dx2 * dy1;
+    const g = (dx3 * dy2 - dx2 * dy3) / det, hh = (dx1 * dy3 - dx3 * dy1) / det;
+    const a = x1 - x0 + g * x1, b = x3 - x0 + hh * x3, d = y1 - y0 + g * y1, e = y3 - y0 + hh * y3;
+    const f = n => n.toFixed(6);
+    return `matrix3d(${f(a / w)},${f(d / w)},0,${f(g / w)},${f(b / h)},${f(e / h)},0,${f(hh / h)},0,0,1,0,${f(x0)},${f(y0)},0,1)`;
   }
 
   // ribbon shape at screen position u (0..1) and time t: a centre line that ripples, and a height that swells in the middle
   const centre = (u, t) => 0.57 + 0.028 * Math.sin(2 * Math.PI * (u * 1.1 - t * 0.12)) + 0.012 * Math.sin(2 * Math.PI * (u * 2.3 + t * 0.21));
-  const half = (u, t) => 0.112 + 0.108 * Math.sin(Math.PI * Math.min(1, Math.max(0, u))) * (1 + 0.06 * Math.sin(t * 0.9 + u * 4));
-
-  let offset = 0, boost = 0, lastY = scrollY, dir = 0, settle;
-  addEventListener("scroll", () => {
-    const dy = scrollY - lastY;
-    boost += dy * 0.6;
-    if (dy) dir = Math.sign(dy);
-    lastY = scrollY;
-    // once scrolling stops between two screens, finish the move to the next one in the direction it was going
-    clearTimeout(settle);
-    settle = setTimeout(() => {
-      const H = innerHeight, at = scrollY / H;
-      if (Math.abs(at - Math.round(at)) * H < 3) return;
-      const to = Math.min(3, Math.max(0, dir > 0 ? Math.ceil(at) : Math.floor(at)));
-      scrollTo({ top: to * H, behavior: reduce ? "auto" : "smooth" });
-    }, 140);
-  }, { passive: true });
+  const half = (u, t) => 0.112 + 0.108 * Math.sin(Math.PI * clamp01(u)) * (1 + 0.06 * Math.sin(t * 0.9 + u * 4));
+  let offset = 0, boost = 0;
 
   function drawRibbon(t, dt) {
     if (!reduce) {
-      boost *= 0.9;                            // scrolling nudges the strip, then it settles
-      offset = (offset + dt * 38 + boost * dt * 10) % TOTAL;
-      if (offset < 0) offset += TOTAL;
+      boost *= Math.exp(-dt * 6);                // a stop change nudges the strip, then it settles
+      offset = (offset + dt * (38 + boost)) % TOTAL;
     }
-    const W = screen.clientWidth, H = screen.clientHeight, k = W / 934;
+    const k = cw / 934;
     for (const c of cards) {
       let x0 = c.start - offset;
-      if (x0 < -TOTAL) x0 += 3 * TOTAL;       // keep the three copies tiled across the screen
+      if (x0 < -TOTAL) x0 += 3 * TOTAL;           // keep the three copies tiled across the screen
       if (x0 > 2 * TOTAL) x0 -= 3 * TOTAL;
       const x1 = x0 + c.w;
-      if (x1 < -10 || x0 > 944) { c.el.style.visibility = "hidden"; continue; }
-      c.el.style.visibility = "visible";
+      const on = x1 > 0 && x0 < 934;
+      if (on !== c.shown) { c.shown = on; c.img.style.visibility = on ? "visible" : "hidden"; }
+      if (!on) continue;
       const u0 = x0 / 934, u1 = x1 / 934;
-      const t0 = (centre(u0, t) - half(u0, t)) * H, b0 = (centre(u0, t) + half(u0, t)) * H;
-      const t1 = (centre(u1, t) - half(u1, t)) * H, b1 = (centre(u1, t) + half(u1, t)) * H;
-      const top = Math.min(t0, t1), bottom = Math.max(b0, b1);
-      c.el.style.left = x0 * k + "px";
-      c.el.style.width = c.w * k + "px";
-      c.el.style.clipPath = `polygon(0 ${t0}px, 100% ${t1}px, 100% ${b1}px, 0 ${b0}px)`;
-      c.img.style.top = top + "px";
-      c.img.style.height = bottom - top + "px";
+      const t0 = (centre(u0, t) - half(u0, t)) * ch, b0 = (centre(u0, t) + half(u0, t)) * ch;
+      const t1 = (centre(u1, t) - half(u1, t)) * ch, b1 = (centre(u1, t) + half(u1, t)) * ch;
+      c.img.style.transform = quad(c.bw, baseH, x0 * k, t0, x1 * k, t1, x1 * k, b1, x0 * k, b0);
     }
   }
 
-  let last = performance.now();
-  function frameLoop(now) {
+  /* ---------- one animation loop, which sleeps when nothing moves ---------- */
+  let running = false, last = 0;
+  function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(loop); } }
+  const approach = (v, to, dt, rate, eps) => { v += (to - v) * (1 - Math.exp(-dt * rate)); return Math.abs(to - v) < eps ? to : v; };
+
+  function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    const p = stage();
+    const openTo = clamp01(target - 2);
+    const was = shown;
+    shown = reduce ? target : approach(shown, target, dt, 6.5, 0.0008);
+    opened = reduce ? openTo : approach(opened, openTo, dt, 4.4, 0.01);
+    if (shown !== was) boost += (shown - was) * 2600;
 
-    // the cards ease after the scroll instead of jumping with it
-    shown = reduce ? p : shown + (p - shown) * (1 - Math.exp(-dt * 7));
-    if (Math.abs(p - shown) < 0.0005) shown = p;
+    // reel: hidden and paused once a card fully covers it
+    set(reelBox, "visibility", shown >= 1 ? "hidden" : "visible");
+    set(hint, "opacity", String(Math.max(0, 1 - shown * 5)));
+    set(hint, "animationPlayState", shown > 0.2 ? "paused" : "running");  // a hidden looping animation still costs frames
+    if (reel) shown >= 1 ? !reel.paused() && reel.pause() : reel.paused() && reel.play();
+
+    // laptop page: rises as a rounded card that grows to fill the screen; the laptop glides up after it
     const w = clamp01(shown);
-    // the white card rises as a rounded card, a little smaller than the screen, and grows to fill it as its corners straighten
     const e = smooth(0, 1, w), grow = smooth(0.55, 1, w);
-    work.style.transform = `translate3d(0, ${(1 - e) * 100}%, 0) scale(${0.9 + 0.1 * grow})`;
-    work.style.borderRadius = `${56 * (1 - grow)}px`;
-    // the laptop waits until the card is mostly up, then glides in from below on a soft spring
-    const target = (1 - smooth(0.35, 0.95, w)) * innerHeight;
-    if (reduce) lapY = target;
+    set(work, "visibility", shown > 0 && shown < 2 ? "visible" : "hidden");
+    set(work, "transform", `translate3d(0, ${((1 - e) * 100).toFixed(3)}%, 0) scale(${(0.9 + 0.1 * grow).toFixed(4)})`);
+    set(work, "borderRadius", `${(56 * (1 - grow)).toFixed(1)}px`);
+    const ty = (1 - smooth(0.25, 0.85, w)) * 60;
+    set(title, "transform", `translate3d(0, ${ty.toFixed(2)}px, 0)`);
+    set(title, "opacity", smooth(0.3, 0.9, w).toFixed(3));
+    const lapTarget = (1 - smooth(0.35, 0.95, w)) * innerHeight;
+    if (reduce) { lapY = lapTarget; lapV = 0; }
     else {
-      lapV += (110 * (target - lapY) - 19 * lapV) * dt;  // nearly critically damped: a hint of settle, no bounce
+      lapV += (110 * (lapTarget - lapY) - 19 * lapV) * dt;  // nearly critically damped: a hint of settle, no bounce
       lapY += lapV * dt;
+      if (Math.abs(lapTarget - lapY) < 0.3 && Math.abs(lapV) < 2) { lapY = lapTarget; lapV = 0; }
     }
-    laptop.style.transform = `translate3d(0, ${lapY}px, 0)`;
-    hint.style.opacity = Math.max(0, 1 - p * 5);
+    set(laptop, "transform", `translate3d(0, ${lapY.toFixed(2)}px, 0)`);
+    const ribbonOn = shown > 0 && shown < 2;
+    if (ribbonOn) drawRibbon(now / 1000, dt);
 
-    // then the dark card with the folded phone, which unfolds on the next scroll at its own, slower pace
-    const openTo = clamp01(p - 2);
-    opened = reduce ? openTo : opened + (openTo - opened) * (1 - Math.exp(-dt * 4.2));
-    if (Math.abs(openTo - opened) < 0.01) opened = openTo;  // settle the last 1% so the display is usable promptly
+    // the dark card with the folded phone, which unfolds at its own, slower pace
+    set(foldEl, "visibility", shown > 1 ? "visible" : "hidden");
     Fold.update(clamp01(shown - 1), opened);
 
-    if (shown > 0 && shown < 2) drawRibbon(now / 1000, dt);
-    if (reel) (shown >= 1 ? reel.pause() : reel.paused() && reel.play());
-    requestAnimationFrame(frameLoop);
+    const settled = shown === target && opened === openTo && lapV === 0 && lapY === lapTarget;
+    if (!settled || (ribbonOn && !reduce)) requestAnimationFrame(loop);
+    else running = false;
   }
-  drawRibbon(0, 0);
-  requestAnimationFrame(frameLoop);
+
+  addEventListener("resize", () => { fit(); sizeRibbon(); lapY = (1 - smooth(0.35, 0.95, clamp01(shown))) * innerHeight; kick(); });
+  kick();
 </script>
 </body>
 </html>
