@@ -416,7 +416,7 @@ function ProjectSheet(p: Props & { index: number | null; onClose: () => void }) 
     )
 }
 
-const SITE = "https://lennonh.com/fold/work/"
+const SITE = "https://lennonh.com/img/work/"
 const img = (n: string, alt: string): Img => ({ src: `${SITE}${n}.jpg`, alt })
 
 FoldfolioSection.defaultProps = {

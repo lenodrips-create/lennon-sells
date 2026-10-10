@@ -6,50 +6,37 @@
 <meta name="theme-color" content="#0a0a0a">
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA. Dev reel 2026.">
+<link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="mac/mac.min.js?v=1">
 <style>
+@font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
 html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:#0a0a0a}
 body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* four full-screen stops (reel → laptop → folded phone → unfolded). The page itself never scrolls:
-   each wheel gesture, swipe or key press moves one stop, and every layer animates with transforms only */
+/* three full-screen stops (reel → MacBook → closed lid with the info page). The page itself never scrolls:
+   each wheel gesture, swipe or key press moves one stop */
 
 /* 1. the showreel: the HyperFrames compositions in reel/ (16:9) and reel-portrait/ (9:16) rendered to video,
    so the device's video hardware plays it; the page picks the one that matches the screen's shape */
 #reel{position:fixed;inset:0;overflow:hidden;background:#0a0a0a}
 #reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0a0a0a}
-/* portrait phones: show the whole frame rather than cropping most of it away */
 #hint{position:absolute;left:50%;bottom:18px;width:2px;height:34px;margin-left:-1px;background:linear-gradient(#f5f3ee,rgba(245,243,238,0));animation:hint 1.6s ease-in-out infinite}
 @keyframes hint{0%{transform:translateY(-10px);opacity:0}40%{opacity:1}100%{transform:translateY(10px);opacity:0}}
 
-/* 2. scrolling down slides a white screen up over the reel, and the laptop springs up from the bottom with it */
-/* each card is taller than the screen by its corner radius: its rounded top shows while it rises and ends up just
-   above the screen, so the corners never need animating and nothing repaints during the move */
-#work{--tb:clamp(84px,14vh,160px);--lip:56px;position:fixed;left:0;right:0;bottom:0;top:calc(-1 * var(--lip));background:#f5f9fc;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;transform:translate3d(0,100%,0);border-radius:var(--lip) var(--lip) 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.45);visibility:hidden;will-change:transform}
-/* a heavy, plain headline across the top of the laptop page */
-.work-title{position:absolute;left:0;right:0;top:calc(var(--lip) + var(--tb) * .2);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#0a0a0a;z-index:2;will-change:transform}
-/* the laptop sits below the headline: its lid starts 7.5% down the photo, and the photo is 3:4 */
-.laptop{position:relative;width:min(1180px,96vw,calc((100vh - var(--tb)) * 1.44));width:min(1180px,96vw,calc((100svh - var(--tb)) * 1.44));aspect-ratio:1448/1086;transform:translateY(100vh);will-change:transform}
-/* the photo's edges (and the hand running off its left side) are faded into the page colour in the file itself */
-.laptop>img{position:absolute;inset:0;width:100%;height:100%;display:block}
-/* phones: centre the laptop and let the photo's empty margins run off the sides */
-@media (max-width:700px){#work{align-items:center}.laptop{width:118vw;flex:none}.work-title{top:calc(var(--lip) + clamp(28px,7vh,64px));font-size:15vw;padding:0 4vw}}
+/* 2. scrolling down slides a white card up over the reel, and the MacBook rises with it. The card is taller than
+   the screen by its corner radius: its rounded top shows while it rises and ends up just above the screen */
+#work{--tb:clamp(84px,14vh,160px);--lip:56px;position:fixed;left:0;right:0;bottom:0;top:calc(-1 * var(--lip));background:#f5f9fc;overflow:hidden;transform:translate3d(0,100%,0);border-radius:var(--lip) var(--lip) 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.45);visibility:hidden;will-change:transform}
+.work-title{position:absolute;left:0;right:0;top:calc(var(--lip) + var(--tb) * .2);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#0a0a0a;z-index:2;will-change:transform,opacity}
+@media (max-width:700px){.work-title{top:calc(var(--lip) + clamp(76px,10vh,104px));font-size:15vw;padding:0 4vw}}
+/* the MacBook is a real-time 3D model (mac/src/mac.js); its canvas covers the card below the lip */
+#mac{position:absolute;left:0;top:var(--lip);width:100%;height:calc(100% - var(--lip));display:block;will-change:transform}
+body.no-mac .mac-hint{display:none}
+.mac-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));margin:0;text-align:center;font:600 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6c7076;opacity:0;transition:opacity .4s;z-index:2}
 
-/* the laptop's screen, positioned over the photo's display (257,99)-(1191,685) of 1448x1086 */
-.screen{position:absolute;left:17.749%;top:9.116%;width:64.503%;height:53.959%;border-radius:1.1% / 1.6%;overflow:hidden;background:#151515;container-type:size;color:#f2f2f2}
-.screen-bg{position:absolute;inset:-4%;background:url("fold/work/01.jpg") center 30%/cover;filter:blur(6px) brightness(.32) saturate(.7)}
-.notch{position:absolute;left:44.86%;top:0;width:10.92%;height:3.2%;background:#040404;border-radius:0 0 1.2cqw 1.2cqw;z-index:3}
-.bar{position:absolute;left:0;right:0;top:6.5%;display:flex;font-size:1.45cqw;line-height:1.2;letter-spacing:-.01em;z-index:2}
-.bar span{position:absolute;white-space:nowrap}
-.foot{position:absolute;left:0;right:0;bottom:4.2%;text-align:center;font-size:1.3cqw;opacity:.9;z-index:2}
-/* the picture strip: each picture is mapped onto its slice of the curve with a perspective transform,
-   so the browser only moves layers on the GPU and never repaints them */
-.ribbon{position:absolute;inset:0;z-index:1;overflow:hidden}
-.rb{position:absolute;left:0;top:0;display:block;object-fit:cover;transform-origin:0 0;backface-visibility:hidden;will-change:transform}
+@media (prefers-reduced-motion: reduce){#hint{animation:none}}
 
-@media (prefers-reduced-motion: reduce){
-  #hint{animation:none}
-}
 /* ---------- menu ---------- */
 .menu-btn{position:fixed;top:max(18px,env(safe-area-inset-top));right:max(18px,env(safe-area-inset-right));z-index:50;display:flex;align-items:center;gap:10px;height:42px;padding:0 16px 0 18px;border:0;border-radius:999px;
   font:700 14px/1 "League Spartan",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
@@ -87,7 +74,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
 @media (prefers-reduced-motion: reduce){.menu,.menu li a,.menu-foot{transition:none}}
 
 </style>
-<link rel="stylesheet" href="fold/fold.css?v=5">
+<link rel="stylesheet" href="info/info.css?v=1">
 </head>
 <body>
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA. Dev reel 2026.</h1>
@@ -99,134 +86,80 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
 
 <section id="work" aria-label="Project gallery">
   <h2 class="work-title">Project Gallery</h2>
-  <div class="laptop" aria-hidden="true">
-    <img src="laptop/laptop.jpg" alt="" width="1448" height="1086">
-    <div class="screen">
-      <div class="screen-bg"></div>
-      <div class="notch"></div>
-      <div class="bar">
-        <span style="left:2%">Lennon Helman</span>
-        <span style="left:18%">Software Developer<br>based in Greencastle, PA</span>
-        <span style="left:57%">Index&nbsp;&nbsp;Info&nbsp;&nbsp;Archive</span>
-        <span style="right:2%">Email</span>
-      </div>
-      <div class="ribbon" id="ribbon"></div>
-      <div class="foot">© 2026 Lennon Helman</div>
-    </div>
-  </div>
+  <canvas id="mac" aria-hidden="true"></canvas>
+  <p class="mac-hint" aria-hidden="true">Scroll to close</p>
 </section>
 
-<section id="fold" aria-label="Portfolio" data-finish="graphite">
-  <div class="fold-stage">
-    <div class="device">
-      <div class="device-shadow"></div>
-      <div class="half half-a">
-        <div class="face face-front"><div class="pane"></div></div>
+<section id="info" aria-label="Lennon Helman" inert>
+  <div class="info-scroll ff">
+    <a class="ff-brand" href="#ff-top">Lennon Helman</a>
+    <section class="ff-hero" id="ff-top">
+      <p class="ff-kicker rv"><b></b>Software developer · Greencastle, PA</p>
+      <h2 class="ff-title rv">I build what <em>I imagine.</em></h2>
+      <p class="ff-lede rv">Browsers, dev tools and the web: the engine, the interface and the page that tells people about it.</p>
+    </section>
+
+    <section class="ff-sec" id="ff-services">
+      <div class="ff-head rv"><h3>Services we offer</h3><span>03 services</span></div>
+      <div class="ff-services">
+        <article class="ff-svc rv">
+          <span class="ff-svc-num">01</span>
+          <h4>Custom websites</h4>
+          <p>Hand-built sites made to fit what you do: the design, the animation and fast, clean code. This site is one of them.</p>
+          <div class="ff-tags"><span>Design</span><span>Animation</span><span>Hosting</span></div>
+          <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Custom%20website">Ask about a website ↗</a>
+        </article>
+        <article class="ff-svc rv" style="--i:1">
+          <span class="ff-svc-num">02</span>
+          <h4>Bug fixes</h4>
+          <p>Something broken, slow or acting strange? I track down the cause and fix it, from layout glitches to crashes.</p>
+          <div class="ff-tags"><span>Debugging</span><span>Performance</span><span>Cleanup</span></div>
+          <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Bug%20fix">Report a bug ↗</a>
+        </article>
+        <article class="ff-svc rv" style="--i:2">
+          <span class="ff-svc-num">03</span>
+          <h4>Electronic projects</h4>
+          <p>Hardware and the code that runs it: circuits, microcontrollers, sensors and lights, planned and built with you.</p>
+          <div class="ff-tags"><span>Microcontrollers</span><span>Sensors</span><span>Prototypes</span></div>
+          <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Electronics%20project">Plan a build ↗</a>
+        </article>
       </div>
-      <div class="half half-b">
-        <div class="face face-front"><div class="pane"></div></div>
-        <div class="face face-back" aria-hidden="true">
-          <div class="cover">
-            <div class="cover-top"><span>LH</span><span>Dev Reel 2026</span></div>
-            <div>
-              <div class="cover-clock">9:41</div>
-              <div class="cover-date"></div>
-            </div>
-            <div>
-              <div class="cover-name">Lennon Helman</div>
-              <div class="cover-role">Software developer</div>
-              <div class="cover-cta"><i></i>Scroll to unfold</div>
-            </div>
-          </div>
+      <div class="ff-links rv"><a class="ff-pill" href="mailto:lenodrips@gmail.com?subject=New%20project">Start a project ↗</a></div>
+    </section>
+
+    <section class="ff-sec" id="ff-about">
+      <div class="ff-head rv"><h3>About</h3><span>@lenodrips</span></div>
+      <div class="ff-about">
+        <div class="rv">
+          <p>I'm Lennon. I build what I imagine.</p>
+          <p>I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it.</p>
+          <p>Most of my work starts as a question. Could I make my own web browser? That became Kepler, written in C++ on Qt and Chromium. Could a full code studio run inside a browser tab? That became CTerm Studio, with a C core compiled to WebAssembly.</p>
+          <p>I care about how software feels as much as what it does: fast, private, and a little bit cinematic.</p>
+        </div>
+        <div class="rv" style="--i:1">
+          <ul class="ff-facts">
+            <li><span>Handle</span>@lenodrips</li>
+            <li><span>Focus</span>Browsers, dev tools, the web</li>
+            <li><span>Based in</span>Greencastle, PA</li>
+            <li><span>Public projects</span>5</li>
+          </ul>
+          <div class="ff-chips"><span>C++</span><span>Qt 6</span><span>Rust</span><span>C</span><span>WebAssembly</span><span>JavaScript</span><span>React</span><span>Vite</span><span>CMake</span><span>HyperFrames</span></div>
         </div>
       </div>
-      <div class="hinge"></div>
+    </section>
 
-      <div class="live ff">
-        <div class="ff-scroll">
-          <header class="ff-nav">
-            <a class="ff-brand" href="#ff-top">Lennon Helman</a>
-            <nav aria-label="Portfolio"><a href="#ff-services">Services</a><a href="#ff-about">About</a><a href="#ff-contact">Contact</a></nav>
-            <a class="ff-pill" href="mailto:lenodrips@gmail.com">Email ↗</a>
-          </header>
-
-          <section class="ff-hero" id="ff-top">
-            <p class="ff-kicker rv"><b></b>Software developer · Greencastle, PA</p>
-            <h2 class="ff-title rv">I build what <em>I imagine.</em></h2>
-            <p class="ff-lede rv">Browsers, dev tools and the web: the engine, the interface and the page that tells people about it.</p>
-          </section>
-
-          <section class="ff-sec" id="ff-services">
-            <div class="ff-head rv"><h3>Services we offer</h3><span>03 services</span></div>
-            <div class="ff-services">
-              <article class="ff-svc rv">
-                <span class="ff-svc-num">01</span>
-                <h4>Custom websites</h4>
-                <p>Hand-built sites made to fit what you do: the design, the animation and fast, clean code. This site is one of them.</p>
-                <div class="ff-tags"><span>Design</span><span>Animation</span><span>Hosting</span></div>
-                <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Custom%20website">Ask about a website ↗</a>
-              </article>
-              <article class="ff-svc rv" style="--i:1">
-                <span class="ff-svc-num">02</span>
-                <h4>Bug fixes</h4>
-                <p>Something broken, slow or acting strange? I track down the cause and fix it, from layout glitches to crashes.</p>
-                <div class="ff-tags"><span>Debugging</span><span>Performance</span><span>Cleanup</span></div>
-                <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Bug%20fix">Report a bug ↗</a>
-              </article>
-              <article class="ff-svc rv" style="--i:2">
-                <span class="ff-svc-num">03</span>
-                <h4>Electronic projects</h4>
-                <p>Hardware and the code that runs it: circuits, microcontrollers, sensors and lights, planned and built with you.</p>
-                <div class="ff-tags"><span>Microcontrollers</span><span>Sensors</span><span>Prototypes</span></div>
-                <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Electronics%20project">Plan a build ↗</a>
-              </article>
-            </div>
-            <div class="ff-links rv"><a class="ff-pill" href="mailto:lenodrips@gmail.com?subject=New%20project">Start a project ↗</a></div>
-          </section>
-
-          <section class="ff-sec" id="ff-about">
-            <div class="ff-head rv"><h3>About</h3><span>@lenodrips</span></div>
-            <div class="ff-about">
-              <div class="rv">
-                <p>I'm Lennon. I build what I imagine.</p>
-                <p>I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it.</p>
-                <p>Most of my work starts as a question. Could I make my own web browser? That became Kepler, written in C++ on Qt and Chromium. Could a full code studio run inside a browser tab? That became CTerm Studio, with a C core compiled to WebAssembly.</p>
-                <p>I care about how software feels as much as what it does: fast, private, and a little bit cinematic.</p>
-              </div>
-              <div class="rv" style="--i:1">
-                <ul class="ff-facts">
-                  <li><span>Handle</span>@lenodrips</li>
-                  <li><span>Focus</span>Browsers, dev tools, the web</li>
-                  <li><span>Based in</span>Greencastle, PA</li>
-                  <li><span>Public projects</span>5</li>
-                </ul>
-                <div class="ff-chips"><span>C++</span><span>Qt 6</span><span>Rust</span><span>C</span><span>WebAssembly</span><span>JavaScript</span><span>React</span><span>Vite</span><span>CMake</span><span>HyperFrames</span></div>
-              </div>
-            </div>
-          </section>
-
-          <section class="ff-sec ff-contact" id="ff-contact">
-            <div class="ff-head rv"><h3>Contact</h3><span>Open to work</span></div>
-            <a class="ff-big rv" href="mailto:lenodrips@gmail.com">lenodrips@gmail.com</a>
-            <div class="ff-links rv">
-              <a class="ff-ghost" href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a>
-              <a class="ff-ghost" href="https://keplerbrowser.org" target="_blank" rel="noopener">keplerbrowser.org ↗</a>
-            </div>
-          </section>
-
-          <footer class="ff-foot"><span>© 2026 Lennon Helman</span><span>Greencastle, PA</span></footer>
-        </div>
-
+    <section class="ff-sec ff-contact" id="ff-contact">
+      <div class="ff-head rv"><h3>Contact</h3><span>Open to work</span></div>
+      <a class="ff-big rv" href="mailto:lenodrips@gmail.com">lenodrips@gmail.com</a>
+      <div class="ff-links rv">
+        <a class="ff-ghost" href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a>
+        <a class="ff-ghost" href="https://keplerbrowser.org" target="_blank" rel="noopener">keplerbrowser.org ↗</a>
       </div>
-    </div>
-  </div>
-  <div class="fold-ui">
-    <div class="finishes" role="group" aria-label="Frame finish">
-      <button data-f="graphite" aria-pressed="true" aria-label="Graphite"></button>
-      <button data-f="silver" aria-pressed="false" aria-label="Silver"></button>
-      <button data-f="ember" aria-pressed="false" aria-label="Ember"></button>
-    </div>
-    <span class="fold-hint">Scroll to unfold</span>
+    </section>
+
+    <footer class="ff-foot"><span>© 2026 Lennon Helman</span><span>Greencastle, PA</span></footer>
+
+    <footer class="ff-foot"><span>© 2026 Lennon Helman</span><span>Greencastle, PA</span></footer>
   </div>
 </section>
 
@@ -242,7 +175,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     <div><a href="#top" data-go="home">Back to start</a><span>Lennon Helman · Greencastle, PA</span></div>
   </div>
 </nav>
-<script src="fold/fold.js?v=6"></script>
+<script type="module" src="mac/mac.min.js?v=1"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -281,35 +214,46 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   pickVideo();
   portraitMq.addEventListener("change", pickVideo);
 
-  /* ---------- four stops: 0 reel, 1 laptop, 2 folded phone, 3 unfolded phone ---------- */
-  const LAST = 3;
-  let target = 0, shown = 0, opened = 0;
-  // every move is a fixed-length tween that starts from wherever the page is, so it can be reversed mid-way
+  /* ---------- three stops: 0 reel, 1 open MacBook, 2 closed lid filling the screen + info ---------- */
+  const LAST = 2;
+  let target = 0, shown = 0;
+  // every move is a fixed-length tween that starts from wherever the page is, so it can be reversed mid-way.
+  // Reel ↔ MacBook is eased here; closing the lid is timed linearly, because the model eases the lid and the camera itself
   const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  const stageTw = { from: 0, to: 0, t0: 0, dur: 0.85 }, openTw = { from: 0, to: 0, t0: 0, dur: 1.05 };
-  function retarget(tw, from, to) { tw.from = from; tw.to = to; tw.t0 = performance.now(); }
-  function sample(tw, now) { const t = clamp01((now - tw.t0) / (tw.dur * 1000)); return t >= 1 ? tw.to : tw.from + (tw.to - tw.from) * easeInOut(t); }
-  function go(dir) {
-    const t = Math.min(LAST, Math.max(0, target + dir));
-    if (t === target) return;
-    target = t;
-    retarget(stageTw, shown, Math.min(t, 2));         // stops 2 and 3 share the card position; 3 only unfolds
-    retarget(openTw, opened, t === LAST ? 1 : 0);
-    if (reduce) { stageTw.t0 = openTw.t0 = -1e9; }
-    kick();
-  }
-  // jump straight to a stop; when that means unfolding too, the phone waits until its card has arrived
+  const tw = { from: 0, to: 0, t0: 0, dur: 0.85, ease: easeInOut };
   function goTo(t) {
+    t = Math.min(LAST, Math.max(0, t));
     if (t === target) return;
-    const dir = t - target;
     target = t;
-    retarget(stageTw, shown, Math.min(t, 2));
-    retarget(openTw, opened, t === LAST ? 1 : 0);
-    if (t === LAST && shown < 1.99) openTw.t0 += stageTw.dur * 1000;
-    if (reduce) { stageTw.t0 = openTw.t0 = -1e9; }
+    const lo = Math.min(shown, t), hi = Math.max(shown, t);
+    const a = Math.max(0, Math.min(1, hi) - lo), b = Math.max(0, hi - Math.max(1, lo));  // distance in each leg
+    tw.from = shown; tw.to = t; tw.t0 = performance.now();
+    tw.dur = reduce ? 0 : Math.max(0.35, 0.85 * a + 2.1 * b);
+    tw.ease = a > 0 ? easeInOut : x => x;
     kick();
-    return dir;
   }
+  const go = dir => goTo(target + dir);
+  function sample(now) {
+    const t = tw.dur ? clamp01((now - tw.t0) / (tw.dur * 1000)) : 1;
+    return t >= 1 ? tw.to : tw.from + (tw.to - tw.from) * tw.ease(t);
+  }
+
+  /* ---------- info page ---------- */
+  const info = document.getElementById("info");
+  const infoScroll = info.querySelector(".info-scroll");
+  function scrollInfo(sel, smoothly) {
+    const el = sel && infoScroll.querySelector(sel);
+    const top = el ? Math.max(0, el.offsetTop - 20) : 0;
+    infoScroll.scrollTo({ top, behavior: smoothly && !reduce ? "smooth" : "auto" });
+  }
+  info.addEventListener("click", e => {
+    const a = e.target.closest('a[href^="#ff-"]');
+    if (!a) return;
+    e.preventDefault();
+    scrollInfo(a.getAttribute("href"), true);
+  });
+  const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add("in")), { root: infoScroll, threshold: 0.12 });
+  info.querySelectorAll(".rv").forEach(el => io.observe(el));
 
   /* ---------- menu ---------- */
   const menuBtn = document.getElementById("menu-btn"), menu = document.getElementById("menu");
@@ -333,17 +277,16 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     // move while the menu slides away
     if (where === "home") goTo(0);
     else if (where === "gallery") goTo(1);
-    else { Fold.jump(where === "about" ? "#ff-about" : "#ff-contact"); goTo(LAST); }
+    else { scrollInfo(where === "about" ? "#ff-about" : "#ff-contact", shown === LAST); goTo(LAST); }
   });
   addEventListener("keydown", e => { if (e.key === "Escape" && menuOpen) { e.stopPropagation(); setMenu(false); } }, true);
 
-  // inside the unfolded phone the display and the project sheet scroll natively
-  const liveScroll = document.querySelector("#fold .live .ff-scroll");
+  // on the info page its content scrolls natively; at its top, scrolling up opens the MacBook again
   let innerAt = 0;
-  liveScroll.addEventListener("scroll", () => { innerAt = performance.now(); }, { passive: true });
+  infoScroll.addEventListener("scroll", () => { innerAt = performance.now(); }, { passive: true });
   function innerScroller(node) {
-    if (target !== LAST || !node || !node.closest || !node.closest("#fold .live.on")) return null;
-    return node.closest(".ff-scroll");
+    if (target !== LAST || !node || !node.closest || !node.closest("#info")) return null;
+    return infoScroll;
   }
   const canScroll = (el, dy) => (dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0);
 
@@ -354,12 +297,13 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     if (menuOpen) { e.preventDefault(); return; }
     const dy = e.deltaMode ? e.deltaY * 16 : e.deltaY;
     const el = innerScroller(e.target);
-    if (el && canScroll(el, dy)) return;              // let the display scroll itself
+    if (el && canScroll(el, dy)) return;              // let the page content scroll itself
     e.preventDefault();
-    const now = performance.now(), mag = Math.abs(dy);
+    // event timestamps, not handling time, so a busy frame can't split one gesture into two
+    const now = e.timeStamp || performance.now(), mag = Math.abs(dy);
     const fresh = now - lastWheel > 180 || (mag > lastMag * 1.8 && mag > 15);
     lastWheel = now; lastMag = mag;
-    if (el && now - innerAt < 300) { armed = false; return; }   // tail of a scroll inside the display
+    if (el && now - innerAt < 300) { armed = false; return; }   // tail of a scroll inside the content
     if (fresh) armed = true;
     if (armed && mag >= 4 && now - lastStep > 380) { armed = false; lastStep = now; go(Math.sign(dy)); }
   }, { passive: false });
@@ -386,114 +330,55 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     const a = document.activeElement;
     const down = e.key === "ArrowDown" || e.key === "PageDown" || (e.key === " " && !(a && a.closest && a.closest("button, a")));
     const up = e.key === "ArrowUp" || e.key === "PageUp";
-    if (e.key === "Home" || e.key === "End") { e.preventDefault(); go(e.key === "Home" ? -LAST : LAST); return; }
+    if (e.key === "Home" || e.key === "End") { e.preventDefault(); goTo(e.key === "Home" ? 0 : LAST); return; }
     if (!down && !up) return;
-    const el = innerScroller(a) || (target === LAST && opened === 1 ? liveScroll : null);
-    if (el && canScroll(el, down ? 1 : -1)) return;
+    const el = innerScroller(a) || (target === LAST && shown === LAST ? infoScroll : null);
+    if (el && canScroll(el, down ? 1 : -1)) {
+      if (innerScroller(a)) return;                    // focus is in the content: the browser scrolls it
+      e.preventDefault();                              // otherwise scroll it here
+      const page = e.key === "PageDown" || e.key === "PageUp" || e.key === " ";
+      el.scrollBy({ top: (down ? 1 : -1) * (page ? el.clientHeight * 0.85 : 90), behavior: reduce ? "auto" : "smooth" });
+      return;
+    }
     e.preventDefault();
     go(down ? 1 : -1);
   });
 
-  /* ---------- laptop page ---------- */
+  /* ---------- the MacBook page ---------- */
   const work = document.getElementById("work");
-  const laptop = work.querySelector(".laptop");
+  const canvas = document.getElementById("mac");
   const title = work.querySelector(".work-title");
+  const macHint = work.querySelector(".mac-hint");
   const hint = document.getElementById("hint");
-  const foldEl = document.getElementById("fold");
-  let lapY = innerHeight, lapV = 0, isLight = false;
-
-  /* ---------- pictures flow along a waving ribbon ---------- */
-  const screen = document.querySelector(".screen");
-  const ribbon = document.getElementById("ribbon");
-  // Lennon's project screenshots, each card as wide as its picture's shape (in 934-wide screen units)
-  const SHOTS = [["01", 1.78], ["02", 1.02], ["03", 1.84], ["04", 1.5], ["05", 1.5], ["06", 1.5], ["11", 1.5],
-                 ["12", 1.5], ["13", 1.5], ["14", 1.5], ["16", 1.5], ["20", 0.8], ["21", 1.78]].map(([n, a]) => [n, Math.round(118 * a)]);
-  const COPIES = 2, GAP = 6, TOTAL = SHOTS.reduce((a, [, w]) => a + w + GAP, 0);
-  const cards = [];
-  for (let copy = 0; copy < COPIES; copy++)
-    SHOTS.forEach(([n, w], i) => {
-      const img = document.createElement("img");
-      img.className = "rb";
-      img.src = `fold/work/${n}.jpg`;
-      img.alt = "";
-      img.decoding = "async";
-      ribbon.appendChild(img);
-      cards.push({ img, w, start: copy * TOTAL + SHOTS.slice(0, i).reduce((a, [, v]) => a + v + GAP, 0), shown: true });
-    });
-  let cw = 0, ch = 0, baseH = 0;
-  // each picture keeps a fixed size; only its transform changes per frame
-  function sizeRibbon() {
-    cw = screen.clientWidth; ch = screen.clientHeight;
-    const k = cw / 934;
-    baseH = Math.max(1, Math.round(ch * 0.36));
-    for (const c of cards) { c.bw = Math.max(1, Math.round(c.w * k)); c.img.style.width = c.bw + "px"; c.img.style.height = baseH + "px"; }
-  }
-  sizeRibbon();
-
-  // the 3D transform that maps a w×h box onto the quad (x0,y0) (x1,y1) (x2,y2) (x3,y3), clockwise from top-left
-  function quad(w, h, x0, y0, x1, y1, x2, y2, x3, y3) {
-    const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3;
-    const dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
-    const det = dx1 * dy2 - dx2 * dy1;
-    const g = (dx3 * dy2 - dx2 * dy3) / det, hh = (dx1 * dy3 - dx3 * dy1) / det;
-    const a = x1 - x0 + g * x1, b = x3 - x0 + hh * x3, d = y1 - y0 + g * y1, e = y3 - y0 + hh * y3;
-    const f = n => n.toFixed(6);
-    return `matrix3d(${f(a / w)},${f(d / w)},0,${f(g / w)},${f(b / h)},${f(e / h)},0,${f(hh / h)},0,0,1,0,${f(x0)},${f(y0)},0,1)`;
-  }
-
-  // ribbon shape at screen position u (0..1) and time t: a centre line that ripples, and a height that swells in the middle
-  const centre = (u, t) => 0.57 + 0.028 * Math.sin(2 * Math.PI * (u * 1.1 - t * 0.12)) + 0.012 * Math.sin(2 * Math.PI * (u * 2.3 + t * 0.21));
-  const half = (u, t) => 0.112 + 0.108 * Math.sin(Math.PI * clamp01(u)) * (1 + 0.06 * Math.sin(t * 0.9 + u * 4));
-  let offset = 0, boost = 0;
-
-  function drawRibbon(t, dt) {
-    if (!reduce) {
-      boost *= Math.exp(-dt * 6);                // a stop change nudges the strip, then it settles
-      offset = (offset + dt * (38 + boost)) % TOTAL;
-    }
-    const k = cw / 934;
-    for (const c of cards) {
-      const span = COPIES * TOTAL;                 // keep the copies tiled across the screen
-      let x0 = ((c.start - offset) % span + span) % span;
-      if (x0 > 934) x0 -= span;
-      const x1 = x0 + c.w;
-      const on = x1 > 0 && x0 < 934;
-      if (on !== c.shown) { c.shown = on; c.img.style.visibility = on ? "visible" : "hidden"; }
-      if (!on) continue;
-      const u0 = x0 / 934, u1 = x1 / 934;
-      const t0 = (centre(u0, t) - half(u0, t)) * ch, b0 = (centre(u0, t) + half(u0, t)) * ch;
-      const t1 = (centre(u1, t) - half(u1, t)) * ch, b1 = (centre(u1, t) + half(u1, t)) * ch;
-      c.img.style.transform = quad(c.bw, baseH, x0 * k, t0, x1 * k, t1, x1 * k, b1, x0 * k, b0);
-    }
-  }
+  let lapY = innerHeight, lapV = 0, isLight = false, infoOn = false, hintTimer = 0;
 
   /* ---------- one animation loop, which sleeps when nothing moves ---------- */
   let running = false, last = 0;
   function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(loop); } }
+  addEventListener("mac-ready", kick);
+  // without WebGL the MacBook can't draw: the info page gets a plain background instead
+  addEventListener("load", () => { if (!window.Mac) document.body.classList.add("no-mac"); });
 
   function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    const was = shown;
-    shown = sample(stageTw, now);
-    opened = sample(openTw, now);
-    if (shown !== was) boost += (shown - was) * 2600;
+    shown = sample(now);
 
-    // reel: hidden and paused once a card fully covers it
+    // reel: hidden and paused once the card fully covers it
     set(reelBox, "visibility", shown >= 1 ? "hidden" : "visible");
     set(hint, "opacity", String(Math.max(0, 1 - shown * 5)));
     set(hint, "animationPlayState", shown > 0.2 ? "paused" : "running");  // a hidden looping animation still costs frames
     if (!reduce) shown >= 1 ? !video.paused && video.pause() : video.paused && video.play().catch(() => {});
 
-    // laptop page: rises as a rounded card that grows to fill the screen; the laptop glides up after it
-    const w = clamp01(shown);
-    set(work, "visibility", shown > 0 && shown < 2 ? "visible" : "hidden");
-    const light = shown > 0.5 && shown < 1.5;
+    // MacBook page: rises as a rounded card; the laptop glides up after it, then closes and fills the screen
+    const w = clamp01(shown), c = clamp01(shown - 1);
+    set(work, "visibility", shown > 0 ? "visible" : "hidden");
+    const light = shown > 0.5 && shown < 1.55;
     if (light !== isLight) { isLight = light; document.body.classList.toggle("light", light); }
     set(work, "transform", `translate3d(0, ${((1 - w) * 100).toFixed(3)}%, 0)`);
-    const ty = (1 - smooth(0.25, 0.85, w)) * 60;
+    const ty = (1 - smooth(0.25, 0.85, w)) * 60 - smooth(0, 0.35, c) * 40;
     set(title, "transform", `translate3d(0, ${ty.toFixed(2)}px, 0)`);
-    set(title, "opacity", smooth(0.3, 0.9, w).toFixed(3));
+    set(title, "opacity", (smooth(0.3, 0.9, w) * (1 - smooth(0, 0.3, c))).toFixed(3));
     const lapTarget = (1 - smooth(0.35, 0.95, w)) * innerHeight;
     if (reduce) { lapY = lapTarget; lapV = 0; }
     else {
@@ -501,20 +386,30 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
       lapY += lapV * dt;
       if (Math.abs(lapTarget - lapY) < 0.3 && Math.abs(lapV) < 2) { lapY = lapTarget; lapV = 0; }
     }
-    set(laptop, "transform", `translate3d(0, ${lapY.toFixed(2)}px, 0)`);
-    const ribbonOn = shown > 0 && shown < 2;
-    if (ribbonOn) drawRibbon(now / 1000, dt);
+    set(canvas, "transform", `translate3d(0, ${lapY.toFixed(2)}px, 0)`);
+    // "scroll to close" shows once the laptop has settled open
+    if (shown === 1 && !hintTimer) hintTimer = setTimeout(() => set(macHint, "opacity", "1"), 1600);
+    if (shown !== 1) { clearTimeout(hintTimer); hintTimer = 0; set(macHint, "opacity", "0"); }
+    if (window.Mac && shown > 0) Mac.update(w, c, now, dt);
 
-    // the dark card with the folded phone, which unfolds at its own, slower pace
-    set(foldEl, "visibility", shown > 1 ? "visible" : "hidden");
-    Fold.update(clamp01(shown - 1), opened);
+    // the info page appears on the closed lid as the camera settles over it
+    const k = smooth(0.84, 1, c);
+    set(info, "visibility", k > 0 ? "visible" : "hidden");
+    set(info, "opacity", k.toFixed(3));
+    const on = shown === LAST;
+    if (on !== infoOn) {
+      infoOn = on;
+      info.inert = !on;
+      if (on) info.querySelectorAll(".ff-hero .rv").forEach(el => el.classList.add("in"));
+    }
 
-    const settled = shown === stageTw.to && opened === openTw.to && lapV === 0 && lapY === lapTarget;
-    if (!settled || (ribbonOn && !reduce)) requestAnimationFrame(loop);
+    const settled = shown === tw.to && lapV === 0 && lapY === lapTarget;
+    const stripMoving = window.Mac && shown > 0 && c < 0.75 && !reduce;   // the gallery on the display keeps flowing
+    if (!settled || stripMoving) requestAnimationFrame(loop);
     else running = false;
   }
 
-  addEventListener("resize", () => { sizeRibbon(); lapY = (1 - smooth(0.35, 0.95, clamp01(shown))) * innerHeight; kick(); });
+  addEventListener("resize", () => { lapY = (1 - smooth(0.35, 0.95, clamp01(shown))) * innerHeight; kick(); });
   kick();
 </script>
 </body>

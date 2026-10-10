@@ -290,7 +290,7 @@ function ProjectSheet(p) {
             </motion.div>
         </motion.div>);
 }
-const SITE = "https://lennonh.com/fold/work/";
+const SITE = "https://lennonh.com/img/work/";
 const img = (n, alt) => ({ src: `${SITE}${n}.jpg`, alt });
 FoldfolioSection.defaultProps = {
     name: "Lennon Helman",

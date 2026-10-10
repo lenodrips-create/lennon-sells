@@ -6,7 +6,7 @@
 
 The defaults already contain Lennon's content and links, so it works as soon as it's dropped in.
 
-lennonh.com itself isn't built in Framer; it's this repository, published by GitHub Pages. The same section is already live there, built in plain HTML, CSS and JS (`fold/`). Use this file only if you build the site, or a copy of it, in Framer.
+lennonh.com itself isn't built in Framer; it's this repository, published by GitHub Pages. The foldable section used to be live there too; the site now uses a 3D MacBook instead (`mac/`), so this component is only for a Framer build of the site. Its default pictures still load from lennonh.com.
 
 ## Paste it into Framer (about 2 minutes)
 
@@ -33,7 +33,7 @@ Select the component and use the right-hand panel. You don't need to touch the c
 | Frame, Finish picker | The phone's default finish (Graphite, Silver or Ember), and whether visitors can switch it |
 | Scroll length | How many screens of scrolling the fold takes (2 to 6) |
 
-The default project images load from `https://lennonh.com/fold/work/`. For a Framer site, replace them in the **Projects** control with images uploaded to Framer, so the site doesn't depend on the other host.
+The default project images load from `https://lennonh.com/img/work/`. For a Framer site, replace them in the **Projects** control with images uploaded to Framer, so the site doesn't depend on the other host.
 
 ## Responsive behavior
 
