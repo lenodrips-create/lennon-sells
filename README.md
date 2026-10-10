@@ -1,6 +1,6 @@
 # Lennon
 
-The whole site is one full-screen animation: a 24-second [HyperFrames](https://github.com/heygen-com/hyperframes) showreel on black. It has five chapters (type, shape, motion, rhythm and signal), each joined by a different transition: a circle iris, alternating stripes, dots that swell to fill the frame, a skewed panel, bars that rise into a wall, and a zoom through the type. It ends on a title card and loops. The page shows the composition in an iframe and plays its GSAP timeline, so nothing loads from outside the site. Visitors who prefer reduced motion see the end card.
+The whole site is one full-screen animation: a 24-second [HyperFrames](https://github.com/heygen-com/hyperframes) showreel on black. The copy is developer-themed: BUILD / IT / SHIP, then five chapters (code, stack, deploy, commit and runtime, which glitches HELLO WORLD), each joined by a different transition: a circle iris, alternating stripes, dots that swell to fill the frame, a skewed panel, bars that rise into a wall, and a zoom through the type. It ends on a title card (Lennon Helman, software developer, Greencastle, PA) and loops. The page shows the composition in an iframe and plays its GSAP timeline, so nothing loads from outside the site. Visitors who prefer reduced motion see the end card.
 
 **Live site:** http://lennonh.com/
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920, height=1080">
-<title>Lennon Helman — Showreel 2026</title>
+<title>Lennon Helman — Dev Reel 2026</title>
 <script src="vendor/gsap.min.js"></script>
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:500;src:url("fonts/league-spartan-latin-500-normal.woff2") format("woff2")}
@@ -19,7 +19,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 .mask{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .02em}
 .ch{display:inline-block}
 
-/* 1. slam */
+/* 1. build / it / ship */
 #s1{background:var(--ink)}
 .slam{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:470px;line-height:1;letter-spacing:-.03em}
 #w2{color:var(--orange)}
@@ -27,7 +27,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 #s1-bar{position:absolute;left:0;top:50%;width:1920px;height:34px;margin-top:-17px;background:var(--orange)}
 #wipeA{position:absolute;left:50%;top:50%;width:2400px;height:2400px;margin:-1200px 0 0 -1200px;border-radius:50%;background:var(--orange)}
 
-/* 2. type */
+/* 2. code */
 #s2{background:var(--orange)}
 #s2-tilt{position:absolute;left:-800px;top:-400px;width:3520px;height:1880px;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .row{font-weight:900;font-size:236px;line-height:.9;white-space:nowrap;color:var(--ink);letter-spacing:-.01em}
@@ -35,7 +35,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 #typo{font-weight:900;font-size:262px;line-height:.9;white-space:nowrap;color:var(--ink);padding-left:820px;letter-spacing:-.02em}
 .stripe{position:absolute;top:0;width:194px;height:1080px;background:var(--ink)}
 
-/* 3. shape */
+/* 3. stack */
 #s3{background:var(--ink)}
 .dot{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--paper)}
 #shapes{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:120px;padding-bottom:80px}
@@ -44,7 +44,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 #tri{width:320px;height:290px}
 #s3-word{position:absolute;left:70px;bottom:40px;font-weight:900;font-size:250px;line-height:.9;color:var(--ink);-webkit-text-stroke:3px var(--paper)}
 
-/* 4. motion */
+/* 4. deploy */
 #s4{background:var(--paper);color:var(--ink)}
 #s4-word{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:340px;line-height:1;letter-spacing:-.02em;color:var(--ink)}
@@ -52,7 +52,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 .sl{position:absolute;left:0;background:var(--ink)}
 #wipeD{position:absolute;left:0;top:-200px;width:3400px;height:1480px;background:var(--blue)}
 
-/* 5. rhythm */
+/* 5. commit */
 #s5{background:var(--blue)}
 .barw{position:absolute;bottom:0;width:60px;height:1080px}
 .bar{position:absolute;left:10px;bottom:0;width:40px;height:1080px;background:var(--paper)}
@@ -60,7 +60,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 #ticker{position:absolute;left:0;bottom:110px;width:1920px;height:92px;background:var(--ink);overflow:hidden}
 #ticker-text{position:absolute;left:0;top:0;height:92px;display:flex;align-items:center;white-space:nowrap;font-weight:700;font-size:46px;letter-spacing:.06em;color:var(--orange)}
 
-/* 6. signal */
+/* 6. runtime */
 #s6{background:var(--ink)}
 #glitch{position:absolute;inset:0}
 .gl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:320px;line-height:.86;letter-spacing:-.02em}
@@ -97,19 +97,19 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
     <div id="s1-cam" class="fill">
       <div class="ring" id="r1"></div><div class="ring" id="r2"></div><div class="ring" id="r3"></div>
       <div id="s1-bar"></div>
-      <div class="slam" id="w1">MAKE</div>
+      <div class="slam" id="w1">BUILD</div>
       <div class="slam" id="w2">IT</div>
-      <div class="slam" id="w3">MOVE</div>
+      <div class="slam" id="w3">SHIP</div>
     </div>
   </div>
 
   <div class="scene" id="s2">
     <div id="s2-tilt">
-      <div class="row" data-layout-ignore data-dir="1"><span class="outline">TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE</span></div>
-      <div class="row" data-layout-ignore data-dir="-1">FORM ✦ FORM ✦ FORM ✦ FORM ✦ FORM ✦ FORM ✦ FORM</div>
-      <div id="typo" class="split">TYPOGRAPHY</div>
-      <div class="row" data-layout-ignore data-dir="-1">WORDS ✦ WORDS ✦ WORDS ✦ WORDS ✦ WORDS ✦ WORDS</div>
-      <div class="row" data-layout-ignore data-dir="1"><span class="outline">TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE</span></div>
+      <div class="row" data-layout-ignore data-dir="1"><span class="outline">&lt;/&gt; ✦ CODE ✦ &lt;/&gt; ✦ CODE ✦ &lt;/&gt; ✦ CODE ✦ &lt;/&gt;</span></div>
+      <div class="row" data-layout-ignore data-dir="-1">DEBUG ✦ DEBUG ✦ DEBUG ✦ DEBUG ✦ DEBUG ✦ DEBUG</div>
+      <div id="typo" class="split">TYPESCRIPT</div>
+      <div class="row" data-layout-ignore data-dir="-1">REFACTOR ✦ REFACTOR ✦ REFACTOR ✦ REFACTOR</div>
+      <div class="row" data-layout-ignore data-dir="1"><span class="outline">&lt;/&gt; ✦ CODE ✦ &lt;/&gt; ✦ CODE ✦ &lt;/&gt; ✦ CODE ✦ &lt;/&gt;</span></div>
     </div>
   </div>
 
@@ -120,31 +120,31 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
       <div id="sq"></div>
       <svg id="tri" viewBox="0 0 320 290"><polygon points="160,0 320,290 0,290" fill="#2440ff"/></svg>
     </div>
-    <div id="s3-word" class="split">SHAPE</div>
+    <div id="s3-word" class="split">STACK</div>
   </div>
 
   <div class="scene" id="s4">
     <div id="speed" class="fill"></div>
     <div id="s4-word">
-      <div class="layer outline" id="L4" data-layout-ignore>MOTION</div>
-      <div class="layer outline" id="L3" data-layout-ignore>MOTION</div>
-      <div class="layer outline" id="L2" data-layout-ignore>MOTION</div>
-      <div class="layer outline" id="L1" data-layout-ignore>MOTION</div>
-      <div class="layer" id="L0">MOTION</div>
+      <div class="layer outline" id="L4" data-layout-ignore>DEPLOY</div>
+      <div class="layer outline" id="L3" data-layout-ignore>DEPLOY</div>
+      <div class="layer outline" id="L2" data-layout-ignore>DEPLOY</div>
+      <div class="layer outline" id="L1" data-layout-ignore>DEPLOY</div>
+      <div class="layer" id="L0">DEPLOY</div>
     </div>
   </div>
 
   <div class="scene" id="s5">
     <div id="bars" class="fill"></div>
-    <div id="s5-word" class="split">RHYTHM</div>
-    <div id="ticker"><div id="ticker-text">LENNON HELMAN ✦ GREENCASTLE, PA ✦ SHOWREEL 2026 ✦ LENNON HELMAN ✦ GREENCASTLE, PA ✦ SHOWREEL 2026 ✦ LENNON HELMAN ✦</div></div>
+    <div id="s5-word" class="split">COMMIT</div>
+    <div id="ticker"><div id="ticker-text">git commit -m &quot;ship it&quot; ✦ BROWSERS ✦ DEV TOOLS ✦ WEBSITES ✦ git push origin main ✦ BUILD PASSING ✦</div></div>
   </div>
 
   <div class="scene" id="s6">
     <div id="glitch">
-      <div class="gl g-c" data-layout-ignore><div>LENNON</div><div>HELMAN</div></div>
-      <div class="gl g-r" data-layout-ignore><div>LENNON</div><div>HELMAN</div></div>
-      <div class="gl g-base"><div>LENNON</div><div>HELMAN</div></div>
+      <div class="gl g-c" data-layout-ignore><div>HELLO</div><div>WORLD</div></div>
+      <div class="gl g-r" data-layout-ignore><div>HELLO</div><div>WORLD</div></div>
+      <div class="gl g-base"><div>HELLO</div><div>WORLD</div></div>
     </div>
     <div id="scan"></div>
     <div id="sweep"></div>
@@ -155,8 +155,8 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
     <div id="end">
       <div id="end-name" class="split">LENNON HELMAN</div>
       <div id="end-line"></div>
-      <div id="end-town">GREENCASTLE, PA</div>
-      <div id="end-tag">SHOWREEL 2026</div>
+      <div id="end-town">SOFTWARE DEVELOPER</div>
+      <div id="end-tag">GREENCASTLE, PA</div>
     </div>
   </div>
 
@@ -166,13 +166,13 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 
   <div id="hud">
     <div id="hud-lh" data-layout-allow-overlap>LH</div>
-    <div id="hud-yr" data-layout-allow-overlap>Showreel — 2026</div>
-    <div class="hud-label" id="lab1" data-layout-allow-overlap>01 / Type</div>
-    <div class="hud-label" id="lab2" data-layout-allow-overlap>02 / Shape</div>
-    <div class="hud-label" id="lab3" data-layout-allow-overlap>03 / Motion</div>
-    <div class="hud-label" id="lab4" data-layout-allow-overlap>04 / Rhythm</div>
-    <div class="hud-label" id="lab5" data-layout-allow-overlap>05 / Signal</div>
-    <div id="hud-reel" data-layout-allow-overlap>Greencastle, PA</div>
+    <div id="hud-yr" data-layout-allow-overlap>Dev Reel — 2026</div>
+    <div class="hud-label" id="lab1" data-layout-allow-overlap>01 / Code</div>
+    <div class="hud-label" id="lab2" data-layout-allow-overlap>02 / Stack</div>
+    <div class="hud-label" id="lab3" data-layout-allow-overlap>03 / Deploy</div>
+    <div class="hud-label" id="lab4" data-layout-allow-overlap>04 / Commit</div>
+    <div class="hud-label" id="lab5" data-layout-allow-overlap>05 / Runtime</div>
+    <div id="hud-reel" data-layout-allow-overlap>&lt;/&gt; Developer</div>
     <div id="hud-prog"></div>
   </div>
 </div>
@@ -197,7 +197,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
       el.appendChild(m);
     }
   });
-  // MOTION layers get per-letter spans (no masks: the letters fall in from above)
+  // DEPLOY layers get per-letter spans (no masks: the letters fall in from above)
   $$(".layer").forEach(el => {
     const text = el.textContent;
     el.textContent = "";
@@ -250,7 +250,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
     const g = document.createElement("div");
     g.className = "gl g-slice";
     g.setAttribute("data-layout-ignore", "");
-    g.innerHTML = "<div>LENNON</div><div>HELMAN</div>";
+    g.innerHTML = "<div>HELLO</div><div>WORLD</div>";
     g.style.clipPath = `inset(${top}% 0 ${100 - bottom}% 0)`;
     g.style.visibility = "hidden";
     glitch.appendChild(g);
@@ -273,7 +273,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
   tl.fromTo("#hud-prog", { scaleX: 0 }, { scaleX: 1, duration: 24, ease: "none" }, 0);
   [["#lab1", 2.95, 6.45], ["#lab2", 6.45, 9.9], ["#lab3", 9.9, 13.6], ["#lab4", 13.6, 17.05], ["#lab5", 17.05, 20.95]].forEach(([id, a, b]) => { show(id, a); hide(id, b); });
 
-  /* ---------- 1. MAKE / IT / MOVE (0 - 2.95) ---------- */
+  /* ---------- 1. BUILD / IT / SHIP (0 - 2.95) ---------- */
   show("#s1", 0);
   tl.set(".slam", { opacity: 0 }, 0);
   tl.set("#s1-bar", { scaleX: 0 }, 0);
@@ -291,7 +291,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
   tl.fromTo("#wipeA", { scale: 0 }, { scale: 1, duration: 0.6, ease: "power3.in" }, 2.35);
   hide("#s1", 2.95); show("#s2", 2.95); hide("#wipeA", 2.95);
 
-  /* ---------- 2. TYPE (2.95 - 6.45) ---------- */
+  /* ---------- 2. CODE (2.95 - 6.45) ---------- */
   $$("#s2 .row").forEach(row => {
     const d = Number(row.dataset.dir);
     tl.fromTo(row, { x: -d * 360 }, { x: d * 360, duration: 3.6, ease: "none" }, 2.9);
@@ -305,7 +305,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
   tl.fromTo(".stripe", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.inOut", stagger: 0.03 }, 5.9);
   hide("#s2", 6.45); show("#s3", 6.45); hide("#wipeB", 6.45);
 
-  /* ---------- 3. SHAPE (6.45 - 9.9) ---------- */
+  /* ---------- 3. STACK (6.45 - 9.9) ---------- */
   tl.fromTo(".dot", { scale: 0 }, { scale: 1, duration: 0.5, ease: "back.out(3)", stagger: { grid: [9, 16], from: "center", amount: 0.6 } }, 6.5);
   [["#circ", 6.7, -30], ["#sq", 6.88, 45], ["#tri", 7.06, -60]].forEach(([s, t, r]) => {
     tl.fromTo(s, { y: -950, rotation: r }, { y: 0, rotation: 0, duration: 0.45, ease: "power3.in" }, t);
@@ -323,7 +323,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
   tl.to(".dot", { scale: 24, duration: 0.5, ease: "power3.in", stagger: { grid: [9, 16], from: "center", amount: 0.3 } }, 9.25);
   hide("#s3", 9.9); show("#s4", 9.9);
 
-  /* ---------- 4. MOTION (9.9 - 13.6) ---------- */
+  /* ---------- 4. DEPLOY (9.9 - 13.6) ---------- */
   const ROT = [-40, 25, -15, 35, -25, 20];
   ["#L4", "#L3", "#L2", "#L1", "#L0"].forEach((L, k) => {
     tl.fromTo(`${L} .ch`, { y: -950, rotation: i => ROT[i] }, { y: 0, rotation: 0, duration: 0.75, ease: "back.out(1.7)", stagger: 0.07 }, 10.0 + (4 - k) * 0.05);
@@ -341,7 +341,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
   tl.fromTo("#wipeD", { x: -3800 }, { x: -700, duration: 0.6, ease: "power3.inOut" }, 13.0);
   hide("#s4", 13.6); show("#s5", 13.6); hide("#wipeD", 13.6);
 
-  /* ---------- 5. RHYTHM (13.6 - 17.05) ---------- */
+  /* ---------- 5. COMMIT (13.6 - 17.05) ---------- */
   const H1 = Array.from({ length: 32 }, () => 0.12 + rand() * 0.42);
   const H2 = Array.from({ length: 32 }, () => 0.1 + rand() * 0.5);
   tl.fromTo(".bar", { scaleY: 0 }, { scaleY: i => H1[i], duration: 0.45, ease: "expo.out", stagger: 0.015 }, 13.65);
@@ -358,7 +358,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
   tl.to(".bar", { scaleY: 1, scaleX: 1.55, duration: 0.45, ease: "power3.in", stagger: { each: 0.01, from: "edges" } }, 16.55);
   hide("#s5", 17.05); show("#s6", 17.05);
 
-  /* ---------- 6. SIGNAL (17.05 - 20.95) ---------- */
+  /* ---------- 6. RUNTIME (17.05 - 20.95) ---------- */
   tl.fromTo("#glitch", { scale: 1.6, opacity: 0, filter: "blur(28px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.55, ease: "expo.out" }, 17.1);
   tl.fromTo("#sweep", { y: -20 }, { y: 1100, duration: 1.4, ease: "power1.inOut" }, 17.6);
   const slices = $$(".g-slice");
