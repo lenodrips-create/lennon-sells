@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Collect the static site
-        run: mkdir _site && cp index.html _site/ && cp -r reel media img info .well-known _site/ && mkdir _site/mac && cp mac/mac.min.js _site/mac/
+        run: mkdir _site && cp index.html _site/ && cp -r reel media img info fonts .well-known _site/ && mkdir _site/mac && cp mac/mac.min.js _site/mac/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

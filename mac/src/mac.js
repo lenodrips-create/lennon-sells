@@ -446,7 +446,13 @@ function update(rise, close, now, dt) {
 addEventListener("resize", () => { resize(); });
 // once the web fonts are in, redraw the display's text and re-measure the headline the laptop sits under
 document.fonts && document.fonts.ready.then(() => { drawBackground(bgImg.complete && bgImg.naturalWidth ? bgImg : null); resize(); });
-window.Mac = { update, resize };
+// copy what's on screen into a 2D canvas (drawn in the same task, so the drawing buffer is still there)
+function snapshot(target) {
+  renderer.render(scene, camera);
+  target.width = canvas.width; target.height = canvas.height;
+  target.getContext("2d").drawImage(canvas, 0, 0);
+}
+window.Mac = { update, resize, snapshot };
 // draw once while the reel plays, so shaders and textures are ready before the laptop first rises
 (window.requestIdleCallback || (f => setTimeout(f, 200)))(() => update(0, 0, performance.now(), 0));
 window.dispatchEvent(new Event("mac-ready"));

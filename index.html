@@ -7,13 +7,12 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA. Dev reel 2026.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="mac/mac.min.js?v=2">
+<link rel="modulepreload" href="mac/mac.min.js?v=3">
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
 html{background:#0a0a0a;overscroll-behavior-y:none}
 body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-html.menu-open{overflow:hidden}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* The page scrolls normally: the white card scrolls up over the reel and the MacBook pins to the screen. There,
@@ -33,7 +32,7 @@ html.menu-open{overflow:hidden}
 #work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#f5f9fc;border-radius:56px 56px 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.45)}
 /* the stage holds the headline and the MacBook, and stays pinned to the screen from the moment it reaches the top */
 .stage{position:sticky;top:0;height:100vh;z-index:1}
-.work-title{position:absolute;left:0;right:0;top:calc(var(--tb) * .2 + 6px);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#0a0a0a;z-index:2;will-change:transform,opacity}
+.work-title{position:absolute;left:0;right:0;top:calc(var(--tb) * .2 + 70px);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#0a0a0a;z-index:2;will-change:transform,opacity}
 @media (max-width:700px){.work-title{top:clamp(76px,10vh,104px);font-size:15vw;padding:0 4vw}}
 /* the MacBook is a real-time 3D model (mac/src/mac.js) */
 #mac{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -44,41 +43,25 @@ body.no-mac .mac-hint{display:none}
 
 @media (prefers-reduced-motion: reduce){#hint{animation:none}}
 
-/* ---------- menu ---------- */
-.menu-btn{position:fixed;top:max(18px,env(safe-area-inset-top));right:max(18px,env(safe-area-inset-right));z-index:50;display:flex;align-items:center;gap:10px;height:42px;padding:0 16px 0 18px;border:0;border-radius:999px;
-  font:700 14px/1 "League Spartan",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
-  background:#f5f3ee;color:#0a0a0a;transition:background .35s,color .35s,transform .25s cubic-bezier(.2,.8,.2,1)}
-.menu-btn:hover{transform:scale(1.04)}
-.menu-btn:focus-visible{outline:2px solid #ff3d00;outline-offset:3px}
-.menu-btn i{position:relative;display:block;width:18px;height:10px}
-.menu-btn i::before,.menu-btn i::after{content:"";position:absolute;left:0;right:0;height:2px;border-radius:1px;background:currentColor;transition:transform .45s cubic-bezier(.2,.8,.2,1),top .45s cubic-bezier(.2,.8,.2,1)}
-.menu-btn i::before{top:0}.menu-btn i::after{top:8px}
-body.light .menu-btn{background:#0a0a0a;color:#f5f3ee}
-body.menu-open .menu-btn{background:#f5f3ee;color:#0a0a0a}
-body.menu-open .menu-btn i::before{top:4px;transform:rotate(45deg)}
-body.menu-open .menu-btn i::after{top:4px;transform:rotate(-45deg)}
+/* ---------- navigation: a pill of buttons in the top middle ---------- */
+@font-face{font-family:"Readex Pro";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/readex-pro-latin-400-normal.woff2") format("woff2")}
+.topnav{position:fixed;top:max(24px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:4px;padding:8px 12px;border-radius:999px;
+  background:rgba(23,23,23,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:400 14px/1.25 "Readex Pro",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+.topnav a{padding:8px 20px;border-radius:999px;color:#d4d4d4;text-decoration:none;white-space:nowrap;transition:color .15s}
+.topnav a:hover,.topnav a:focus-visible,.topnav a[aria-current="true"]{color:#fff}
+.topnav a:focus-visible{outline:1px solid rgba(255,255,255,.5);outline-offset:-1px}
+@media (max-width:560px){.topnav{top:max(16px,env(safe-area-inset-top));gap:0;padding:6px 8px}.topnav a{padding:8px 11px;font-size:13px}.topnav .long{display:none}}
 
-.menu{position:fixed;inset:0;z-index:40;background:#0a0a0a;color:#f5f3ee;display:flex;flex-direction:column;justify-content:space-between;
-  padding:clamp(80px,12vh,120px) clamp(20px,5vw,72px) clamp(22px,4vh,40px);
-  transform:translate3d(0,-100%,0);visibility:hidden;transition:transform .7s cubic-bezier(.76,0,.24,1),visibility 0s .7s;will-change:transform}
-body.menu-open .menu{transform:none;visibility:visible;transition:transform .7s cubic-bezier(.76,0,.24,1)}
-.menu ol{list-style:none;margin:0;padding:0;counter-reset:m}
-.menu li{overflow:hidden;border-bottom:1px solid rgba(245,243,238,.12)}
-.menu li a{display:flex;align-items:baseline;gap:clamp(12px,2vw,28px);padding:clamp(10px,1.6vh,18px) 0;color:inherit;text-decoration:none;
-  font:900 clamp(44px,9.5vw,148px)/.86 "League Spartan",system-ui,sans-serif;letter-spacing:-.04em;text-transform:uppercase;
-  transform:translate3d(0,105%,0);transition:transform .8s cubic-bezier(.2,.8,.2,1),color .25s}
-.menu li a span{font:500 clamp(12px,1.1vw,15px)/1 system-ui,sans-serif;letter-spacing:.1em;color:#8e8d93;transform:translateY(-.4em)}
-body.menu-open .menu li a{transform:none}
-body.menu-open .menu li:nth-child(1) a{transition-delay:.18s,0s}
-body.menu-open .menu li:nth-child(2) a{transition-delay:.25s,0s}
-body.menu-open .menu li:nth-child(3) a{transition-delay:.32s,0s}
-.menu li a:hover,.menu li a:focus-visible{color:#ff3d00;outline:none}
-.menu-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px 28px;font-size:14px;color:#8e8d93;opacity:0;transition:opacity .4s}
-body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
-.menu-foot a{color:#f5f3ee;text-decoration:none;border-bottom:1px solid rgba(245,243,238,.3)}
-.menu-foot a:hover,.menu-foot a:focus-visible{color:#ff3d00;border-color:#ff3d00;outline:none}
-.menu-foot div{display:flex;flex-wrap:wrap;gap:10px 24px}
-@media (prefers-reduced-motion: reduce){.menu,.menu li a,.menu-foot{transition:none}}
+/* ---------- after the services: the skier ---------- */
+/* one more scroll at the end of the services plays it: the screen zooms out of the services' grey into the skier
+   video, holds, then zooms into the snow, swooshes left and turns white */
+#ski{position:fixed;inset:0;z-index:20;overflow:hidden;background:#0a0a0a;visibility:hidden;opacity:0}
+#ski video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform}
+/* the grey it starts from: a copy of the closed lid under the same shade as the services */
+.ski-grey{position:absolute;inset:0;background:#232428}
+.ski-grey canvas{position:absolute;inset:0;width:100%;height:100%}
+.ski-grey::after{content:"";position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 0%,rgba(0,0,0,.08),rgba(0,0,0,.42))}
+.ski-white{position:absolute;inset:0;background:#fff;opacity:0}
 
 </style>
 <link rel="stylesheet" href="info/info.css?v=2">
@@ -131,18 +114,19 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   </div>
 </section>
 
-<button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="menu"><span>Menu</span><i aria-hidden="true"></i></button>
-<nav class="menu" id="menu" aria-label="Site" inert>
-  <ol>
-    <li><a href="#gallery" data-go="gallery"><span>01</span>Project Gallery</a></li>
-    <li><a href="#services" data-go="services"><span>02</span>Services</a></li>
-  </ol>
-  <div class="menu-foot">
-    <div><a href="mailto:lenodrips@gmail.com">lenodrips@gmail.com</a><a href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a></div>
-    <div><a href="#top" data-go="home">Back to start</a><span>Lennon Helman · Greencastle, PA</span></div>
-  </div>
+<div id="ski" aria-hidden="true">
+  <video muted playsinline loop preload="none" data-src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_063509_7d167302-4fd4-480b-8260-18ab572333d4.mp4"></video>
+  <div class="ski-grey"><canvas></canvas></div>
+  <div class="ski-white"></div>
+</div>
+
+<nav class="topnav" aria-label="Site">
+  <a href="#top" data-go="home">home</a>
+  <a href="#gallery" data-go="gallery"><span class="long">project </span>gallery</a>
+  <a href="#services" data-go="services">services</a>
+  <a href="mailto:lenodrips@gmail.com">contact</a>
 </nav>
-<script type="module" src="mac/mac.min.js?v=2"></script>
+<script type="module" src="mac/mac.min.js?v=3"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -202,36 +186,49 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     })());
   }
 
-  /* ---------- the lid: one scroll at the laptop closes it, one scroll back up opens it ---------- */
-  // it closes in its own time rather than following the scroll; the page holds still at the laptop meanwhile
-  const LID_DUR = reduce ? 0 : 1.7;
-  let c = 0, lidFrom = 0, lidTo = 0, lidT0 = 0, lidDone = Promise.resolve(), lidResolve = null;
-  function moveLid(to) {
-    if (to === lidTo) return lidDone;
-    if (lidResolve) lidResolve();
-    lidFrom = c; lidTo = to; lidT0 = performance.now();
-    lidDone = new Promise(r => (lidResolve = r));
-    kick();
-    return lidDone;
+  /* ---------- moves that play in their own time ---------- */
+  // a tween from 0 to 1 and back, timed linearly; whatever it drives eases itself. The returned promise settles
+  // when the move ends (or is replaced by another).
+  function tween(dur) {
+    const tw = { v: 0, from: 0, to: 0, t0: 0, dur, done: Promise.resolve(), resolve: null, speed: 1 };
+    tw.go = (to, speed = 1) => {
+      if (to === tw.to && speed === tw.speed) return tw.done;
+      if (tw.resolve) tw.resolve();
+      tw.from = tw.v; tw.to = to; tw.t0 = performance.now(); tw.speed = speed;
+      tw.done = new Promise(r => (tw.resolve = r));
+      kick();
+      return tw.done;
+    };
+    tw.step = now => {
+      if (tw.v === tw.to) return;
+      const d = (tw.dur * 1000 * Math.abs(tw.to - tw.from)) / tw.speed;
+      const t = d ? clamp01((now - tw.t0) / d) : 1;
+      tw.v = t >= 1 ? tw.to : tw.from + (tw.to - tw.from) * t;
+      if (tw.v === tw.to && tw.resolve) { tw.resolve(); tw.resolve = null; }
+    };
+    tw.moving = () => tw.v !== tw.to;
+    return tw;
   }
-  function stepLid(now) {
-    if (c === lidTo) return;
-    const dur = LID_DUR * 1000 * Math.abs(lidTo - lidFrom);
-    const t = dur ? clamp01((now - lidT0) / dur) : 1;
-    c = t >= 1 ? lidTo : lidFrom + (lidTo - lidFrom) * t;
-    if (c === lidTo && lidResolve) { lidResolve(); lidResolve = null; }
-  }
-  // what a scroll at the laptop does to the lid, if anything: down while it isn't closed closes it, up while it
-  // isn't open opens it. Either way the page holds still there instead of scrolling. Only a scroll that starts at
-  // the laptop moves the lid: one that arrives there from above or below stops there, so the open laptop (or the
-  // closed lid) is always seen before it changes.
-  let fromLaptop = false;
-  const atLaptop = () => Math.abs(window.scrollY - closeAt) <= 1;
-  function lidIntent(dir) {
-    if (menuOpen) return null;
-    const y = window.scrollY;
-    if (dir > 0 && c < 1 && y >= closeAt - 1) return 1;
-    if (dir < 0 && c > 0 && y <= closeAt + 1) return 0;
+  // the lid closes in its own time rather than following the scroll; the page holds still at the laptop meanwhile
+  const lid = tween(reduce ? 0 : 1.7);
+  // the skier sequence: 3.45 s forwards, played back at double speed
+  const SKI_T = 3.45;
+  const ski = tween(reduce ? 0 : SKI_T);
+  const playSki = to => ski.go(to, to ? 1 : 2);
+
+  /* ---------- scroll gestures ---------- */
+  // At the laptop, one scroll down closes the lid and one scroll up opens it. At the end of the services, one
+  // scroll down plays the skier into white, and one scroll up from the white plays it back. Only a scroll that
+  // starts there does it: one that arrives from elsewhere stops there first. Meanwhile the page holds still.
+  let gStartY = 0;
+  const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
+  const startedAt = y => Math.abs(gStartY - y) <= 1;
+  function decide(dir) {
+    const y = window.scrollY, end = maxScroll();
+    if (ski.v > 0 || ski.to > 0) return { run: dir < 0 ? () => playSki(0) : null };
+    if (dir > 0 && y >= end - 1 && lid.v === 1) return { run: gStartY >= end - 1 ? () => playSki(1) : null };
+    if (dir > 0 && lid.v < 1 && y >= closeAt - 1) return { run: startedAt(closeAt) ? () => lid.go(1) : null };
+    if (dir < 0 && lid.v > 0 && y <= closeAt + 1) return { run: startedAt(closeAt) ? () => lid.go(0) : null };
     return null;
   }
   // a wheel or trackpad gesture is a run of events without a pause; a sudden jump in strength starts a new one,
@@ -239,22 +236,22 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   let lastWheel = -1e9, lastMag = 0;
   addEventListener("wheel", e => {
     const ts = e.timeStamp || performance.now(), mag = Math.abs(e.deltaY);
-    if (ts - lastWheel > 200 || (mag > lastMag * 1.8 && mag > 15)) fromLaptop = atLaptop();
+    if (ts - lastWheel > 200 || (mag > lastMag * 1.8 && mag > 15)) gStartY = window.scrollY;
     lastWheel = ts; lastMag = mag;
-    const to = e.deltaY ? lidIntent(Math.sign(e.deltaY)) : null;
-    if (to === null) return;
+    const d = e.deltaY ? decide(Math.sign(e.deltaY)) : null;
+    if (!d) return;
     e.preventDefault();
-    if (fromLaptop) moveLid(to);
+    if (d.run) d.run();
   }, { passive: false });
   let touchY = null;
-  addEventListener("touchstart", e => { touchY = e.touches[0].clientY; fromLaptop = atLaptop(); }, { passive: true });
+  addEventListener("touchstart", e => { touchY = e.touches[0].clientY; gStartY = window.scrollY; }, { passive: true });
   addEventListener("touchmove", e => {
     if (touchY === null) return;
     const dy = touchY - e.touches[0].clientY;            // positive: finger moving up, page scrolling down
-    const to = dy ? lidIntent(Math.sign(dy)) : null;
-    if (to === null) return;
+    const d = dy ? decide(Math.sign(dy)) : null;
+    if (!d) return;
     if (e.cancelable) e.preventDefault();                 // from the first move, or the browser takes over the scroll
-    if (fromLaptop && Math.abs(dy) > 8) moveLid(to);
+    if (d.run && Math.abs(dy) > 8) d.run();
   }, { passive: false });
   addEventListener("touchend", () => { touchY = null; }, { passive: true });
   addEventListener("keydown", e => {
@@ -263,61 +260,81 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     const down = ["ArrowDown", "PageDown", "End"].includes(e.key) || (e.key === " " && !e.shiftKey && !(a && a.closest && a.closest("button, a")));
     const up = ["ArrowUp", "PageUp", "Home"].includes(e.key) || (e.key === " " && e.shiftKey);
     if (!down && !up) return;
-    fromLaptop = atLaptop();
-    const to = lidIntent(down ? 1 : -1);
-    if (to === null) return;
+    gStartY = window.scrollY;
+    const d = decide(down ? 1 : -1);
+    if (!d) return;
     e.preventDefault();
-    moveLid(to);
+    if (d.run) d.run();
   });
 
   /* ---------- services: they rise in as they scroll into view ---------- */
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 });
   info.querySelectorAll(".rv").forEach(el => io.observe(el));
 
-  /* ---------- menu ---------- */
-  const menuBtn = document.getElementById("menu-btn"), menu = document.getElementById("menu");
-  let menuOpen = false;
-  function setMenu(open) {
-    menuOpen = open;
-    document.body.classList.toggle("menu-open", open);
-    document.documentElement.classList.toggle("menu-open", open);   // the page doesn't scroll under the menu
-    menuBtn.setAttribute("aria-expanded", open);
-    menuBtn.querySelector("span").textContent = open ? "Close" : "Menu";
-    menu.inert = !open;
-    if (open) setTimeout(() => menu.querySelector("a").focus({ preventScroll: true }), 300);
-    else menuBtn.focus({ preventScroll: true });
-  }
-  menuBtn.addEventListener("click", () => setMenu(!menuOpen));
-  menu.addEventListener("click", e => {
+  /* ---------- navigation ---------- */
+  const nav = document.querySelector(".topnav");
+  const navLinks = [...nav.querySelectorAll("a[data-go]")];
+  nav.addEventListener("click", e => {
     const a = e.target.closest("a[data-go]");
     if (!a) return;
     e.preventDefault();
-    const where = a.dataset.go;
-    setMenu(false);
-    navigate(where);
+    navigate(a.dataset.go);
   });
-  // go there while the menu slides away, passing through the laptop: open or close its lid on the way
+  // go there, passing through what's in the way: back out of the white, then open or close the lid at the laptop
   let navId = 0;
   async function navigate(where) {
-    const id = ++navId, lid = where === "services" ? 1 : 0;
-    if (c !== lid) {
+    const id = ++navId, lidTo = where === "services" ? 1 : 0;
+    if (ski.v > 0 || ski.to > 0) { await playSki(0); if (id !== navId) return; }
+    if (lid.v !== lidTo) {
       if (Math.abs(window.scrollY - closeAt) > 1) await scrollToAsync(closeAt);
       if (id !== navId) return;
-      await moveLid(lid);
+      await lid.go(lidTo);
       if (id !== navId) return;
     }
     scrollToAsync(where === "home" ? 0 : where === "gallery" ? closeAt : infoAt);
   }
-  addEventListener("keydown", e => { if (e.key === "Escape" && menuOpen) { e.stopPropagation(); setMenu(false); } }, true);
+  let current = "";
+  function markCurrent(where) {
+    if (where === current) return;
+    current = where;
+    navLinks.forEach(a => a.setAttribute("aria-current", a.dataset.go === where));
+  }
+
+  /* ---------- the skier ---------- */
+  const skiBox = document.getElementById("ski");
+  const skiVideo = skiBox.querySelector("video");
+  const skiGrey = skiBox.querySelector(".ski-grey canvas");
+  const skiWhite = skiBox.querySelector(".ski-white");
+  const easeOut = t => 1 - Math.pow(1 - t, 3), easeIn = t => t * t * t;
+  let skiLoaded = false, skiShown = false;
+  function loadSki() {                                 // fetched once the services are near, not on every visit
+    if (skiLoaded) return;
+    skiLoaded = true;
+    skiVideo.preload = "auto";
+    skiVideo.src = skiVideo.dataset.src;
+  }
+  function drawSki(t) {                               // t: seconds into the sequence
+    // 0–0.35 s: the grey copy of the services' background fades in over them
+    set(skiBox, "opacity", smooth(0, 0.35, t).toFixed(3));
+    // 0.35–1.65 s: zoom out of the grey into the video; then hold for 0.8 s
+    const out = easeOut(clamp01((t - 0.35) / 1.3));
+    set(skiGrey.parentNode, "opacity", (1 - easeOut(clamp01((t - 0.35) / 0.8))).toFixed(3));
+    // 2.45–3.05 s: zoom into the snow; 2.85–3.45 s: swoosh to the left as it turns white
+    const into = easeIn(clamp01((t - 2.45) / 0.6)), sw = easeIn(clamp01((t - 2.85) / 0.6));
+    const scale = (2.6 - 1.6 * out) * (1 + into) * (1 + 0.6 * sw);
+    set(skiVideo, "transformOrigin", t < 2 ? "50% 50%" : "50% 80%");   // switched while the scale is 1, so nothing jumps
+    set(skiVideo, "transform", `translate3d(${(-45 * sw).toFixed(2)}vw, 0, 0) scale(${scale.toFixed(4)})`);
+    set(skiVideo, "filter", sw > 0.01 ? `blur(${(10 * sw).toFixed(1)}px)` : "none");
+    set(skiWhite, "opacity", smooth(3.0, SKI_T, t).toFixed(3));
+  }
 
   /* ---------- the MacBook page ---------- */
   const title = work.querySelector(".work-title");
   const shade = work.querySelector(".lid-shade");
   const macHint = work.querySelector(".mac-hint");
   const hint = document.getElementById("hint");
-  let isLight = false;
 
-  /* ---------- one animation loop: it runs while the page scrolls or the gallery plays, and sleeps otherwise ---------- */
+  /* ---------- one animation loop: it runs while something moves or the gallery plays, and sleeps otherwise ---------- */
   let running = false, last = 0;
   function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(loop); } }
   addEventListener("scroll", kick, { passive: true });
@@ -328,16 +345,21 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    stepLid(now);
+    lid.step(now);
+    ski.step(now);
+    let y = window.scrollY;
     // the services only show over a closed lid, and the card only scrolls down off an open one: anything else
     // that scrolls past the laptop (a flick's momentum, the scrollbar) is held there, and moves the lid if the
-    // gesture started at the laptop
-    let y = window.scrollY;
-    if (!menuOpen && ((y > closeAt + 1 && c < 1) || (y < closeAt - 1 && c > 0))) {
-      if (fromLaptop) moveLid(y > closeAt ? 1 : 0);
+    // gesture started at the laptop. While the skier plays, the page stays at the end.
+    if ((y > closeAt + 1 && lid.v < 1) || (y < closeAt - 1 && lid.v > 0)) {
+      if (startedAt(closeAt)) lid.go(y > closeAt ? 1 : 0);
       window.scrollTo(0, closeAt);
       y = closeAt;
+    } else if (ski.v > 0 && y < maxScroll() - 1) {
+      window.scrollTo(0, maxScroll());
+      y = window.scrollY;
     }
+    const c = lid.v;
     const w = clamp01(y / riseLen);                   // the card covering the reel
 
     // reel: hidden and paused once the card covers it
@@ -346,19 +368,31 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     set(hint, "animationPlayState", w > 0.2 ? "paused" : "running");  // a hidden looping animation still costs frames
     if (!reduce) w >= 1 ? !video.paused && video.pause() : video.paused && video.play().catch(() => {});
 
-    // the menu button turns dark over the white card, and light again once the lid covers it
-    const light = w > 0.5 && c < 0.55;
-    if (light !== isLight) { isLight = light; document.body.classList.toggle("light", light); }
     // the headline lifts away as the lid starts to close; a shade settles over the closed lid
     set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
     set(title, "opacity", (1 - smooth(0, 0.3, c)).toFixed(3));
     set(shade, "opacity", smooth(0.8, 1, c).toFixed(3));
-    set(macHint, "opacity", w > 0.98 && c === 0 && lidTo === 0 ? "1" : "0");
+    set(macHint, "opacity", w > 0.98 && c === 0 && lid.to === 0 ? "1" : "0");
     if (window.Mac && w > 0) Mac.update(w, c, now, dt);
+    if (c > 0.5) loadSki();
 
-    // keep going while the lid moves, or the gallery plays on the open laptop's screen
+    // the skier: on top of everything while it plays, the video running only while it can be seen
+    const on = ski.v > 0;
+    if (on !== skiShown) {
+      skiShown = on;
+      set(skiBox, "visibility", on ? "visible" : "hidden");
+      if (on && window.Mac && Mac.snapshot) Mac.snapshot(skiGrey);   // the grey it starts from is the lid itself
+    }
+    if (on) drawSki(ski.v * SKI_T);
+    const skiPlays = on && ski.v < 1;
+    if (skiPlays && skiVideo.paused) skiVideo.play().catch(() => {});
+    if (!skiPlays && !skiVideo.paused) skiVideo.pause();
+
+    markCurrent(ski.v > 0.5 ? "" : c >= 0.5 ? "services" : w >= 0.5 ? "gallery" : "home");
+
+    // keep going while something moves, or the gallery plays on the open laptop's screen
     const playing = window.Mac && w > 0 && c < 0.75 && !reduce;
-    if (playing || c !== lidTo) requestAnimationFrame(loop);
+    if (playing || lid.moving() || ski.moving()) requestAnimationFrame(loop);
     else running = false;
   }
 
