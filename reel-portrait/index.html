@@ -9,8 +9,8 @@
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:500;src:url("fonts/league-spartan-latin-500-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;src:url("fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;src:url("fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
-/* white backgrounds and black type, grey accents and icons, and a blue triangle */
-:root{--bg:#ffffff;--fg:#0a0a0a;--grey:#a3a3a8;--accent:#8e8e93;--blue:#2440ff}
+/* white backgrounds and black type, black accents, grey icons, and a blue triangle */
+:root{--bg:#ffffff;--fg:#0a0a0a;--grey:#a3a3a8;--accent:#0a0a0a;--blue:#2440ff}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",sans-serif}
 #root{position:relative;width:100%;height:100%;overflow:hidden;background:var(--bg)}
@@ -24,6 +24,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
 #s1{background:var(--bg)}
 .ring{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;border:8px solid var(--accent)}
 #made{display:flex;flex-direction:column;align-items:center;justify-content:center}
+#made-sub{margin-top:34px;font-weight:500;font-size:30px;letter-spacing:.3em;padding-left:.3em;color:var(--fg);white-space:nowrap}
 .made-line{font-weight:900;font-size:222px;line-height:.86;letter-spacing:-.02em;white-space:nowrap;color:var(--fg)}
 #wipeA{position:absolute;left:50%;top:50%;width:2400px;height:2400px;margin:-1200px 0 0 -1200px;border-radius:50%;background:var(--fg)}
 
@@ -74,6 +75,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
       <div id="made" class="fill">
         <div class="made-line split">LENNON</div>
         <div class="made-line split">HELMAN</div>
+        <div id="made-sub">SOFTWARE ENGINEER · GREENCASTLE, PA</div>
       </div>
     </div>
   </div>
@@ -103,7 +105,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
   </div>
 
   <div class="scene" id="s7">
-    <svg id="ring7" viewBox="0 0 780 780"><circle cx="390" cy="390" r="370" fill="none" stroke="#8e8e93" stroke-width="4" stroke-dasharray="10 22"/></svg>
+    <svg id="ring7" viewBox="0 0 780 780"><circle cx="390" cy="390" r="370" fill="none" stroke="#0a0a0a" stroke-width="4" stroke-dasharray="10 22"/></svg>
     <div id="end">
       <div id="end-name"><div class="split">LENNON</div><div class="split">HELMAN</div></div>
       <div id="end-line"></div>
@@ -181,7 +183,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
   tl.fromTo("#r1", { scale: 0.2, opacity: 1 }, { scale: 4.2, opacity: 0, duration: 0.8, ease: "power2.out" }, 0.3);
   tl.to("#s1-cam", { keyframes: { x: [0, -24, 18, -10, 5, 0], y: [0, 14, -15, 8, -3, 0] }, duration: 0.38, ease: "none" }, 0.28);
   tl.fromTo("#made", { scale: 1 }, { scale: 1.08, duration: 1.9, ease: "none" }, 0.15);
-  tl.to("#made .ch", { color: "#8e8e93", duration: 0.1, stagger: { each: 0.03, from: "center" } }, 1.05);
+  tl.fromTo("#made-sub", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.75);
 
   /* transition A: black circle iris */
   tl.fromTo("#wipeA", { scale: 0 }, { scale: 1, duration: 0.6, ease: "power3.in" }, 1.5);
