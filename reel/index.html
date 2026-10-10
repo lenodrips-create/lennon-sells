@@ -54,14 +54,14 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 #end-town{font-weight:500;font-size:44px;letter-spacing:.35em;color:var(--paper);padding-left:.35em}
 #end-tag{margin-top:22px;font-weight:700;font-size:28px;letter-spacing:.45em;color:var(--orange);padding-left:.45em}
 
-/* HUD over everything; difference blend keeps it readable on any background.
+/* HUD over everything, in plain off-white (a full-frame blend mode cost ~25% CPU).
    Inset 150px so it survives the page cropping the frame to fill 16:10 screens */
-#hud{position:absolute;inset:0;mix-blend-mode:difference;color:#fff;font-weight:500;font-size:24px;letter-spacing:.22em;text-transform:uppercase}
+#hud{position:absolute;inset:0;color:#f5f3ee;font-weight:500;font-size:24px;letter-spacing:.22em;text-transform:uppercase}
 #hud-lh{position:absolute;left:150px;top:80px;font-weight:900;letter-spacing:.04em;font-size:34px}
 #hud-yr{position:absolute;right:150px;top:84px}
 .hud-label{position:absolute;left:150px;bottom:80px;visibility:hidden}
 #hud-reel{position:absolute;right:150px;bottom:80px}
-#hud-prog{position:absolute;left:150px;right:150px;bottom:62px;height:2px;background:#fff;transform-origin:0 50%}
+#hud-prog{position:absolute;left:150px;right:150px;bottom:62px;height:2px;background:#f5f3ee;transform-origin:0 50%}
 </style>
 </head>
 <body>
@@ -212,6 +212,8 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
   /* transition C: dots swell until they fill the frame, then a skewed black panel sweeps into the end card */
   tl.to(".dot", { scale: 24, duration: 0.5, ease: "power3.in", stagger: { grid: [9, 16], from: "center", amount: 0.3 } }, 8.4);
   tl.fromTo("#wipeD", { x: -3800 }, { x: -700, duration: 0.6, ease: "power3.inOut" }, 9.0);
+  tl.to("#hud", { opacity: 0, duration: 0.25, ease: "power1.out" }, 8.55);  // off-white labels would vanish on the white flash
+  tl.to("#hud", { opacity: 1, duration: 0.3, ease: "power1.in" }, 9.65);
   hide("#s3", 9.6); show("#s7", 9.6); hide("#wipeD", 9.6);
 
   /* ---------- 4. END CARD (9.6 - 12.65) ---------- */

@@ -79,7 +79,7 @@ window.Fold = (function () {
     device.style.setProperty("--ri", r - bz + "px");
   }
   size();
-  addEventListener("resize", size);
+  addEventListener("resize", () => { size(); lastRise = -1; });  // re-apply transforms for the new size
 
   /* ---------- cover screen clock ---------- */
   const clock = root.querySelector(".cover-clock"), date = root.querySelector(".cover-date");
@@ -142,11 +142,13 @@ window.Fold = (function () {
   addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
 
   /* ---------- per-frame update ---------- */
-  let isOn = false;
+  let isOn = false, lastRise = -1, lastOpen = -1, hintText = "";
   live.inert = true;
   // the hero is already on screen in the folding copies, so it starts visible rather than fading in at hand-over
   live.querySelectorAll(".ff-hero .rv").forEach(el => el.classList.add("in"));
   function update(rise, open) {
+    if (rise === lastRise && open === lastOpen) return;  // nothing moved: skip all style writes
+    lastRise = rise; lastOpen = open;
     // the dark card rises over the laptop as a rounded card and grows to full bleed, like the white one before it
     const e = smooth(0, 1, rise), grow = smooth(0.55, 1, rise);
     root.style.transform = `translate3d(0, ${(1 - e) * 100}%, 0) scale(${0.9 + 0.1 * grow})`;
@@ -167,7 +169,8 @@ window.Fold = (function () {
     device.classList.toggle("shut", angle > 176);
     device.style.setProperty("--crease", (Math.sin(Math.PI * Math.min(1, angle / 180)) * 0.9).toFixed(3));
     device.style.setProperty("--hinge", (1 - 0.6 * o).toFixed(3));
-    hint.textContent = o > 0.98 ? "Scroll up to fold" : "Scroll to unfold";
+    const text = o > 0.98 ? "Scroll up to fold" : "Scroll to unfold";
+    if (text !== hintText) hint.textContent = hintText = text;
     hint.style.opacity = rise > 0.98 && (o < 0.04 || o > 0.98) ? 1 : 0;
 
     // fully open: hand over to the live, interactive display; folding again copies its scroll position back
