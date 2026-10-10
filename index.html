@@ -11,7 +11,7 @@
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
-html{background:#0a0a0a;overscroll-behavior-y:none}
+html{--gap:clamp(10px,2.6vw,40px);background:#0a0a0a;overscroll-behavior-y:none}
 body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
@@ -22,10 +22,15 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 /* 1. the showreel: the HyperFrames compositions in reel/ (16:9) and reel-portrait/ (9:16) rendered to video,
    so the device's video hardware plays it; the page picks the one that matches the screen's shape.
    It sits in a rounded frame a little inside the screen edges. */
-#reel{--gap:clamp(10px,2.6vw,40px);position:fixed;top:var(--gap);left:var(--gap);right:var(--gap);bottom:var(--gap);overflow:hidden;border-radius:clamp(16px,2.2vw,32px);background:#151515}
+#reel{position:fixed;top:var(--gap);left:var(--gap);right:var(--gap);bottom:var(--gap);overflow:hidden;border-radius:clamp(16px,2.2vw,32px);background:#151515}
 #reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#151515}
-#hint{position:absolute;left:50%;bottom:18px;width:2px;height:34px;margin-left:-1px;background:linear-gradient(#f5f3ee,rgba(245,243,238,0));animation:hint 1.6s ease-in-out infinite}
-@keyframes hint{0%{transform:translateY(-10px);opacity:0}40%{opacity:1}100%{transform:translateY(10px);opacity:0}}
+/* a scroll button at the bottom middle of the video, in the navigation's style; the card scrolls up over it */
+#hint{position:fixed;left:50%;bottom:calc(var(--gap) + clamp(16px,3vh,28px));transform:translateX(-50%);z-index:0;display:flex;align-items:center;gap:10px;padding:12px 18px 12px 22px;border:0;border-radius:999px;cursor:pointer;
+  background:rgba(23,23,23,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#d4d4d4;font:400 14px/1.25 "Readex Pro",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;transition:color .15s}
+#hint:hover,#hint:focus-visible{color:#fff}
+#hint:focus-visible{outline:1px solid rgba(255,255,255,.5);outline-offset:2px}
+#hint svg{width:14px;height:14px;animation:hint 1.6s ease-in-out infinite}
+@keyframes hint{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
 .intro{height:100vh}
 
 /* 2. the white card, in the page's flow: it scrolls up over the fixed reel */
@@ -41,7 +46,7 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 body.no-mac .mac-hint{display:none}
 .mac-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));margin:0;text-align:center;font:600 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6c7076;opacity:0;transition:opacity .4s;z-index:2}
 
-@media (prefers-reduced-motion: reduce){#hint{animation:none}}
+@media (prefers-reduced-motion: reduce){#hint svg{animation:none}}
 
 /* ---------- navigation: a pill of buttons in the top middle ---------- */
 @font-face{font-family:"Readex Pro";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/readex-pro-latin-400-normal.woff2") format("woff2")}
@@ -69,8 +74,8 @@ body.no-mac .mac-hint{display:none}
 
 <div id="reel" aria-hidden="true">
   <video id="reel-video" muted playsinline loop preload="auto" poster="media/reel-poster.jpg"></video>
-  <div id="hint"></div>
 </div>
+<button id="hint" type="button" aria-label="Scroll to the project gallery">scroll<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v11M3.5 9 8 13.5 12.5 9"/></svg></button>
 
 <div class="intro" aria-hidden="true"></div>
 
@@ -339,8 +344,10 @@ body.no-mac .mac-hint{display:none}
     const a = e.target.closest("a[data-go]");
     if (!a) return;
     e.preventDefault();
-    const where = a.dataset.go;
-    // go there through what's in the way: the white card comes down, the lid opens or closes at the laptop
+    goTo(a.dataset.go);
+  });
+  // go there through what's in the way: the white card comes down, the lid opens or closes at the laptop
+  function goTo(where) {
     run(async () => {
       if (where === "about") {
         if (lid.v < 1) await toServices();
@@ -356,7 +363,7 @@ body.no-mac .mac-hint{display:none}
         await scrollAnim(where === "home" ? 0 : closeAt);
       }
     });
-  });
+  }
   let current = "";
   function markCurrent(where) {
     if (where === current) return;
@@ -369,6 +376,8 @@ body.no-mac .mac-hint{display:none}
   const shade = work.querySelector(".lid-shade");
   const macHint = work.querySelector(".mac-hint");
   const hint = document.getElementById("hint");
+  const hintArrow = hint.querySelector("svg");
+  hint.addEventListener("click", () => goTo("gallery"));
   const reveals = whiteCard.querySelectorAll(".rv");
   let whiteUp = false, aboutIn = false;
 
@@ -401,7 +410,8 @@ body.no-mac .mac-hint{display:none}
     // reel: hidden and paused once the card covers it
     set(reelBox, "visibility", w >= 1 ? "hidden" : "visible");
     set(hint, "opacity", String(Math.max(0, 1 - w * 5)));
-    set(hint, "animationPlayState", w > 0.2 ? "paused" : "running");  // a hidden looping animation still costs frames
+    set(hint, "visibility", w > 0.2 ? "hidden" : "visible");          // and not clickable once the card is coming up
+    set(hintArrow, "animationPlayState", w > 0.2 ? "paused" : "running");  // a hidden looping animation still costs frames
     if (!reduce) w >= 1 ? !video.paused && video.pause() : video.paused && video.play().catch(() => {});
 
     // the headline lifts away as the lid starts to close; a shade settles over the closed lid
