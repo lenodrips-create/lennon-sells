@@ -6,30 +6,28 @@
 <title>Lennon Helman — Intro</title>
 <script src="vendor/gsap.min.js"></script>
 <style>
-@font-face{font-family:"Inter";font-style:normal;font-weight:300;src:url("fonts/inter-latin-300-normal.woff2") format("woff2")}
-@font-face{font-family:"Inter";font-style:normal;font-weight:500;src:url("fonts/inter-latin-500-normal.woff2") format("woff2")}
-@font-face{font-family:"Playfair Display";font-style:italic;font-weight:400;src:url("fonts/playfair-display-latin-400-italic.woff2") format("woff2")}
+@font-face{font-family:"Fredoka";font-style:normal;font-weight:400;src:url("fonts/fredoka-latin-400-normal.woff2") format("woff2")}
+@font-face{font-family:"Fredoka";font-style:normal;font-weight:700;src:url("fonts/fredoka-latin-700-normal.woff2") format("woff2")}
 html,body{height:100%}
-body{margin:0;background:#000;color:#f4f2ef}
-#root{position:relative;width:100%;height:100%;overflow:hidden;background:#000}
-.clip{position:absolute;inset:0}
+body{margin:0;background:#fff;color:#000}
+#root{position:relative;width:100%;height:100%;overflow:hidden;background:#fff}
 #stars{position:absolute;inset:0}
-.star{position:absolute;border-radius:50%;background:#fff}
+.star{position:absolute;border-radius:50%;background:#bdbdbd}
 #glow{position:absolute;left:50%;top:50%;width:1400px;height:900px;margin:-450px 0 0 -700px;
-  background:radial-gradient(closest-side, rgba(120,140,255,.22), rgba(170,90,255,.08) 55%, rgba(0,0,0,0) 100%)}
+  background:radial-gradient(closest-side, rgba(0,0,0,.06), rgba(0,0,0,.02) 55%, rgba(0,0,0,0) 100%)}
 #stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;perspective:900px}
-#name{margin:0;font-family:"Inter",sans-serif;font-weight:500;font-size:168px;line-height:1;text-transform:uppercase;
-  letter-spacing:.06em;white-space:nowrap;padding:0 0 12px}
+#name{margin:0;font-family:"Fredoka",sans-serif;font-weight:700;font-size:200px;line-height:1;
+  letter-spacing:.02em;white-space:nowrap;padding:0 0 12px}
 .ch,.tch{display:inline-block;transform-origin:50% 100%}
-.gap{display:inline-block;width:.32em}
-#rule{position:relative;width:1180px;height:2px;margin:46px 0 40px}
-#line{position:absolute;inset:0;background:linear-gradient(90deg, rgba(255,255,255,0), #fff 50%, rgba(255,255,255,0))}
-#spark{position:absolute;top:-7px;left:0;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#fff;
-  box-shadow:0 0 18px 6px rgba(160,180,255,.9), 0 0 60px 20px rgba(140,110,255,.45)}
-#town{margin:0;font-family:"Playfair Display",serif;font-style:italic;font-weight:400;font-size:84px;line-height:1.1;
-  letter-spacing:.1em;white-space:nowrap}
-#coords{display:flex;align-items:center;gap:22px;margin-top:30px;font-family:"Inter",sans-serif;font-weight:300;
-  font-size:26px;letter-spacing:.42em;text-transform:uppercase;color:#a9a4a0}
+.gap{display:inline-block;width:.28em}
+#rule{position:relative;width:1180px;height:3px;margin:40px 0 40px}
+#line{position:absolute;inset:0;border-radius:2px;background:linear-gradient(90deg, rgba(0,0,0,0), #000 50%, rgba(0,0,0,0))}
+#spark{position:absolute;top:-7px;left:0;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#000;
+  box-shadow:0 0 14px 4px rgba(0,0,0,.25)}
+#town{margin:0;font-family:"Fredoka",sans-serif;font-weight:700;font-size:92px;line-height:1.1;
+  letter-spacing:.04em;white-space:nowrap}
+#coords{display:flex;align-items:center;gap:22px;margin-top:30px;font-family:"Fredoka",sans-serif;font-weight:400;
+  font-size:28px;letter-spacing:.3em;text-transform:uppercase;color:#595959}
 #pin{position:relative;width:14px;height:14px}
 #pin-dot{position:absolute;inset:0;border-radius:50%;background:#ff4d6d}
 #pin-ring{position:absolute;inset:0;border-radius:50%;border:2px solid #ff4d6d}
@@ -67,11 +65,11 @@ body{margin:0;background:#000;color:#f4f2ef}
   tl.fromTo("#glow", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 2.2, ease: "power2.out" }, 0);
   tl.to("#glow", { scale: 1.12, duration: 2.6, yoyo: true, repeat: 1, ease: "sine.inOut" }, 2.2);
 
-  // LENNON HELMAN: letters flip up from below and the spacing pulls together
+  // Lennon Helman: letters flip up from below and the spacing pulls together
   tl.fromTo(".ch",
     { yPercent: 115, rotationX: -85, opacity: 0, filter: "blur(14px)", x: (i, el, all) => (i - (all.length - 1) / 2) * 46 },
     { yPercent: 0, rotationX: 0, x: 0, opacity: 1, filter: "blur(0px)", duration: 1.1, ease: "expo.out", stagger: { each: 0.055, from: "center" } }, 0.25);
-  tl.fromTo("#name", { textShadow: "0 0 0px rgba(160,180,255,0)" }, { textShadow: "0 0 40px rgba(160,180,255,.55)", duration: 0.5, yoyo: true, repeat: 1, ease: "sine.inOut" }, 1.5);
+  tl.fromTo("#name", { textShadow: "0 0 0px rgba(0,0,0,0)" }, { textShadow: "0 8px 30px rgba(0,0,0,.22)", duration: 0.5, yoyo: true, repeat: 1, ease: "sine.inOut" }, 1.5);
 
   // a light line draws across with a spark riding it
   tl.fromTo("#line", { scaleX: 0 }, { scaleX: 1, duration: 1, ease: "power3.inOut" }, 2.0);
