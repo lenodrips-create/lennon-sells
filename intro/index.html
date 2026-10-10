@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920, height=1080">
 <title>Lennon Helman — Intro</title>
-<script src="vendor/gsap.min.js"></script>
+<script src="vendor/gsap.min.js?v=5"></script>
 <style>
-@font-face{font-family:"Fredoka";font-style:normal;font-weight:400;src:url("fonts/fredoka-latin-400-normal.woff2") format("woff2")}
-@font-face{font-family:"Fredoka";font-style:normal;font-weight:700;src:url("fonts/fredoka-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"League Spartan";font-style:normal;font-weight:500;src:url("fonts/league-spartan-latin-500-normal.woff2?v=5") format("woff2")}
+@font-face{font-family:"League Spartan";font-style:normal;font-weight:700;src:url("fonts/league-spartan-latin-700-normal.woff2?v=5") format("woff2")}
 html,body{height:100%}
 body{margin:0;background:#fff;color:#000}
 #root{position:relative;width:100%;height:100%;overflow:hidden;background:#fff}
@@ -16,7 +16,7 @@ body{margin:0;background:#fff;color:#000}
 #glow{position:absolute;left:50%;top:50%;width:1400px;height:900px;margin:-450px 0 0 -700px;
   background:radial-gradient(closest-side, rgba(0,0,0,.06), rgba(0,0,0,.02) 55%, rgba(0,0,0,0) 100%)}
 #stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;perspective:900px}
-#name{margin:0;font-family:"Fredoka",sans-serif;font-weight:700;font-size:200px;line-height:1;
+#name{margin:0;font-family:"League Spartan",sans-serif;font-weight:700;font-size:200px;line-height:1;
   letter-spacing:.02em;white-space:nowrap;padding:0 0 12px}
 .ch,.tch{display:inline-block;transform-origin:50% 100%}
 .gap{display:inline-block;width:.28em}
@@ -24,13 +24,8 @@ body{margin:0;background:#fff;color:#000}
 #line{position:absolute;inset:0;border-radius:2px;background:linear-gradient(90deg, rgba(0,0,0,0), #000 50%, rgba(0,0,0,0))}
 #spark{position:absolute;top:-7px;left:0;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#000;
   box-shadow:0 0 14px 4px rgba(0,0,0,.25)}
-#town{margin:0;font-family:"Fredoka",sans-serif;font-weight:700;font-size:92px;line-height:1.1;
+#town{margin:0;font-family:"League Spartan",sans-serif;font-weight:500;font-size:92px;line-height:1.1;
   letter-spacing:.04em;white-space:nowrap}
-#coords{display:flex;align-items:center;gap:22px;margin-top:30px;font-family:"Fredoka",sans-serif;font-weight:400;
-  font-size:28px;letter-spacing:.3em;text-transform:uppercase;color:#595959}
-#pin{position:relative;width:14px;height:14px}
-#pin-dot{position:absolute;inset:0;border-radius:50%;background:#ff4d6d}
-#pin-ring{position:absolute;inset:0;border-radius:50%;border:2px solid #ff4d6d}
 </style>
 </head>
 <body>
@@ -41,7 +36,6 @@ body{margin:0;background:#fff;color:#000}
       <h1 id="name"><span class="ch">L</span><span class="ch">e</span><span class="ch">n</span><span class="ch">n</span><span class="ch">o</span><span class="ch">n</span><span class="gap"></span><span class="ch">H</span><span class="ch">e</span><span class="ch">l</span><span class="ch">m</span><span class="ch">a</span><span class="ch">n</span></h1>
       <div id="rule"><div id="line"></div><div id="spark"></div></div>
       <p id="town"><span class="tch">G</span><span class="tch">r</span><span class="tch">e</span><span class="tch">e</span><span class="tch">n</span><span class="tch">c</span><span class="tch">a</span><span class="tch">s</span><span class="tch">t</span><span class="tch">l</span><span class="tch">e</span><span class="tch">,</span><span class="tch">&nbsp;</span><span class="tch">P</span><span class="tch">A</span></p>
-      <div id="coords"><div id="pin"><div id="pin-ring"></div><div id="pin-dot"></div></div><span id="coords-text">39.79° N · 77.73° W</span></div>
     </div>
 </div>
 <script>
@@ -81,10 +75,6 @@ body{margin:0;background:#fff;color:#000}
     { opacity: 0, y: 30, filter: "blur(10px)", x: (i, el, all) => (i - (all.length - 1) / 2) * 34 },
     { opacity: 1, y: 0, x: 0, filter: "blur(0px)", duration: 0.9, ease: "power3.out", stagger: 0.045 }, 2.6);
 
-  // coordinates and a pulsing pin
-  tl.fromTo("#coords", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 3.6);
-  tl.fromTo("#pin-dot", { scale: 0 }, { scale: 1, duration: 0.5, ease: "back.out(3)" }, 3.7);
-  tl.fromTo("#pin-ring", { scale: 1, opacity: 0.9 }, { scale: 3.2, opacity: 0, duration: 1.2, repeat: 2, ease: "power1.out" }, 3.9);
 
   // the HyperFrames CLI pre-creates the registry; a plain browser load through the player does not
   tl.set({}, {}, 8); // hold the last frame to the 8s mark
