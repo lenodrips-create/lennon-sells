@@ -73,7 +73,7 @@ body.no-mac .mac-hint{display:none}
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA. Dev reel 2026.</h1>
 
 <div id="reel" aria-hidden="true">
-  <video id="reel-video" muted playsinline loop preload="auto" poster="media/reel-poster.jpg"></video>
+  <video id="reel-video" muted playsinline loop preload="auto" poster="media/reel-poster.jpg?v=2"></video>
 </div>
 <button id="hint" type="button" aria-label="Scroll to the project gallery">scroll<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v11M3.5 9 8 13.5 12.5 9"/></svg></button>
 
@@ -173,19 +173,20 @@ body.no-mac .mac-hint{display:none}
   const video = document.getElementById("reel-video");
   const portraitMq = matchMedia("(orientation: portrait)");
   const ext = video.canPlayType('video/webm; codecs="vp9"') ? "webm" : "mp4";   // VP9 where supported, H.264 elsewhere
+  const V = "?v=2";                                   // bump when the reel is re-rendered, so caches fetch the new one
   function pickVideo() {
     const tall = portraitMq.matches;
     if (reduce) {                                      // reduced motion: the end card, still
       video.preload = "none";
-      video.poster = tall ? "media/reel-portrait-end.jpg" : "media/reel-end.jpg";
+      video.poster = (tall ? "media/reel-portrait-end.jpg" : "media/reel-end.jpg") + V;
       return;
     }
     // upright phones get the vertical cut so it fills the screen; small landscape screens get 720p
     const px = Math.max(window.screen.width, window.screen.height) * (devicePixelRatio || 1);
-    const src = tall ? `media/reel-portrait.${ext}` : `media/reel${px <= 1500 ? "-720" : ""}.${ext}`;
+    const src = (tall ? `media/reel-portrait.${ext}` : `media/reel${px <= 1500 ? "-720" : ""}.${ext}`) + V;
     if (video.getAttribute("src") === src) return;
     const t = video.currentTime || 0;
-    video.poster = tall ? "media/reel-portrait-poster.jpg" : "media/reel-poster.jpg";
+    video.poster = (tall ? "media/reel-portrait-poster.jpg" : "media/reel-poster.jpg") + V;
     video.src = src;
     video.addEventListener("loadedmetadata", () => { video.currentTime = t % (video.duration || 1); }, { once: true });
     if (reelBox.style.visibility !== "hidden") video.play().catch(() => {});   // not while a card covers it
