@@ -7,7 +7,7 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA. Dev reel 2026.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="mac/mac.min.js?v=3">
+<link rel="modulepreload" href="mac/mac.min.js?v=4">
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
@@ -16,8 +16,8 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* The page scrolls normally: the white card scrolls up over the reel and the MacBook pins to the screen. There,
-   one scroll down closes the lid by itself, and further scrolling brings the services up over the closed lid.
-   Scrolling back up to the laptop opens it again, and the card scrolls back down off the reel. */
+   one scroll down closes the lid by itself and carries on up to the services over the closed lid; one scroll up
+   from the top of the services goes straight back to the open laptop. */
 
 /* 1. the showreel: the HyperFrames compositions in reel/ (16:9) and reel-portrait/ (9:16) rendered to video,
    so the device's video hardware plays it; the page picks the one that matches the screen's shape.
@@ -52,16 +52,11 @@ body.no-mac .mac-hint{display:none}
 .topnav a:focus-visible{outline:1px solid rgba(255,255,255,.5);outline-offset:-1px}
 @media (max-width:560px){.topnav{top:max(16px,env(safe-area-inset-top));gap:0;padding:6px 8px}.topnav a{padding:8px 11px;font-size:13px}.topnav .long{display:none}}
 
-/* ---------- after the services: the skier ---------- */
-/* one more scroll at the end of the services plays it: the screen zooms out of the services' grey into the skier
-   video, holds, then zooms into the snow, swooshes left and turns white */
-#ski{position:fixed;inset:0;z-index:20;overflow:hidden;background:#0a0a0a;visibility:hidden;opacity:0}
-#ski video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform}
-/* the grey it starts from: a copy of the closed lid under the same shade as the services */
-.ski-grey{position:absolute;inset:0;background:#232428}
-.ski-grey canvas{position:absolute;inset:0;width:100%;height:100%}
-.ski-grey::after{content:"";position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 0%,rgba(0,0,0,.08),rgba(0,0,0,.42))}
-.ski-white{position:absolute;inset:0;background:#fff;opacity:0}
+/* ---------- after the services: a white card ---------- */
+/* one more scroll at the end of the services pops it up from the bottom, like the first card; scrolling up takes
+   it back down. It's taller than the screen by its corner radius, so its rounded top ends just above the screen. */
+#white{position:fixed;left:0;right:0;bottom:0;top:-56px;z-index:20;background:#fff;border-radius:56px 56px 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.45);
+  transform:translate3d(0,100%,0);visibility:hidden;will-change:transform}
 
 </style>
 <link rel="stylesheet" href="info/info.css?v=2">
@@ -114,11 +109,7 @@ body.no-mac .mac-hint{display:none}
   </div>
 </section>
 
-<div id="ski" aria-hidden="true">
-  <video muted playsinline loop preload="none" data-src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260418_063509_7d167302-4fd4-480b-8260-18ab572333d4.mp4"></video>
-  <div class="ski-grey"><canvas></canvas></div>
-  <div class="ski-white"></div>
-</div>
+<div id="white" aria-hidden="true"></div>
 
 <nav class="topnav" aria-label="Site">
   <a href="#top" data-go="home">home</a>
@@ -126,7 +117,7 @@ body.no-mac .mac-hint{display:none}
   <a href="#services" data-go="services">services</a>
   <a href="mailto:lenodrips@gmail.com">contact</a>
 </nav>
-<script type="module" src="mac/mac.min.js?v=3"></script>
+<script type="module" src="mac/mac.min.js?v=4"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -166,7 +157,8 @@ body.no-mac .mac-hint{display:none}
   portraitMq.addEventListener("change", pickVideo);
 
   /* ---------- scroll positions ---------- */
-  // the card rises over the reel's screen of scrolling; at closeAt the stage pins and the services follow it
+  // the card rises over the reel's screen of scrolling; at closeAt the stage pins (the laptop), and the services
+  // start at infoAt, a screen further on, over the closed lid
   const work = document.getElementById("work");
   const info = document.getElementById("info");
   let riseLen = 1, closeAt = 1, infoAt = 1;
@@ -176,32 +168,39 @@ body.no-mac .mac-hint{display:none}
   }
   measure();
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";   // always start on the reel
-  // scroll smoothly and resolve on arrival
-  function scrollToAsync(top) {
-    window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+  const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
+  const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  // scroll the page to a position over a set time, eased; `at` = [fraction, fn] runs fn once partway
+  function scrollAnim(to, dur, at) {
+    const from = window.scrollY;
+    if (dur === undefined) dur = Math.min(1.4, Math.max(0.5, (Math.abs(to - from) / innerHeight) * 0.5));
+    if (reduce || Math.abs(to - from) < 1) { window.scrollTo(0, to); if (at) at[1](); return Promise.resolve(); }
     const t0 = performance.now();
-    return new Promise(done => (function check() {
-      if (Math.abs(window.scrollY - top) < 2 || performance.now() - t0 > 2500) done();
-      else requestAnimationFrame(check);
-    })());
+    return new Promise(done => (function frame(now) {
+      const t = clamp01((now - t0) / (dur * 1000));
+      window.scrollTo(0, from + (to - from) * easeInOut(t));
+      if (at && t >= at[0]) { at[1](); at = null; }
+      if (t < 1) requestAnimationFrame(frame); else done();
+    })(t0));
   }
+  const until = test => new Promise(done => (function check() { test() ? done() : requestAnimationFrame(check); })());
 
   /* ---------- moves that play in their own time ---------- */
   // a tween from 0 to 1 and back, timed linearly; whatever it drives eases itself. The returned promise settles
   // when the move ends (or is replaced by another).
   function tween(dur) {
-    const tw = { v: 0, from: 0, to: 0, t0: 0, dur, done: Promise.resolve(), resolve: null, speed: 1 };
-    tw.go = (to, speed = 1) => {
-      if (to === tw.to && speed === tw.speed) return tw.done;
+    const tw = { v: 0, from: 0, to: 0, t0: 0, dur, done: Promise.resolve(), resolve: null };
+    tw.go = to => {
+      if (to === tw.to) return tw.done;
       if (tw.resolve) tw.resolve();
-      tw.from = tw.v; tw.to = to; tw.t0 = performance.now(); tw.speed = speed;
+      tw.from = tw.v; tw.to = to; tw.t0 = performance.now();
       tw.done = new Promise(r => (tw.resolve = r));
       kick();
       return tw.done;
     };
     tw.step = now => {
       if (tw.v === tw.to) return;
-      const d = (tw.dur * 1000 * Math.abs(tw.to - tw.from)) / tw.speed;
+      const d = tw.dur * 1000 * Math.abs(tw.to - tw.from);
       const t = d ? clamp01((now - tw.t0) / d) : 1;
       tw.v = t >= 1 ? tw.to : tw.from + (tw.to - tw.from) * t;
       if (tw.v === tw.to && tw.resolve) { tw.resolve(); tw.resolve = null; }
@@ -209,26 +208,44 @@ body.no-mac .mac-hint{display:none}
     tw.moving = () => tw.v !== tw.to;
     return tw;
   }
-  // the lid closes in its own time rather than following the scroll; the page holds still at the laptop meanwhile
-  const lid = tween(reduce ? 0 : 1.7);
-  // the skier sequence: 3.45 s forwards, played back at double speed
-  const SKI_T = 3.45;
-  const ski = tween(reduce ? 0 : SKI_T);
-  const playSki = to => ski.go(to, to ? 1 : 2);
+  const lid = tween(reduce ? 0 : 1.7);       // the lid closes in its own time rather than following the scroll
+  const white = tween(reduce ? 0 : 0.8);     // the white card after the services
+
+  /* ---------- the moves between stops ---------- */
+  // While one runs, the page ignores scrolling. A new one doesn't start until it's done.
+  let auto = false;
+  async function run(fn) {
+    if (auto) return;
+    auto = true;
+    try { await fn(); } finally { auto = false; kick(); }
+  }
+  // close the lid, and as it fills the screen bring the services up over it
+  async function toServices() {
+    if (Math.abs(window.scrollY - closeAt) > 1) await scrollAnim(closeAt);
+    const shut = lid.go(1);
+    await until(() => lid.v >= 0.88);
+    await scrollAnim(infoAt, 0.8);
+    await shut;
+  }
+  // take the services back down off the lid, and open it as they go
+  async function toLaptop() {
+    await scrollAnim(closeAt, 0.75, [0.7, () => lid.go(0)]);
+    await lid.go(0);
+  }
 
   /* ---------- scroll gestures ---------- */
-  // At the laptop, one scroll down closes the lid and one scroll up opens it. At the end of the services, one
-  // scroll down plays the skier into white, and one scroll up from the white plays it back. Only a scroll that
-  // starts there does it: one that arrives from elsewhere stops there first. Meanwhile the page holds still.
+  // At the laptop, one scroll down goes to the services; at the top of the services, one scroll up goes back to
+  // the laptop; at the end of the services, one scroll down pops up the white card, and one scroll up from it takes
+  // it away. Only a scroll that starts there does it: one that arrives from elsewhere stops there first.
   let gStartY = 0;
-  const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
   const startedAt = y => Math.abs(gStartY - y) <= 1;
   function decide(dir) {
+    if (auto) return { run: null };                 // something's moving: hold still
     const y = window.scrollY, end = maxScroll();
-    if (ski.v > 0 || ski.to > 0) return { run: dir < 0 ? () => playSki(0) : null };
-    if (dir > 0 && y >= end - 1 && lid.v === 1) return { run: gStartY >= end - 1 ? () => playSki(1) : null };
-    if (dir > 0 && lid.v < 1 && y >= closeAt - 1) return { run: startedAt(closeAt) ? () => lid.go(1) : null };
-    if (dir < 0 && lid.v > 0 && y <= closeAt + 1) return { run: startedAt(closeAt) ? () => lid.go(0) : null };
+    if (white.v > 0 || white.to > 0) return { run: dir < 0 ? () => white.go(0) : null };
+    if (dir > 0 && lid.v === 0 && y >= closeAt - 1) return { run: startedAt(closeAt) ? () => run(toServices) : null };
+    if (dir < 0 && lid.v === 1 && y <= infoAt + 1) return { run: startedAt(infoAt) ? () => run(toLaptop) : null };
+    if (dir > 0 && lid.v === 1 && y >= end - 1) return { run: startedAt(end) ? () => white.go(1) : null };
     return null;
   }
   // a wheel or trackpad gesture is a run of events without a pause; a sudden jump in strength starts a new one,
@@ -251,7 +268,7 @@ body.no-mac .mac-hint{display:none}
     const d = dy ? decide(Math.sign(dy)) : null;
     if (!d) return;
     if (e.cancelable) e.preventDefault();                 // from the first move, or the browser takes over the scroll
-    if (d.run && Math.abs(dy) > 8) d.run();
+    if (d.run && Math.abs(dy) > 8) { d.run(); touchY = null; }
   }, { passive: false });
   addEventListener("touchend", () => { touchY = null; }, { passive: true });
   addEventListener("keydown", e => {
@@ -278,21 +295,18 @@ body.no-mac .mac-hint{display:none}
     const a = e.target.closest("a[data-go]");
     if (!a) return;
     e.preventDefault();
-    navigate(a.dataset.go);
+    const where = a.dataset.go;
+    // go there through what's in the way: the white card comes down, the lid opens or closes at the laptop
+    run(async () => {
+      if (white.v > 0 || white.to > 0) await white.go(0);
+      if (where === "services") {
+        if (lid.v < 1) await toServices(); else await scrollAnim(infoAt);
+      } else {
+        if (lid.v > 0) await toLaptop();
+        await scrollAnim(where === "home" ? 0 : closeAt);
+      }
+    });
   });
-  // go there, passing through what's in the way: back out of the white, then open or close the lid at the laptop
-  let navId = 0;
-  async function navigate(where) {
-    const id = ++navId, lidTo = where === "services" ? 1 : 0;
-    if (ski.v > 0 || ski.to > 0) { await playSki(0); if (id !== navId) return; }
-    if (lid.v !== lidTo) {
-      if (Math.abs(window.scrollY - closeAt) > 1) await scrollToAsync(closeAt);
-      if (id !== navId) return;
-      await lid.go(lidTo);
-      if (id !== navId) return;
-    }
-    scrollToAsync(where === "home" ? 0 : where === "gallery" ? closeAt : infoAt);
-  }
   let current = "";
   function markCurrent(where) {
     if (where === current) return;
@@ -300,39 +314,12 @@ body.no-mac .mac-hint{display:none}
     navLinks.forEach(a => a.setAttribute("aria-current", a.dataset.go === where));
   }
 
-  /* ---------- the skier ---------- */
-  const skiBox = document.getElementById("ski");
-  const skiVideo = skiBox.querySelector("video");
-  const skiGrey = skiBox.querySelector(".ski-grey canvas");
-  const skiWhite = skiBox.querySelector(".ski-white");
-  const easeOut = t => 1 - Math.pow(1 - t, 3), easeIn = t => t * t * t;
-  let skiLoaded = false, skiShown = false;
-  function loadSki() {                                 // fetched once the services are near, not on every visit
-    if (skiLoaded) return;
-    skiLoaded = true;
-    skiVideo.preload = "auto";
-    skiVideo.src = skiVideo.dataset.src;
-  }
-  function drawSki(t) {                               // t: seconds into the sequence
-    // 0–0.35 s: the grey copy of the services' background fades in over them
-    set(skiBox, "opacity", smooth(0, 0.35, t).toFixed(3));
-    // 0.35–1.65 s: zoom out of the grey into the video; then hold for 0.8 s
-    const out = easeOut(clamp01((t - 0.35) / 1.3));
-    set(skiGrey.parentNode, "opacity", (1 - easeOut(clamp01((t - 0.35) / 0.8))).toFixed(3));
-    // 2.45–3.05 s: zoom into the snow; 2.85–3.45 s: swoosh to the left as it turns white
-    const into = easeIn(clamp01((t - 2.45) / 0.6)), sw = easeIn(clamp01((t - 2.85) / 0.6));
-    const scale = (2.6 - 1.6 * out) * (1 + into) * (1 + 0.6 * sw);
-    set(skiVideo, "transformOrigin", t < 2 ? "50% 50%" : "50% 80%");   // switched while the scale is 1, so nothing jumps
-    set(skiVideo, "transform", `translate3d(${(-45 * sw).toFixed(2)}vw, 0, 0) scale(${scale.toFixed(4)})`);
-    set(skiVideo, "filter", sw > 0.01 ? `blur(${(10 * sw).toFixed(1)}px)` : "none");
-    set(skiWhite, "opacity", smooth(3.0, SKI_T, t).toFixed(3));
-  }
-
   /* ---------- the MacBook page ---------- */
   const title = work.querySelector(".work-title");
   const shade = work.querySelector(".lid-shade");
   const macHint = work.querySelector(".mac-hint");
   const hint = document.getElementById("hint");
+  const whiteCard = document.getElementById("white");
 
   /* ---------- one animation loop: it runs while something moves or the gallery plays, and sleeps otherwise ---------- */
   let running = false, last = 0;
@@ -346,18 +333,16 @@ body.no-mac .mac-hint{display:none}
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     lid.step(now);
-    ski.step(now);
+    white.step(now);
     let y = window.scrollY;
-    // the services only show over a closed lid, and the card only scrolls down off an open one: anything else
-    // that scrolls past the laptop (a flick's momentum, the scrollbar) is held there, and moves the lid if the
-    // gesture started at the laptop. While the skier plays, the page stays at the end.
-    if ((y > closeAt + 1 && lid.v < 1) || (y < closeAt - 1 && lid.v > 0)) {
-      if (startedAt(closeAt)) lid.go(y > closeAt ? 1 : 0);
-      window.scrollTo(0, closeAt);
-      y = closeAt;
-    } else if (ski.v > 0 && y < maxScroll() - 1) {
-      window.scrollTo(0, maxScroll());
-      y = window.scrollY;
+    // between the laptop and the services the page only moves on its own: anything else that scrolls in there (a
+    // flick's momentum, the scrollbar) is held at the stop it came from. Under the white card it stays at the end.
+    if (!auto) {
+      const hold = white.v > 0 ? maxScroll() : lid.v === 0 && y > closeAt + 1 ? closeAt : lid.v === 1 && y < infoAt - 1 ? infoAt : null;
+      if (hold !== null && Math.abs(y - hold) > 1) {
+        window.scrollTo(0, hold);
+        y = window.scrollY;
+      }
     }
     const c = lid.v;
     const w = clamp01(y / riseLen);                   // the card covering the reel
@@ -372,27 +357,18 @@ body.no-mac .mac-hint{display:none}
     set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
     set(title, "opacity", (1 - smooth(0, 0.3, c)).toFixed(3));
     set(shade, "opacity", smooth(0.8, 1, c).toFixed(3));
-    set(macHint, "opacity", w > 0.98 && c === 0 && lid.to === 0 ? "1" : "0");
+    set(macHint, "opacity", w > 0.98 && c === 0 && lid.to === 0 && !auto ? "1" : "0");
     if (window.Mac && w > 0) Mac.update(w, c, now, dt);
-    if (c > 0.5) loadSki();
 
-    // the skier: on top of everything while it plays, the video running only while it can be seen
-    const on = ski.v > 0;
-    if (on !== skiShown) {
-      skiShown = on;
-      set(skiBox, "visibility", on ? "visible" : "hidden");
-      if (on && window.Mac && Mac.snapshot) Mac.snapshot(skiGrey);   // the grey it starts from is the lid itself
-    }
-    if (on) drawSki(ski.v * SKI_T);
-    const skiPlays = on && ski.v < 1;
-    if (skiPlays && skiVideo.paused) skiVideo.play().catch(() => {});
-    if (!skiPlays && !skiVideo.paused) skiVideo.pause();
+    // the white card pops up from the bottom
+    set(whiteCard, "visibility", white.v > 0 ? "visible" : "hidden");
+    set(whiteCard, "transform", `translate3d(0, ${((1 - easeInOut(white.v)) * 100).toFixed(3)}%, 0)`);
 
-    markCurrent(ski.v > 0.5 ? "" : c >= 0.5 ? "services" : w >= 0.5 ? "gallery" : "home");
+    markCurrent(white.v > 0.5 ? "" : c >= 0.5 ? "services" : w >= 0.5 ? "gallery" : "home");
 
     // keep going while something moves, or the gallery plays on the open laptop's screen
     const playing = window.Mac && w > 0 && c < 0.75 && !reduce;
-    if (playing || lid.moving() || ski.moving()) requestAnimationFrame(loop);
+    if (playing || lid.moving() || white.moving()) requestAnimationFrame(loop);
     else running = false;
   }
 
