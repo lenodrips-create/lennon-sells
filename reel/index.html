@@ -9,10 +9,11 @@
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:500;src:url("fonts/league-spartan-latin-500-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;src:url("fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;src:url("fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
-:root{--ink:#0a0a0a;--paper:#f5f3ee;--orange:#ff3d00;--blue:#2440ff}
+/* white backgrounds and black type, grey icons in the code chapter, orange and blue accents */
+:root{--bg:#ffffff;--fg:#0a0a0a;--grey:#a3a3a8;--orange:#ff3d00;--blue:#2440ff}
 html,body{height:100%}
-body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spartan",sans-serif}
-#root{position:relative;width:100%;height:100%;overflow:hidden;background:var(--ink)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",sans-serif}
+#root{position:relative;width:100%;height:100%;overflow:hidden;background:var(--bg)}
 .scene{position:absolute;inset:0;overflow:hidden;visibility:hidden}
 .fill{position:absolute;inset:0}
 .center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
@@ -20,48 +21,49 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 .ch{display:inline-block}
 
 /* 1. name */
-#s1{background:var(--ink)}
+#s1{background:var(--bg)}
 .ring{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;border:8px solid var(--orange)}
 #made{display:flex;flex-direction:column;align-items:center;justify-content:center}
-.made-line{font-weight:900;font-size:290px;line-height:.86;letter-spacing:-.02em;white-space:nowrap;color:var(--paper)}
-#wipeA{position:absolute;left:50%;top:50%;width:2400px;height:2400px;margin:-1200px 0 0 -1200px;border-radius:50%;background:var(--orange)}
+.made-line{font-weight:900;font-size:290px;line-height:.86;letter-spacing:-.02em;white-space:nowrap;color:var(--fg)}
+#wipeA{position:absolute;left:50%;top:50%;width:2400px;height:2400px;margin:-1200px 0 0 -1200px;border-radius:50%;background:var(--fg)}
 
 /* 2. code */
-#s2{background:var(--orange)}
+#s2{background:var(--bg)}
 #s2-tilt{position:absolute;left:-800px;top:-400px;width:3520px;height:1880px;display:flex;flex-direction:column;justify-content:center;gap:6px}
-.row{font-weight:900;font-size:236px;line-height:.9;white-space:nowrap;color:var(--ink);letter-spacing:-.01em}
-.row .outline{color:var(--orange);-webkit-text-stroke:3px var(--ink)}
-#typo{font-weight:900;font-size:262px;line-height:.9;white-space:nowrap;color:var(--ink);padding-left:820px;letter-spacing:-.02em}
-.stripe{position:absolute;top:0;width:194px;height:1080px;background:var(--ink)}
+.row{font-weight:900;font-size:236px;line-height:.9;white-space:nowrap;color:var(--fg);letter-spacing:-.01em}
+.row .outline{color:var(--bg);-webkit-text-stroke:3px var(--fg)}
+.row .ic{color:var(--grey);-webkit-text-stroke:0}
+#typo{font-weight:900;font-size:262px;line-height:.9;white-space:nowrap;color:var(--fg);-webkit-text-stroke:3px var(--fg);padding-left:820px;letter-spacing:-.02em}
+.stripe{position:absolute;top:0;width:194px;height:1080px;background:var(--fg)}
 
 /* 3. build */
-#s3{background:var(--ink)}
-.dot{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--paper)}
+#s3{background:var(--bg)}
+.dot{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--fg)}
 #shapes{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:120px;padding-bottom:80px}
 #circ{width:300px;height:300px;border-radius:50%;background:var(--orange)}
-#sq{width:270px;height:270px;background:var(--paper)}
+#sq{width:270px;height:270px;background:var(--fg)}
 #tri{width:320px;height:290px}
-#s3-word{position:absolute;left:150px;bottom:110px;font-weight:900;font-size:250px;line-height:.9;color:var(--ink);-webkit-text-stroke:3px var(--paper)}
+#s3-word{position:absolute;left:150px;bottom:110px;font-weight:900;font-size:250px;line-height:.9;color:var(--bg);-webkit-text-stroke:3px var(--fg)}
 
-#wipeD{position:absolute;left:0;top:-200px;width:3400px;height:1480px;background:var(--ink)}
+#wipeD{position:absolute;left:0;top:-200px;width:3400px;height:1480px;background:var(--bg)}
 
 /* 5. end card */
-#s7{background:var(--ink)}
+#s7{background:var(--bg)}
 #ring7{position:absolute;left:50%;top:50%;width:780px;height:780px;margin:-390px 0 0 -390px}
 #end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-#end-name{font-weight:900;font-size:156px;line-height:.95;letter-spacing:-.01em;color:var(--paper);white-space:nowrap}
+#end-name{font-weight:900;font-size:156px;line-height:.95;letter-spacing:-.01em;color:var(--fg);white-space:nowrap}
 #end-line{width:720px;height:6px;margin:34px 0 30px;background:var(--orange)}
-#end-town{font-weight:500;font-size:44px;letter-spacing:.35em;color:var(--paper);padding-left:.35em}
+#end-town{font-weight:500;font-size:44px;letter-spacing:.35em;color:var(--fg);padding-left:.35em}
 #end-tag{margin-top:22px;font-weight:700;font-size:28px;letter-spacing:.45em;color:var(--orange);padding-left:.45em}
 
-/* HUD over everything, in plain off-white (a full-frame blend mode cost ~25% CPU).
+/* HUD over everything, in plain black (a full-frame blend mode cost ~25% CPU).
    Inset 150px so it survives the page cropping the frame to fill 16:10 screens */
-#hud{position:absolute;inset:0;color:#f5f3ee;font-weight:500;font-size:24px;letter-spacing:.22em;text-transform:uppercase}
+#hud{position:absolute;inset:0;color:var(--fg);font-weight:500;font-size:24px;letter-spacing:.22em;text-transform:uppercase}
 #hud-lh{position:absolute;left:150px;top:80px;font-weight:900;letter-spacing:.04em;font-size:34px}
 #hud-yr{position:absolute;right:150px;top:84px}
 .hud-label{position:absolute;left:150px;bottom:80px;visibility:hidden}
 #hud-reel{position:absolute;right:150px;bottom:80px}
-#hud-prog{position:absolute;left:150px;right:150px;bottom:62px;height:2px;background:#f5f3ee;transform-origin:0 50%}
+#hud-prog{position:absolute;left:150px;right:150px;bottom:62px;height:2px;background:var(--fg);transform-origin:0 50%}
 </style>
 </head>
 <body>
@@ -79,11 +81,11 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 
   <div class="scene" id="s2">
     <div id="s2-tilt" data-layout-allow-overflow>
-      <div class="row" data-layout-ignore data-dir="1"><span class="outline">&lt;/&gt; ✦ CODE ✦ &lt;/&gt; ✦ CODE ✦ &lt;/&gt; ✦ CODE ✦ &lt;/&gt;</span></div>
-      <div class="row" data-layout-ignore data-dir="-1">DEBUG ✦ DEBUG ✦ DEBUG ✦ DEBUG ✦ DEBUG ✦ DEBUG</div>
+      <div class="row" data-layout-ignore data-dir="1"><span class="outline"><span class="ic">&lt;/&gt;</span> <span class="ic">✦</span> CODE <span class="ic">✦</span> <span class="ic">&lt;/&gt;</span> <span class="ic">✦</span> CODE <span class="ic">✦</span> <span class="ic">&lt;/&gt;</span> <span class="ic">✦</span> CODE <span class="ic">✦</span> <span class="ic">&lt;/&gt;</span></span></div>
+      <div class="row" data-layout-ignore data-dir="-1">DEBUG <span class="ic">✦</span> DEBUG <span class="ic">✦</span> DEBUG <span class="ic">✦</span> DEBUG <span class="ic">✦</span> DEBUG <span class="ic">✦</span> DEBUG</div>
       <div id="typo" class="split">TYPESCRIPT</div>
-      <div class="row" data-layout-ignore data-dir="-1">REFACTOR ✦ REFACTOR ✦ REFACTOR ✦ REFACTOR</div>
-      <div class="row" data-layout-ignore data-dir="1"><span class="outline">&lt;/&gt; ✦ CODE ✦ &lt;/&gt; ✦ CODE ✦ &lt;/&gt; ✦ CODE ✦ &lt;/&gt;</span></div>
+      <div class="row" data-layout-ignore data-dir="-1">REFACTOR <span class="ic">✦</span> REFACTOR <span class="ic">✦</span> REFACTOR <span class="ic">✦</span> REFACTOR</div>
+      <div class="row" data-layout-ignore data-dir="1"><span class="outline"><span class="ic">&lt;/&gt;</span> <span class="ic">✦</span> CODE <span class="ic">✦</span> <span class="ic">&lt;/&gt;</span> <span class="ic">✦</span> CODE <span class="ic">✦</span> <span class="ic">&lt;/&gt;</span> <span class="ic">✦</span> CODE <span class="ic">✦</span> <span class="ic">&lt;/&gt;</span></span></div>
     </div>
   </div>
 
@@ -177,7 +179,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
   tl.fromTo("#made", { scale: 1 }, { scale: 1.08, duration: 1.9, ease: "none" }, 0.15);
   tl.to("#made .ch", { color: "#ff3d00", duration: 0.1, stagger: { each: 0.03, from: "center" } }, 1.05);
 
-  /* transition A: orange circle iris */
+  /* transition A: black circle iris */
   tl.fromTo("#wipeA", { scale: 0 }, { scale: 1, duration: 0.6, ease: "power3.in" }, 1.5);
   hide("#s1", 2.1); show("#s2", 2.1); hide("#wipeA", 2.1);
 
@@ -187,7 +189,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
     tl.fromTo(row, { x: -d * 360 }, { x: d * 360, duration: 3.6, ease: "none" }, 2.05);
   });
   tl.fromTo("#typo .ch", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "expo.out", stagger: 0.045 }, 2.2);
-  tl.to("#typo .ch", { color: "#f5f3ee", duration: 0.12, stagger: { each: 0.05, from: "center" } }, 3.65);
+  tl.to("#typo .ch", { color: "#ffffff", duration: 0.12, stagger: { each: 0.05, from: "center" } }, 3.65);
   tl.to("#typo .ch", { yPercent: -12, duration: 0.25, ease: "sine.inOut", stagger: { each: 0.04, yoyo: true, repeat: 1 } }, 4.05);
   tl.fromTo("#s2-tilt", { scale: 1 }, { scale: 1.16, duration: 0.6, ease: "power4.in" }, 4.55);
 
@@ -209,10 +211,10 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
   tl.to("#circ, #sq, #tri", { scale: 0, duration: 0.3, ease: "back.in(2)", stagger: 0.06 }, 8.25);
   tl.to("#s3-word .ch", { yPercent: 115, duration: 0.3, ease: "power3.in", stagger: 0.03 }, 8.25);
 
-  /* transition C: dots swell until they fill the frame, then a skewed black panel sweeps into the end card */
+  /* transition C: dots swell until they fill the frame, then a skewed white panel sweeps into the end card */
   tl.to(".dot", { scale: 24, duration: 0.5, ease: "power3.in", stagger: { grid: [9, 16], from: "center", amount: 0.3 } }, 8.4);
   tl.fromTo("#wipeD", { x: -3800 }, { x: -700, duration: 0.6, ease: "power3.inOut" }, 9.0);
-  tl.to("#hud", { opacity: 0, duration: 0.25, ease: "power1.out" }, 8.55);  // off-white labels would vanish on the white flash
+  tl.to("#hud", { opacity: 0, duration: 0.25, ease: "power1.out" }, 8.55);  // black labels would vanish as the black dots fill the frame
   tl.to("#hud", { opacity: 1, duration: 0.3, ease: "power1.in" }, 9.65);
   hide("#s3", 9.6); show("#s7", 9.6); hide("#wipeD", 9.6);
 

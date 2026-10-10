@@ -22,8 +22,8 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 /* 1. the showreel: the HyperFrames compositions in reel/ (16:9) and reel-portrait/ (9:16) rendered to video,
    so the device's video hardware plays it; the page picks the one that matches the screen's shape.
    It sits in a rounded frame a little inside the screen edges. */
-#reel{position:fixed;top:var(--gap);left:var(--gap);right:var(--gap);bottom:var(--gap);overflow:hidden;border-radius:clamp(16px,2.2vw,32px);background:#151515}
-#reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#151515}
+#reel{position:fixed;top:var(--gap);left:var(--gap);right:var(--gap);bottom:var(--gap);overflow:hidden;border-radius:clamp(16px,2.2vw,32px);background:#fff}
+#reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
 /* a scroll button at the bottom middle of the video, in the navigation's style; the card scrolls up over it */
 #hint{position:fixed;left:50%;bottom:calc(var(--gap) + clamp(16px,3vh,28px));transform:translateX(-50%);z-index:0;display:flex;align-items:center;gap:10px;padding:12px 18px 12px 22px;border:0;border-radius:999px;cursor:pointer;
   background:rgba(23,23,23,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#d4d4d4;font:400 14px/1.25 "Readex Pro",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;transition:color .15s}
@@ -73,7 +73,7 @@ body.no-mac .mac-hint{display:none}
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA. Dev reel 2026.</h1>
 
 <div id="reel" aria-hidden="true">
-  <video id="reel-video" muted playsinline loop preload="auto" poster="media/reel-poster.jpg"></video>
+  <video id="reel-video" muted playsinline loop preload="auto" poster="media/reel-poster.jpg?v=2"></video>
 </div>
 <button id="hint" type="button" aria-label="Scroll to the project gallery">scroll<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v11M3.5 9 8 13.5 12.5 9"/></svg></button>
 
@@ -173,19 +173,20 @@ body.no-mac .mac-hint{display:none}
   const video = document.getElementById("reel-video");
   const portraitMq = matchMedia("(orientation: portrait)");
   const ext = video.canPlayType('video/webm; codecs="vp9"') ? "webm" : "mp4";   // VP9 where supported, H.264 elsewhere
+  const V = "?v=2";                                   // bump when the reel is re-rendered, so caches fetch the new one
   function pickVideo() {
     const tall = portraitMq.matches;
     if (reduce) {                                      // reduced motion: the end card, still
       video.preload = "none";
-      video.poster = tall ? "media/reel-portrait-end.jpg" : "media/reel-end.jpg";
+      video.poster = (tall ? "media/reel-portrait-end.jpg" : "media/reel-end.jpg") + V;
       return;
     }
     // upright phones get the vertical cut so it fills the screen; small landscape screens get 720p
     const px = Math.max(window.screen.width, window.screen.height) * (devicePixelRatio || 1);
-    const src = tall ? `media/reel-portrait.${ext}` : `media/reel${px <= 1500 ? "-720" : ""}.${ext}`;
+    const src = (tall ? `media/reel-portrait.${ext}` : `media/reel${px <= 1500 ? "-720" : ""}.${ext}`) + V;
     if (video.getAttribute("src") === src) return;
     const t = video.currentTime || 0;
-    video.poster = tall ? "media/reel-portrait-poster.jpg" : "media/reel-poster.jpg";
+    video.poster = (tall ? "media/reel-portrait-poster.jpg" : "media/reel-poster.jpg") + V;
     video.src = src;
     video.addEventListener("loadedmetadata", () => { video.currentTime = t % (video.duration || 1); }, { once: true });
     if (reelBox.style.visibility !== "hidden") video.play().catch(() => {});   // not while a card covers it
