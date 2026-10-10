@@ -6,16 +6,36 @@
 <meta name="theme-color" content="#000">
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, Greencastle, PA.">
-<script type="module" src="https://cdn.jsdelivr.net/npm/@hyperframes/player@0.8.79/dist/hyperframes-player.js"></script>
 <style>
 html,body{margin:0;min-height:100%;background:#000;color:#f4f2ef}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-/* the HyperFrames intro sits at the top, full width, 16:9 */
-hyperframes-player{display:block;width:100%;aspect-ratio:16/9;max-height:100vh;background:#000}
+/* the HyperFrames intro sits at the top, full width, 16:9; the 1920x1080 frame is scaled to fit */
+#intro{position:relative;width:100%;aspect-ratio:16/9;max-height:100vh;overflow:hidden;background:#000}
+#intro iframe{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;transform-origin:0 0;pointer-events:none}
 </style>
 </head>
 <body>
 <h1 class="sr-only">Lennon Helman, Greencastle, PA</h1>
-<hyperframes-player src="intro/index.html" width="1920" height="1080" autoplay muted disable-click-to-play assets-loading-ui="none" aria-hidden="true"></hyperframes-player>
+<div id="intro" aria-hidden="true"><iframe src="intro/index.html" title="Intro" tabindex="-1"></iframe></div>
+<script>
+  const box = document.getElementById("intro");
+  const frame = box.querySelector("iframe");
+
+  function fit() {
+    const s = Math.min(box.clientWidth / 1920, box.clientHeight / 1080);
+    frame.style.transform = `translate(${(box.clientWidth - 1920 * s) / 2}px, ${(box.clientHeight - 1080 * s) / 2}px) scale(${s})`;
+  }
+  fit();
+  addEventListener("resize", fit);
+
+  // the composition registers a paused GSAP timeline; play it once the frame has loaded
+  function start(tries) {
+    const tl = frame.contentWindow && frame.contentWindow.__timelines && frame.contentWindow.__timelines.intro;
+    if (!tl) return tries > 0 && setTimeout(() => start(tries - 1), 100);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) tl.progress(1);
+    else tl.play(0);
+  }
+  frame.addEventListener("load", () => start(50));
+</script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # Lennon
 
-A black page with an animated intro at the top: "Lennon Helman" flips in letter by letter, a light line draws across, then "Greencastle, PA" drifts in with its coordinates and a pulsing pin. The intro is a [HyperFrames](https://github.com/heygen-com/hyperframes) composition, played on the page by the `<hyperframes-player>` web component.
+A black page with an animated intro at the top: "Lennon Helman" flips in letter by letter, a light line draws across, then "Greencastle, PA" drifts in with its coordinates and a pulsing pin. The intro is a [HyperFrames](https://github.com/heygen-com/hyperframes) composition. The page shows it in an iframe and plays its GSAP timeline, so nothing loads from outside the site.
 
 **Live site:** https://lenodrips-create.github.io/lennon-sells/
 
@@ -8,7 +8,7 @@ A black page with an animated intro at the top: "Lennon Helman" flips in letter 
 
 | Path | What it is |
 |---|---|
-| `index.html` | The page: black, with the intro player at the top. |
+| `index.html` | The page: black, with the intro at the top. |
 | `intro/index.html` | The HyperFrames composition (8 s, 1920×1080, one GSAP timeline). |
 | `intro/vendor/gsap.min.js` | GSAP 3.14.2, self-hosted. |
 | `intro/fonts/` | Inter and Playfair Display italic, with their licence files. |
