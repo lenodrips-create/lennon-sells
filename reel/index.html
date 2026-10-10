@@ -25,6 +25,9 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 #w2{color:var(--orange)}
 .ring{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;border:8px solid var(--orange)}
 #s1-bar{position:absolute;left:0;top:50%;width:1920px;height:34px;margin-top:-17px;background:var(--orange)}
+#made{display:flex;flex-direction:column;align-items:center;justify-content:center}
+#made-by{font-weight:700;font-size:56px;letter-spacing:.45em;padding-left:.45em;margin-bottom:30px;color:var(--orange)}
+.made-line{font-weight:900;font-size:290px;line-height:.86;letter-spacing:-.02em;white-space:nowrap;color:var(--paper)}
 #wipeA{position:absolute;left:50%;top:50%;width:2400px;height:2400px;margin:-1200px 0 0 -1200px;border-radius:50%;background:var(--orange)}
 
 /* 2. code */
@@ -42,7 +45,7 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 #circ{width:300px;height:300px;border-radius:50%;background:var(--orange)}
 #sq{width:270px;height:270px;background:var(--paper)}
 #tri{width:320px;height:290px}
-#s3-word{position:absolute;left:70px;bottom:40px;font-weight:900;font-size:250px;line-height:.9;color:var(--ink);-webkit-text-stroke:3px var(--paper)}
+#s3-word{position:absolute;left:150px;bottom:110px;font-weight:900;font-size:250px;line-height:.9;color:var(--ink);-webkit-text-stroke:3px var(--paper)}
 
 /* 4. deploy */
 #s4{background:var(--paper);color:var(--ink)}
@@ -56,8 +59,8 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 #s5{background:var(--blue)}
 .barw{position:absolute;bottom:0;width:60px;height:1080px}
 .bar{position:absolute;left:10px;bottom:0;width:40px;height:1080px;background:var(--paper)}
-#s5-word{position:absolute;left:80px;top:130px;font-weight:900;font-size:280px;line-height:.9;color:var(--paper)}
-#ticker{position:absolute;left:0;bottom:110px;width:1920px;height:92px;background:var(--ink);overflow:hidden}
+#s5-word{position:absolute;left:150px;top:150px;font-weight:900;font-size:280px;line-height:.9;color:var(--paper)}
+#ticker{position:absolute;left:0;bottom:140px;width:1920px;height:92px;background:var(--ink);overflow:hidden}
 #ticker-text{position:absolute;left:0;top:0;height:92px;display:flex;align-items:center;white-space:nowrap;font-weight:700;font-size:46px;letter-spacing:.06em;color:var(--orange)}
 
 /* 6. runtime */
@@ -81,17 +84,18 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 #end-town{font-weight:500;font-size:44px;letter-spacing:.35em;color:var(--paper);padding-left:.35em}
 #end-tag{margin-top:22px;font-weight:700;font-size:28px;letter-spacing:.45em;color:var(--orange);padding-left:.45em}
 
-/* HUD over everything; difference blend keeps it readable on any background */
+/* HUD over everything; difference blend keeps it readable on any background.
+   Inset 150px so it survives the page cropping the frame to fill 16:10 screens */
 #hud{position:absolute;inset:0;mix-blend-mode:difference;color:#fff;font-weight:500;font-size:24px;letter-spacing:.22em;text-transform:uppercase}
-#hud-lh{position:absolute;left:60px;top:50px;font-weight:900;letter-spacing:.04em;font-size:34px}
-#hud-yr{position:absolute;right:60px;top:54px}
-.hud-label{position:absolute;left:60px;bottom:50px;visibility:hidden}
-#hud-reel{position:absolute;right:60px;bottom:50px}
-#hud-prog{position:absolute;left:60px;right:60px;bottom:32px;height:2px;background:#fff;transform-origin:0 50%}
+#hud-lh{position:absolute;left:150px;top:80px;font-weight:900;letter-spacing:.04em;font-size:34px}
+#hud-yr{position:absolute;right:150px;top:84px}
+.hud-label{position:absolute;left:150px;bottom:80px;visibility:hidden}
+#hud-reel{position:absolute;right:150px;bottom:80px}
+#hud-prog{position:absolute;left:150px;right:150px;bottom:62px;height:2px;background:#fff;transform-origin:0 50%}
 </style>
 </head>
 <body>
-<div id="root" data-composition-id="reel" data-start="0" data-width="1920" data-height="1080" data-duration="24">
+<div id="root" data-composition-id="reel" data-start="0" data-width="1920" data-height="1080" data-duration="25.2">
 
   <div class="scene" id="s1">
     <div id="s1-cam" class="fill">
@@ -100,11 +104,16 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
       <div class="slam" id="w1">BUILD</div>
       <div class="slam" id="w2">IT</div>
       <div class="slam" id="w3">SHIP</div>
+      <div id="made" class="fill">
+        <div id="made-by">MADE BY</div>
+        <div class="made-line split">LENNON</div>
+        <div class="made-line split">HELMAN</div>
+      </div>
     </div>
   </div>
 
   <div class="scene" id="s2">
-    <div id="s2-tilt">
+    <div id="s2-tilt" data-layout-allow-overflow>
       <div class="row" data-layout-ignore data-dir="1"><span class="outline">&lt;/&gt; ✦ CODE ✦ &lt;/&gt; ✦ CODE ✦ &lt;/&gt; ✦ CODE ✦ &lt;/&gt;</span></div>
       <div class="row" data-layout-ignore data-dir="-1">DEBUG ✦ DEBUG ✦ DEBUG ✦ DEBUG ✦ DEBUG ✦ DEBUG</div>
       <div id="typo" class="split">TYPESCRIPT</div>
@@ -270,10 +279,10 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
 
   // HUD
   tl.fromTo("#hud", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.1);
-  tl.fromTo("#hud-prog", { scaleX: 0 }, { scaleX: 1, duration: 24, ease: "none" }, 0);
+  tl.fromTo("#hud-prog", { scaleX: 0 }, { scaleX: 1, duration: 25.2, ease: "none" }, 0);
   [["#lab1", 2.95, 6.45], ["#lab2", 6.45, 9.9], ["#lab3", 9.9, 13.6], ["#lab4", 13.6, 17.05], ["#lab5", 17.05, 20.95]].forEach(([id, a, b]) => { show(id, a); hide(id, b); });
 
-  /* ---------- 1. BUILD / IT / SHIP (0 - 2.95) ---------- */
+  /* ---------- 1. BUILD / IT / SHIP, MADE BY LENNON HELMAN (0 - 4.15) ---------- */
   show("#s1", 0);
   tl.set(".slam", { opacity: 0 }, 0);
   tl.set("#s1-bar", { scaleX: 0 }, 0);
@@ -386,6 +395,18 @@ body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spart
   tl.fromTo("#end-line", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "expo.inOut" }, 21.6);
   tl.fromTo("#end-town", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 21.9);
   tl.fromTo("#end-tag", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 22.15);
+
+  /* MADE BY LENNON HELMAN: everything from the iris wipe on moves 1.2s later to make room */
+  tl.shiftChildren(1.2, false, 2.34);
+  tl.set("#made", { autoAlpha: 0 }, 0);
+  tl.to("#w3", { scale: 0.55, opacity: 0, filter: "blur(14px)", duration: 0.22, ease: "power2.in" }, 2.35);
+  tl.set("#made", { autoAlpha: 1 }, 2.45);
+  tl.fromTo("#made-by", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 2.45);
+  tl.fromTo("#made .ch", { yPercent: 115 }, { yPercent: 0, duration: 0.6, ease: "expo.out", stagger: 0.035 }, 2.55);
+  tl.fromTo("#r1", { scale: 0.2, opacity: 1 }, { scale: 4.2, opacity: 0, duration: 0.8, ease: "power2.out", immediateRender: false }, 2.62);
+  tl.to("#s1-cam", { keyframes: { x: [0, -24, 18, -10, 5, 0], y: [0, 14, -15, 8, -3, 0] }, duration: 0.38, ease: "none" }, 2.6);
+  tl.fromTo("#made", { scale: 1 }, { scale: 1.07, duration: 1.1, ease: "none" }, 2.45);
+  tl.to("#made .ch", { color: "#ff3d00", duration: 0.1, stagger: { each: 0.03, from: "center" } }, 3.15);
 
   tl.set({}, {}, 24);
 
