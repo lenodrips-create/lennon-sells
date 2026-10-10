@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ['claude/gifted-pascal-xbq24p', 'claude/confident-fermi-3kad7m']
+    branches: ['claude/gifted-pascal-xbq24p']
   workflow_dispatch:
 
 permissions:
