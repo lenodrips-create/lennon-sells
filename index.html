@@ -50,16 +50,19 @@ body.no-mac .mac-hint{display:none}
 .topnav a{padding:8px 20px;border-radius:999px;color:#d4d4d4;text-decoration:none;white-space:nowrap;transition:color .15s}
 .topnav a:hover,.topnav a:focus-visible,.topnav a[aria-current="true"]{color:#fff}
 .topnav a:focus-visible{outline:1px solid rgba(255,255,255,.5);outline-offset:-1px}
-@media (max-width:560px){.topnav{top:max(16px,env(safe-area-inset-top));gap:0;padding:6px 8px}.topnav a{padding:8px 11px;font-size:13px}.topnav .long{display:none}}
+@media (max-width:560px){.topnav{top:max(16px,env(safe-area-inset-top));gap:0;padding:6px 8px}.topnav a{padding:8px 10px;font-size:13px}.topnav .long{display:none}}
+@media (max-width:380px){.topnav{padding:5px 6px}.topnav a{padding:8px 7px;font-size:12.5px}}
 
-/* ---------- after the services: a white card ---------- */
+/* ---------- after the services: a white card with the about me ---------- */
 /* one more scroll at the end of the services pops it up from the bottom, like the first card; scrolling up takes
-   it back down. It's taller than the screen by its corner radius, so its rounded top ends just above the screen. */
+   it back down. It's taller than the screen by its corner radius, so its rounded top ends just above the screen.
+   Its content scrolls inside it when it's taller than the screen (styles in info/info.css). */
 #white{position:fixed;left:0;right:0;bottom:0;top:-56px;z-index:20;background:#fff;border-radius:56px 56px 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.45);
-  transform:translate3d(0,100%,0);visibility:hidden;will-change:transform}
+  transform:translate3d(0,100%,0);visibility:hidden;will-change:transform;overflow:hidden}
+.white-scroll{position:absolute;inset:56px 0 0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 
 </style>
-<link rel="stylesheet" href="info/info.css?v=2">
+<link rel="stylesheet" href="info/info.css?v=3">
 </head>
 <body>
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA. Dev reel 2026.</h1>
@@ -109,12 +112,41 @@ body.no-mac .mac-hint{display:none}
   </div>
 </section>
 
-<div id="white" aria-hidden="true"></div>
+<div id="white" aria-hidden="true" inert>
+  <div class="white-scroll">
+    <section class="ab" aria-label="About me">
+      <div class="ab-head rv"><h2>About me</h2><span>@lenodrips</span></div>
+      <div class="ab-grid">
+        <div class="ab-main">
+          <p class="ab-lead rv">I'm Lennon. I build what I imagine.</p>
+          <p class="rv" style="--i:1">I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it.</p>
+          <p class="rv" style="--i:2">Most of my work starts as a question. Could I make my own web browser? That became Kepler, written in C++ on Qt and Chromium. Could a full code studio run inside a browser tab? That became CTerm Studio, with a C core compiled to WebAssembly.</p>
+          <p class="rv" style="--i:3">I care about how software feels as much as what it does: fast, private, and a little bit cinematic.</p>
+        </div>
+        <div class="ab-side">
+          <ul class="ab-facts rv" style="--i:2">
+            <li><span>Handle</span>@lenodrips</li>
+            <li><span>Focus</span>Browsers, dev tools, the web</li>
+            <li><span>Based in</span>Greencastle, PA</li>
+            <li><span>Public projects</span>5</li>
+          </ul>
+          <div class="ab-chips rv" style="--i:3"><span>C++</span><span>Qt 6</span><span>Rust</span><span>C</span><span>WebAssembly</span><span>JavaScript</span><span>React</span><span>Vite</span><span>CMake</span><span>HyperFrames</span></div>
+          <div class="ab-links rv" style="--i:4">
+            <a href="mailto:lenodrips@gmail.com">lenodrips@gmail.com ↗</a>
+            <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a>
+            <a href="https://keplerbrowser.org" target="_blank" rel="noopener">keplerbrowser.org ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
 
 <nav class="topnav" aria-label="Site">
   <a href="#top" data-go="home">home</a>
   <a href="#gallery" data-go="gallery"><span class="long">project </span>gallery</a>
   <a href="#services" data-go="services">services</a>
+  <a href="#about" data-go="about">about</a>
   <a href="mailto:lenodrips@gmail.com">contact</a>
 </nav>
 <script type="module" src="mac/mac.min.js?v=4"></script>
@@ -209,7 +241,9 @@ body.no-mac .mac-hint{display:none}
     return tw;
   }
   const lid = tween(reduce ? 0 : 1.7);       // the lid closes in its own time rather than following the scroll
-  const white = tween(reduce ? 0 : 0.8);     // the white card after the services
+  const white = tween(reduce ? 0 : 0.8);     // the white card after the services, with the about me
+  const whiteCard = document.getElementById("white"), whiteScroll = whiteCard.querySelector(".white-scroll");
+  const canScroll = (el, dir) => (dir > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0);
 
   /* ---------- the moves between stops ---------- */
   // While one runs, the page ignores scrolling. A new one doesn't start until it's done.
@@ -235,14 +269,18 @@ body.no-mac .mac-hint{display:none}
 
   /* ---------- scroll gestures ---------- */
   // At the laptop, one scroll down goes to the services; at the top of the services, one scroll up goes back to
-  // the laptop; at the end of the services, one scroll down pops up the white card, and one scroll up from it takes
-  // it away. Only a scroll that starts there does it: one that arrives from elsewhere stops there first.
-  let gStartY = 0;
+  // the laptop; at the end of the services, one scroll down pops up the white card, and one scroll up from its top
+  // takes it away (until then the about me on it scrolls). Only a scroll that starts there does it: one that
+  // arrives from elsewhere stops there first.
+  let gStartY = 0, gStartInner = 0;
   const startedAt = y => Math.abs(gStartY - y) <= 1;
   function decide(dir) {
     if (auto) return { run: null };                 // something's moving: hold still
     const y = window.scrollY, end = maxScroll();
-    if (white.v > 0 || white.to > 0) return { run: dir < 0 ? () => white.go(0) : null };
+    if (white.v > 0 || white.to > 0) {
+      if (white.v === 1 && white.to === 1 && canScroll(whiteScroll, dir)) return null;   // the about me scrolls itself
+      return { run: dir < 0 && (white.v < 1 || gStartInner <= 0) ? () => white.go(0) : null };
+    }
     if (dir > 0 && lid.v === 0 && y >= closeAt - 1) return { run: startedAt(closeAt) ? () => run(toServices) : null };
     if (dir < 0 && lid.v === 1 && y <= infoAt + 1) return { run: startedAt(infoAt) ? () => run(toLaptop) : null };
     if (dir > 0 && lid.v === 1 && y >= end - 1) return { run: startedAt(end) ? () => white.go(1) : null };
@@ -253,7 +291,7 @@ body.no-mac .mac-hint{display:none}
   let lastWheel = -1e9, lastMag = 0;
   addEventListener("wheel", e => {
     const ts = e.timeStamp || performance.now(), mag = Math.abs(e.deltaY);
-    if (ts - lastWheel > 200 || (mag > lastMag * 1.8 && mag > 15)) gStartY = window.scrollY;
+    if (ts - lastWheel > 200 || (mag > lastMag * 1.8 && mag > 15)) { gStartY = window.scrollY; gStartInner = whiteScroll.scrollTop; }
     lastWheel = ts; lastMag = mag;
     const d = e.deltaY ? decide(Math.sign(e.deltaY)) : null;
     if (!d) return;
@@ -261,7 +299,7 @@ body.no-mac .mac-hint{display:none}
     if (d.run) d.run();
   }, { passive: false });
   let touchY = null;
-  addEventListener("touchstart", e => { touchY = e.touches[0].clientY; gStartY = window.scrollY; }, { passive: true });
+  addEventListener("touchstart", e => { touchY = e.touches[0].clientY; gStartY = window.scrollY; gStartInner = whiteScroll.scrollTop; }, { passive: true });
   addEventListener("touchmove", e => {
     if (touchY === null) return;
     const dy = touchY - e.touches[0].clientY;            // positive: finger moving up, page scrolling down
@@ -277,8 +315,14 @@ body.no-mac .mac-hint{display:none}
     const down = ["ArrowDown", "PageDown", "End"].includes(e.key) || (e.key === " " && !e.shiftKey && !(a && a.closest && a.closest("button, a")));
     const up = ["ArrowUp", "PageUp", "Home"].includes(e.key) || (e.key === " " && e.shiftKey);
     if (!down && !up) return;
-    gStartY = window.scrollY;
+    gStartY = window.scrollY; gStartInner = whiteScroll.scrollTop;
     const d = decide(down ? 1 : -1);
+    if (d === null && white.v === 1) {                  // keys scroll the about me (focus isn't inside it)
+      e.preventDefault();
+      const page = !["ArrowDown", "ArrowUp"].includes(e.key);
+      whiteScroll.scrollBy({ top: (down ? 1 : -1) * (page ? whiteScroll.clientHeight * 0.85 : 90), behavior: reduce ? "auto" : "smooth" });
+      return;
+    }
     if (!d) return;
     e.preventDefault();
     if (d.run) d.run();
@@ -298,6 +342,12 @@ body.no-mac .mac-hint{display:none}
     const where = a.dataset.go;
     // go there through what's in the way: the white card comes down, the lid opens or closes at the laptop
     run(async () => {
+      if (where === "about") {
+        if (lid.v < 1) await toServices();
+        await scrollAnim(maxScroll());
+        await white.go(1);
+        return;
+      }
       if (white.v > 0 || white.to > 0) await white.go(0);
       if (where === "services") {
         if (lid.v < 1) await toServices(); else await scrollAnim(infoAt);
@@ -319,7 +369,8 @@ body.no-mac .mac-hint{display:none}
   const shade = work.querySelector(".lid-shade");
   const macHint = work.querySelector(".mac-hint");
   const hint = document.getElementById("hint");
-  const whiteCard = document.getElementById("white");
+  const reveals = whiteCard.querySelectorAll(".rv");
+  let whiteUp = false, aboutIn = false;
 
   /* ---------- one animation loop: it runs while something moves or the gallery plays, and sleeps otherwise ---------- */
   let running = false, last = 0;
@@ -360,11 +411,19 @@ body.no-mac .mac-hint{display:none}
     set(macHint, "opacity", w > 0.98 && c === 0 && lid.to === 0 && !auto ? "1" : "0");
     if (window.Mac && w > 0) Mac.update(w, c, now, dt);
 
-    // the white card pops up from the bottom
+    // the white card pops up from the bottom; the about me on it rises in as it arrives, and resets once it's gone
     set(whiteCard, "visibility", white.v > 0 ? "visible" : "hidden");
     set(whiteCard, "transform", `translate3d(0, ${((1 - easeInOut(white.v)) * 100).toFixed(3)}%, 0)`);
+    const up = white.v === 1;
+    if (up !== whiteUp) { whiteUp = up; whiteCard.inert = !up; whiteCard.setAttribute("aria-hidden", !up); }
+    const show = white.v > 0.55 && white.to === 1;
+    if (show !== aboutIn && (show || white.v === 0)) {
+      aboutIn = show;
+      reveals.forEach(el => el.classList.toggle("in", show));
+      if (!show) whiteScroll.scrollTop = 0;
+    }
 
-    markCurrent(white.v > 0.5 ? "" : c >= 0.5 ? "services" : w >= 0.5 ? "gallery" : "home");
+    markCurrent(white.v > 0.5 ? "about" : c >= 0.5 ? "services" : w >= 0.5 ? "gallery" : "home");
 
     // keep going while something moves, or the gallery plays on the open laptop's screen
     const playing = window.Mac && w > 0 && c < 0.75 && !reduce;

@@ -49,3 +49,26 @@ body.no-mac #info{background:#232428}
   .ff-head{flex-direction:column;gap:6px}
 }
 @media (prefers-reduced-motion: reduce){.rv{transition:none}}
+
+/* ---------- the about me, on the white card: black type on white ---------- */
+.ab{--ink:#0a0a0a;--muted:#6b6b70;--line:rgba(0,0,0,.1);box-sizing:border-box;min-height:100%;display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(72px,11vh,110px) clamp(20px,5vw,72px) max(40px,calc(env(safe-area-inset-bottom) + 24px));color:var(--ink);
+  font:clamp(15px,1.15vw,17px)/1.6 system-ui,-apple-system,"Segoe UI",Inter,sans-serif}
+.ab a{color:inherit}
+.ab-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:clamp(20px,3vw,40px);padding-bottom:clamp(12px,1.6vw,20px);border-bottom:1px solid var(--line)}
+.ab-head h2{margin:0;font-family:"League Spartan",sans-serif;font-weight:900;font-size:clamp(52px,9vw,150px);line-height:.84;letter-spacing:-.04em;text-transform:uppercase}
+.ab-head span{color:var(--muted);font-size:.9em}
+.ab-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:clamp(24px,5vw,80px)}
+.ab-main p{margin:0 0 14px;max-width:38em}
+.ab-main .ab-lead{margin-bottom:22px;font-family:"League Spartan",sans-serif;font-weight:700;font-size:clamp(26px,2.8vw,44px);line-height:1.05;letter-spacing:-.02em}
+.ab-facts{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.ab-facts li{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.ab-facts span{color:var(--muted)}
+.ab-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.ab-chips span{padding:5px 11px;border:1px solid var(--line);border-radius:999px;font-size:.84em}
+.ab-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.ab-links a{display:inline-flex;padding:9px 15px;border:1px solid var(--line);border-radius:999px;text-decoration:none;font-size:.92em;transition:border-color .2s,background .2s}
+.ab-links a:hover,.ab-links a:focus-visible{border-color:rgba(0,0,0,.4);background:rgba(0,0,0,.04)}
+.ab-links a:first-child{background:var(--ink);border-color:var(--ink);color:#fff}
+.ab-links a:first-child:hover,.ab-links a:first-child:focus-visible{background:#2a2a2d}
+@media (max-width:760px){.ab-grid{grid-template-columns:1fr}.ab-head{flex-direction:column;gap:6px}}
