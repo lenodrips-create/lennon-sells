@@ -11,8 +11,8 @@ html,body{margin:0;background:#0a0a0a}
 body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* the page scrolls through one screen of distance; both layers stay pinned to the viewport */
-#track{height:200vh;height:200svh}
+/* the page scrolls through three screens of distance: reel → laptop → folded phone → unfolded; every layer stays pinned */
+#track{height:400vh;height:400svh}
 
 /* 1. the showreel covers the whole screen; its 1920x1080 frame is scaled to cover and centered */
 #reel{position:fixed;inset:0;overflow:hidden;background:#0a0a0a}
@@ -45,6 +45,7 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   #hint{animation:none}
 }
 </style>
+<link rel="stylesheet" href="fold/fold.css?v=2">
 </head>
 <body>
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA. Dev reel 2026.</h1>
@@ -75,6 +76,111 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   </div>
 </section>
 
+<section id="fold" aria-label="Portfolio" data-finish="graphite">
+  <div class="fold-stage">
+    <div class="device">
+      <div class="device-shadow"></div>
+      <div class="half half-a">
+        <div class="face face-front"><div class="pane"></div></div>
+      </div>
+      <div class="half half-b">
+        <div class="face face-front"><div class="pane"></div></div>
+        <div class="face face-back" aria-hidden="true">
+          <div class="cover">
+            <div class="cover-top"><span>LH</span><span>Dev Reel 2026</span></div>
+            <div>
+              <div class="cover-clock">9:41</div>
+              <div class="cover-date"></div>
+            </div>
+            <div>
+              <div class="cover-name">Lennon Helman</div>
+              <div class="cover-role">Software developer</div>
+              <div class="cover-cta"><i></i>Scroll to unfold</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hinge"></div>
+
+      <div class="live ff">
+        <div class="ff-scroll">
+          <header class="ff-nav">
+            <a class="ff-brand" href="#ff-top">Lennon Helman</a>
+            <nav aria-label="Portfolio"><a href="#ff-work">Work</a><a href="#ff-about">About</a><a href="#ff-contact">Contact</a></nav>
+            <a class="ff-pill" href="mailto:lenodrips@gmail.com">Email ↗</a>
+          </header>
+
+          <section class="ff-hero" id="ff-top">
+            <p class="ff-kicker rv"><b></b>Software developer · Greencastle, PA</p>
+            <h2 class="ff-title rv">I build what <em>I imagine.</em></h2>
+            <p class="ff-lede rv">Browsers, dev tools and the web: the engine, the interface and the page that tells people about it.</p>
+          </section>
+
+          <section class="ff-sec" id="ff-work">
+            <div class="ff-head rv"><h3>Selected work</h3><span>05 projects</span></div>
+            <div class="ff-grid" id="ff-grid"></div>
+          </section>
+
+          <section class="ff-sec" id="ff-about">
+            <div class="ff-head rv"><h3>About</h3><span>@lenodrips</span></div>
+            <div class="ff-about">
+              <div class="rv">
+                <p>I'm Lennon. I build what I imagine.</p>
+                <p>I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it.</p>
+                <p>Most of my work starts as a question. Could I make my own web browser? That became Kepler, written in C++ on Qt and Chromium. Could a full code studio run inside a browser tab? That became CTerm Studio, with a C core compiled to WebAssembly.</p>
+                <p>I care about how software feels as much as what it does: fast, private, and a little bit cinematic.</p>
+              </div>
+              <div class="rv" style="--i:1">
+                <ul class="ff-facts">
+                  <li><span>Handle</span>@lenodrips</li>
+                  <li><span>Focus</span>Browsers, dev tools, the web</li>
+                  <li><span>Based in</span>Greencastle, PA</li>
+                  <li><span>Public projects</span>5</li>
+                </ul>
+                <div class="ff-chips"><span>C++</span><span>Qt 6</span><span>Rust</span><span>C</span><span>WebAssembly</span><span>JavaScript</span><span>React</span><span>Vite</span><span>CMake</span><span>HyperFrames</span></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="ff-sec ff-contact" id="ff-contact">
+            <div class="ff-head rv"><h3>Contact</h3><span>Open to work</span></div>
+            <a class="ff-big rv" href="mailto:lenodrips@gmail.com">lenodrips@gmail.com</a>
+            <div class="ff-links rv">
+              <a class="ff-ghost" href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a>
+              <a class="ff-ghost" href="https://keplerbrowser.org" target="_blank" rel="noopener">keplerbrowser.org ↗</a>
+            </div>
+          </section>
+
+          <footer class="ff-foot"><span>© 2026 Lennon Helman</span><span>Greencastle, PA</span></footer>
+        </div>
+
+        <div class="ff-detail" role="dialog" aria-modal="true" aria-label="Project">
+          <div class="ff-sheet">
+            <div class="ff-sheet-in">
+              <button class="ff-close" aria-label="Close project">✕</button>
+              <p class="ff-d-kicker"></p>
+              <h3 class="ff-d-title"></h3>
+              <p class="ff-d-text"></p>
+              <div class="ff-tags ff-d-tags"></div>
+              <div class="ff-links"><a class="ff-pill ff-d-link" href="#" target="_blank" rel="noopener"><span></span> ↗</a></div>
+              <div class="ff-gallery"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="fold-ui">
+    <div class="finishes" role="group" aria-label="Frame finish">
+      <button data-f="graphite" aria-pressed="true" aria-label="Graphite"></button>
+      <button data-f="silver" aria-pressed="false" aria-label="Silver"></button>
+      <button data-f="ember" aria-pressed="false" aria-label="Ember"></button>
+    </div>
+    <span class="fold-hint">Scroll to unfold</span>
+  </div>
+</section>
+<script src="fold/fold.js?v=2"></script>
+
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -104,8 +210,9 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   const work = document.getElementById("work");
   const laptop = work.querySelector(".laptop");
   const hint = document.getElementById("hint");
-  let lapY = innerHeight, lapV = 0, shown = 0;
-  const progress = () => Math.min(1, Math.max(0, scrollY / innerHeight));
+  let lapY = innerHeight, lapV = 0, shown = 0, opened = 0;
+  const stage = () => Math.min(3, Math.max(0, scrollY / innerHeight));
+  const clamp01 = x => Math.min(1, Math.max(0, x));
   const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
   /* ---------- pictures flow along a waving ribbon on the laptop screen ---------- */
@@ -138,11 +245,13 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
     boost += dy * 0.6;
     if (dy) dir = Math.sign(dy);
     lastY = scrollY;
-    // once scrolling stops part-way, finish the move in the direction it was going
+    // once scrolling stops between two screens, finish the move to the next one in the direction it was going
     clearTimeout(settle);
     settle = setTimeout(() => {
-      const end = document.documentElement.scrollHeight - innerHeight;
-      if (scrollY > 2 && scrollY < end - 2) scrollTo({ top: dir > 0 ? end : 0, behavior: reduce ? "auto" : "smooth" });
+      const H = innerHeight, at = scrollY / H;
+      if (Math.abs(at - Math.round(at)) * H < 3) return;
+      const to = Math.min(3, Math.max(0, dir > 0 ? Math.ceil(at) : Math.floor(at)));
+      scrollTo({ top: to * H, behavior: reduce ? "auto" : "smooth" });
     }, 140);
   }, { passive: true });
 
@@ -176,17 +285,18 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   function frameLoop(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    const p = progress();
+    const p = stage();
 
-    // the white card eases after the scroll instead of jumping with it
-    shown = reduce ? p : shown + (p - shown) * (1 - Math.exp(-dt * 9));
+    // the cards ease after the scroll instead of jumping with it
+    shown = reduce ? p : shown + (p - shown) * (1 - Math.exp(-dt * 7));
     if (Math.abs(p - shown) < 0.0005) shown = p;
-    // it rises as a rounded card, a little smaller than the screen, and grows to fill it as its corners straighten
-    const e = smooth(0, 1, shown), grow = smooth(0.55, 1, shown);
+    const w = clamp01(shown);
+    // the white card rises as a rounded card, a little smaller than the screen, and grows to fill it as its corners straighten
+    const e = smooth(0, 1, w), grow = smooth(0.55, 1, w);
     work.style.transform = `translate3d(0, ${(1 - e) * 100}%, 0) scale(${0.9 + 0.1 * grow})`;
     work.style.borderRadius = `${56 * (1 - grow)}px`;
     // the laptop waits until the card is mostly up, then glides in from below on a soft spring
-    const target = (1 - smooth(0.35, 0.95, shown)) * innerHeight;
+    const target = (1 - smooth(0.35, 0.95, w)) * innerHeight;
     if (reduce) lapY = target;
     else {
       lapV += (110 * (target - lapY) - 19 * lapV) * dt;  // nearly critically damped: a hint of settle, no bounce
@@ -195,7 +305,13 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
     laptop.style.transform = `translate3d(0, ${lapY}px, 0)`;
     hint.style.opacity = Math.max(0, 1 - p * 5);
 
-    if (shown > 0) drawRibbon(now / 1000, dt);
+    // then the dark card with the folded phone, which unfolds on the next scroll at its own, slower pace
+    const openTo = clamp01(p - 2);
+    opened = reduce ? openTo : opened + (openTo - opened) * (1 - Math.exp(-dt * 4.2));
+    if (Math.abs(openTo - opened) < 0.01) opened = openTo;  // settle the last 1% so the display is usable promptly
+    Fold.update(clamp01(shown - 1), opened);
+
+    if (shown > 0 && shown < 2) drawRibbon(now / 1000, dt);
     if (reel) (shown >= 1 ? reel.pause() : reel.paused() && reel.play());
     requestAnimationFrame(frameLoop);
   }
