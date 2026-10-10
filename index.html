@@ -90,16 +90,9 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   <p class="mac-hint" aria-hidden="true">Scroll to close</p>
 </section>
 
-<section id="info" aria-label="Lennon Helman" inert>
+<section id="info" aria-label="Services we offer" inert>
   <div class="info-scroll ff">
-    <a class="ff-brand" href="#ff-top">Lennon Helman</a>
-    <section class="ff-hero" id="ff-top">
-      <p class="ff-kicker rv"><b></b>Software developer · Greencastle, PA</p>
-      <h2 class="ff-title rv">I build what <em>I imagine.</em></h2>
-      <p class="ff-lede rv">Browsers, dev tools and the web: the engine, the interface and the page that tells people about it.</p>
-    </section>
-
-    <section class="ff-sec" id="ff-services">
+    <section class="ff-sec ff-only" id="ff-services">
       <div class="ff-head rv"><h3>Services we offer</h3><span>03 services</span></div>
       <div class="ff-services">
         <article class="ff-svc rv">
@@ -126,40 +119,6 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
       </div>
       <div class="ff-links rv"><a class="ff-pill" href="mailto:lenodrips@gmail.com?subject=New%20project">Start a project ↗</a></div>
     </section>
-
-    <section class="ff-sec" id="ff-about">
-      <div class="ff-head rv"><h3>About</h3><span>@lenodrips</span></div>
-      <div class="ff-about">
-        <div class="rv">
-          <p>I'm Lennon. I build what I imagine.</p>
-          <p>I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it.</p>
-          <p>Most of my work starts as a question. Could I make my own web browser? That became Kepler, written in C++ on Qt and Chromium. Could a full code studio run inside a browser tab? That became CTerm Studio, with a C core compiled to WebAssembly.</p>
-          <p>I care about how software feels as much as what it does: fast, private, and a little bit cinematic.</p>
-        </div>
-        <div class="rv" style="--i:1">
-          <ul class="ff-facts">
-            <li><span>Handle</span>@lenodrips</li>
-            <li><span>Focus</span>Browsers, dev tools, the web</li>
-            <li><span>Based in</span>Greencastle, PA</li>
-            <li><span>Public projects</span>5</li>
-          </ul>
-          <div class="ff-chips"><span>C++</span><span>Qt 6</span><span>Rust</span><span>C</span><span>WebAssembly</span><span>JavaScript</span><span>React</span><span>Vite</span><span>CMake</span><span>HyperFrames</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="ff-sec ff-contact" id="ff-contact">
-      <div class="ff-head rv"><h3>Contact</h3><span>Open to work</span></div>
-      <a class="ff-big rv" href="mailto:lenodrips@gmail.com">lenodrips@gmail.com</a>
-      <div class="ff-links rv">
-        <a class="ff-ghost" href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a>
-        <a class="ff-ghost" href="https://keplerbrowser.org" target="_blank" rel="noopener">keplerbrowser.org ↗</a>
-      </div>
-    </section>
-
-    <footer class="ff-foot"><span>© 2026 Lennon Helman</span><span>Greencastle, PA</span></footer>
-
-    <footer class="ff-foot"><span>© 2026 Lennon Helman</span><span>Greencastle, PA</span></footer>
   </div>
 </section>
 
@@ -167,8 +126,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
 <nav class="menu" id="menu" aria-label="Site" inert>
   <ol>
     <li><a href="#gallery" data-go="gallery"><span>01</span>Project Gallery</a></li>
-    <li><a href="#about" data-go="about"><span>02</span>About</a></li>
-    <li><a href="#contact" data-go="contact"><span>03</span>Contact</a></li>
+    <li><a href="#services" data-go="services"><span>02</span>Services</a></li>
   </ol>
   <div class="menu-foot">
     <div><a href="mailto:lenodrips@gmail.com">lenodrips@gmail.com</a><a href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a></div>
@@ -238,22 +196,12 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     return t >= 1 ? tw.to : tw.from + (tw.to - tw.from) * tw.ease(t);
   }
 
-  /* ---------- info page ---------- */
+  /* ---------- services page, on the closed lid ---------- */
   const info = document.getElementById("info");
   const infoScroll = info.querySelector(".info-scroll");
-  function scrollInfo(sel, smoothly) {
-    const el = sel && infoScroll.querySelector(sel);
-    const top = el ? Math.max(0, el.offsetTop - 20) : 0;
-    infoScroll.scrollTo({ top, behavior: smoothly && !reduce ? "smooth" : "auto" });
-  }
-  info.addEventListener("click", e => {
-    const a = e.target.closest('a[href^="#ff-"]');
-    if (!a) return;
-    e.preventDefault();
-    scrollInfo(a.getAttribute("href"), true);
-  });
+  // its content rises in once the lid has settled, and again on every visit
   const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add("in")), { root: infoScroll, threshold: 0.12 });
-  info.querySelectorAll(".rv").forEach(el => io.observe(el));
+  const reveals = info.querySelectorAll(".rv");
 
   /* ---------- menu ---------- */
   const menuBtn = document.getElementById("menu-btn"), menu = document.getElementById("menu");
@@ -277,7 +225,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     // move while the menu slides away
     if (where === "home") goTo(0);
     else if (where === "gallery") goTo(1);
-    else { scrollInfo(where === "about" ? "#ff-about" : "#ff-contact", shown === LAST); goTo(LAST); }
+    else { infoScroll.scrollTo({ top: 0, behavior: shown === LAST && !reduce ? "smooth" : "auto" }); goTo(LAST); }
   });
   addEventListener("keydown", e => { if (e.key === "Escape" && menuOpen) { e.stopPropagation(); setMenu(false); } }, true);
 
@@ -392,7 +340,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     if (shown !== 1) { clearTimeout(hintTimer); hintTimer = 0; set(macHint, "opacity", "0"); }
     if (window.Mac && shown > 0) Mac.update(w, c, now, dt);
 
-    // the info page appears on the closed lid as the camera settles over it
+    // the services page appears on the closed lid as the camera settles over it
     const k = smooth(0.84, 1, c);
     set(info, "visibility", k > 0 ? "visible" : "hidden");
     set(info, "opacity", k.toFixed(3));
@@ -400,7 +348,8 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     if (on !== infoOn) {
       infoOn = on;
       info.inert = !on;
-      if (on) info.querySelectorAll(".ff-hero .rv").forEach(el => el.classList.add("in"));
+      if (on) reveals.forEach(el => io.observe(el));
+      else { io.disconnect(); reveals.forEach(el => el.classList.remove("in")); }
     }
 
     const settled = shown === tw.to && lapV === 0 && lapY === lapTarget;
