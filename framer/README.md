@@ -1,6 +1,6 @@
 # FoldfolioSection for Framer
 
-`FoldfolioSection.tsx` is one Framer code component. It recreates the Foldfolio style:
+`FoldfolioSection.tsx` is one Framer code component. `FoldfolioSection.jsx` is the same component in plain JavaScript, with the TypeScript types removed. Use either one; they behave the same. It recreates the Foldfolio style:
 - **The device:** a closed foldable phone that unfolds as you scroll into a full portfolio display. It folds like a book on desktop and tablet, and top to bottom on phones.
 - **The display:** dark styling, rounded cards, a project grid that opens into a detail sheet, About and Contact, and a frame finish picker.
 
@@ -11,7 +11,7 @@ lennonh.com itself isn't built in Framer; it's this repository, published by Git
 ## Paste it into Framer (about 2 minutes)
 
 1. **Create the file.** Open your Framer project. In the left panel, go to **Assets**, then **Code**, and click **+**. Choose **New Code File** and name it `FoldfolioSection`.
-2. **Paste the code.** Select everything in the editor that opens, delete it, and paste the whole of `FoldfolioSection.tsx`. Framer saves it automatically.
+2. **Paste the code.** Select everything in the editor that opens, delete it, and paste the whole of `FoldfolioSection.tsx`, or `FoldfolioSection.jsx` if you'd rather work in plain JavaScript. Framer saves it automatically.
 3. **Place the component.** Go back to the canvas. On your Home page, drag **FoldfolioSection** from **Assets → Code** onto the page. Put it where the section should appear; with the order on lennonh.com, that's right after your laptop section.
 4. **Size it.** With it selected, set **Width** to **Fill** and **Height** to **Fit**. The component sets its own height: 3 screens of scroll by default, adjustable with **Scroll length**.
 5. **Check its container.** Make sure no parent frame has **Overflow: Hidden** or **Clip content** turned on. A clipping parent stops the sticky phone from staying on screen while you scroll.
