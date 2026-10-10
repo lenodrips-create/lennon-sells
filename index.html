@@ -21,7 +21,7 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 @keyframes hint{0%{transform:translateY(-10px);opacity:0}40%{opacity:1}100%{transform:translateY(10px);opacity:0}}
 
 /* 2. scrolling down slides a white screen up over the reel, and the laptop springs up from the bottom with it */
-#work{position:fixed;inset:0;background:#f5f9fc;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;transform:translateY(100%);will-change:transform}
+#work{position:fixed;inset:0;background:#f5f9fc;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;transform:translateY(100%);transform-origin:50% 0;border-radius:56px;box-shadow:0 -30px 80px rgba(0,0,0,.45);will-change:transform,border-radius}
 .laptop{position:relative;width:min(1180px,96vw,calc(133vh));aspect-ratio:1448/1086;transform:translateY(100vh);will-change:transform}
 .laptop>img{position:absolute;inset:0;width:100%;height:100%;display:block;
   /* the hand runs off the photo's left edge; fade that edge into the page */
@@ -104,7 +104,7 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   const work = document.getElementById("work");
   const laptop = work.querySelector(".laptop");
   const hint = document.getElementById("hint");
-  let lapY = innerHeight, lapV = 0;
+  let lapY = innerHeight, lapV = 0, shown = 0;
   const progress = () => Math.min(1, Math.max(0, scrollY / innerHeight));
   const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
@@ -178,19 +178,25 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
     last = now;
     const p = progress();
 
-    // the white screen tracks the scroll; the laptop waits until it is mostly up, then springs in from below
-    work.style.transform = `translateY(${(1 - p) * 100}%)`;
-    const target = (1 - smooth(0.35, 0.95, p)) * innerHeight;
+    // the white card eases after the scroll instead of jumping with it
+    shown = reduce ? p : shown + (p - shown) * (1 - Math.exp(-dt * 9));
+    if (Math.abs(p - shown) < 0.0005) shown = p;
+    // it rises as a rounded card, a little smaller than the screen, and grows to fill it as its corners straighten
+    const e = smooth(0, 1, shown), grow = smooth(0.55, 1, shown);
+    work.style.transform = `translate3d(0, ${(1 - e) * 100}%, 0) scale(${0.9 + 0.1 * grow})`;
+    work.style.borderRadius = `${56 * (1 - grow)}px`;
+    // the laptop waits until the card is mostly up, then glides in from below on a soft spring
+    const target = (1 - smooth(0.35, 0.95, shown)) * innerHeight;
     if (reduce) lapY = target;
     else {
-      lapV += (170 * (target - lapY) - 15 * lapV) * dt;  // a lightly damped spring: it overshoots a little, then settles
+      lapV += (110 * (target - lapY) - 19 * lapV) * dt;  // nearly critically damped: a hint of settle, no bounce
       lapY += lapV * dt;
     }
-    laptop.style.transform = `translateY(${lapY}px)`;
+    laptop.style.transform = `translate3d(0, ${lapY}px, 0)`;
     hint.style.opacity = Math.max(0, 1 - p * 5);
 
-    if (p > 0) drawRibbon(now / 1000, dt);
-    if (reel) (p >= 1 ? reel.pause() : reel.paused() && reel.play());
+    if (shown > 0) drawRibbon(now / 1000, dt);
+    if (reel) (shown >= 1 ? reel.pause() : reel.paused() && reel.play());
     requestAnimationFrame(frameLoop);
   }
   drawRibbon(0, 0);
