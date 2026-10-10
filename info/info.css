@@ -1,15 +1,13 @@
-/* The services page. It sits over the closed MacBook, so the lid that filled the screen becomes the page's
-   background; the content scrolls inside .info-scroll when it's taller than the screen. */
+/* The services. They follow the lid-closing stretch in the page's flow, so they scroll up over the MacBook's
+   pinned stage once its closed lid fills the screen: the lid becomes the page's background. */
 #info{
   --line:rgba(255,255,255,.1);--surface:rgba(255,255,255,.045);--surface-2:rgba(255,255,255,.08);
   --ink:#f2f1ee;--muted:#9a999f;--accent:#ff3d00;
-  position:fixed;inset:0;z-index:5;color:var(--ink);opacity:0;visibility:hidden;will-change:opacity;
+  position:relative;z-index:2;container-type:inline-size;color:var(--ink);
   font-family:system-ui,-apple-system,"Segoe UI",Inter,sans-serif;
 }
-/* a light shade over the aluminium keeps small text easy to read */
-#info::before{content:"";position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 0%,rgba(0,0,0,.08),rgba(0,0,0,.42));pointer-events:none}
+/* without WebGL there's no lid behind them */
 body.no-mac #info{background:#232428}
-.info-scroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;container-type:inline-size;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent}
 
 .ff{--pad:clamp(18px,5cqw,72px);font-size:clamp(14px,1.25cqw,17px);line-height:1.55;color:var(--ink)}
 .ff a{color:inherit;text-decoration:none}
@@ -17,8 +15,8 @@ body.no-mac #info{background:#232428}
 .ff-pill:hover,.ff-pill:focus-visible{transform:translateY(-1px);background:#fff}
 
 .ff-sec{padding:clamp(24px,4cqw,64px) var(--pad)}
-/* the only section: centred on the lid when it fits, clear of the menu button at the top */
-.ff-only{box-sizing:border-box;min-height:100%;display:flex;flex-direction:column;justify-content:center;
+/* the only section: a screen tall, centred on the lid when it fits, clear of the menu button at the top */
+.ff-only{box-sizing:border-box;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
   padding-top:max(96px,calc(env(safe-area-inset-top) + 80px));padding-bottom:max(40px,calc(env(safe-area-inset-bottom) + 24px))}
 .ff-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:clamp(18px,2.4cqw,32px);padding-bottom:clamp(12px,1.6cqw,20px);border-bottom:1px solid var(--line)}
 .ff-head h3{margin:0;font-family:"League Spartan",sans-serif;font-weight:900;font-size:clamp(40px,7cqw,120px);line-height:.88;letter-spacing:-.04em;text-transform:uppercase}
@@ -41,7 +39,7 @@ body.no-mac #info{background:#232428}
 .ff-ghost{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border:1px solid var(--line);border-radius:999px;transition:border-color .2s,background .2s}
 .ff-ghost:hover,.ff-ghost:focus-visible{border-color:rgba(255,255,255,.38);background:rgba(255,255,255,.06)}
 
-/* content rises in once the lid has settled, and as it scrolls into view */
+/* content rises in as it scrolls into view */
 .rv{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.8,.2,1),transform .7s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--i,0) * 70ms)}
 .rv.in{opacity:1;transform:none}
 .ff-svc.in:hover{transform:translateY(-4px)}

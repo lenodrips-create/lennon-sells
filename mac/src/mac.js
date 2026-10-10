@@ -1,6 +1,7 @@
 // A real-time 3D MacBook (Air-like proportions, in centimetres) for the laptop page.
-// Its display shows the project gallery strip; on the next scroll the lid closes on its hinge and the
-// camera cranes over it until the lid fills the screen. The page drives it with Mac.update(rise, close, now, dt).
+// Its display shows the project gallery strip; further scrolling closes the lid on its hinge while the camera
+// cranes over it until the lid fills the screen. The page drives it from the scroll position with
+// Mac.update(rise, close, now, dt): rise is how far the card has come up (0..1), close how far the lid has shut.
 // Build: cd mac && npm install && npm run build  (bundles three.js into mac/mac.min.js)
 import * as THREE from "three";
 
@@ -348,6 +349,7 @@ let vw = 1, vh = 1, headPx = 0, openFit = null, closedFit = null;
 const box = new THREE.Box3();
 function corners() {
   lid.rotation.x = -OPEN;
+  mac.position.set(0, 0, 0); mac.rotation.set(0, 0, 0);   // framed at rest; update() sets its lift again
   mac.updateMatrixWorld(true);
   box.makeEmpty();
   box.expandByObject(base);
@@ -415,6 +417,10 @@ function update(rise, close, now, dt) {
   if (!stripOn && !dirty && rise === last.rise && close === last.close) return;
   last.rise = rise; last.close = close; dirty = false;
 
+  // as the card arrives the laptop lifts into place with a slight turn, and settles as the card finishes
+  const lift = reduce ? 0 : 1 - easeInOut(smooth(0.3, 1, rise));
+  mac.position.y = -5 * lift;
+  mac.rotation.y = 0.22 * lift;
   // the lid closes over the first 60% of the move, with a soft landing
   const lc = easeInOut(clamp01(close / 0.6));
   lid.rotation.x = -OPEN * (1 - lc);

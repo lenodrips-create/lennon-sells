@@ -7,33 +7,42 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA. Dev reel 2026.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="mac/mac.min.js?v=1">
+<link rel="modulepreload" href="mac/mac.min.js?v=2">
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
-html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:#0a0a0a}
-body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+html{background:#0a0a0a;overscroll-behavior-y:none}
+body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+html.menu-open{overflow:hidden}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* three full-screen stops (reel → MacBook → closed lid with the info page). The page itself never scrolls:
-   each wheel gesture, swipe or key press moves one stop */
+/* The page scrolls normally, and everything moves with the scroll: the white card scrolls up over the reel, the
+   MacBook pins to the screen while the next stretch of scrolling closes its lid, and then the services scroll up
+   over the closed lid. Scrolling back up plays it all in reverse. */
 
 /* 1. the showreel: the HyperFrames compositions in reel/ (16:9) and reel-portrait/ (9:16) rendered to video,
-   so the device's video hardware plays it; the page picks the one that matches the screen's shape */
-#reel{position:fixed;inset:0;overflow:hidden;background:#0a0a0a}
-#reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#0a0a0a}
+   so the device's video hardware plays it; the page picks the one that matches the screen's shape.
+   It sits in a rounded frame a little inside the screen edges. */
+#reel{--gap:clamp(10px,2.6vw,40px);position:fixed;top:var(--gap);left:var(--gap);right:var(--gap);bottom:var(--gap);overflow:hidden;border-radius:clamp(16px,2.2vw,32px);background:#151515}
+#reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#151515}
 #hint{position:absolute;left:50%;bottom:18px;width:2px;height:34px;margin-left:-1px;background:linear-gradient(#f5f3ee,rgba(245,243,238,0));animation:hint 1.6s ease-in-out infinite}
 @keyframes hint{0%{transform:translateY(-10px);opacity:0}40%{opacity:1}100%{transform:translateY(10px);opacity:0}}
+.intro{height:100vh}
 
-/* 2. scrolling down slides a white card up over the reel, and the MacBook rises with it. The card is taller than
-   the screen by its corner radius: its rounded top shows while it rises and ends up just above the screen */
-#work{--tb:clamp(84px,14vh,160px);--lip:56px;position:fixed;left:0;right:0;bottom:0;top:calc(-1 * var(--lip));background:#f5f9fc;overflow:hidden;transform:translate3d(0,100%,0);border-radius:var(--lip) var(--lip) 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.45);visibility:hidden;will-change:transform}
-.work-title{position:absolute;left:0;right:0;top:calc(var(--lip) + var(--tb) * .2);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#0a0a0a;z-index:2;will-change:transform,opacity}
-@media (max-width:700px){.work-title{top:calc(var(--lip) + clamp(76px,10vh,104px));font-size:15vw;padding:0 4vw}}
-/* the MacBook is a real-time 3D model (mac/src/mac.js); its canvas covers the card below the lip */
-#mac{position:absolute;left:0;top:var(--lip);width:100%;height:calc(100% - var(--lip));display:block;will-change:transform}
+/* 2. the white card, in the page's flow: it scrolls up over the fixed reel */
+#work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#f5f9fc;border-radius:56px 56px 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.45)}
+/* the stage holds the headline and the MacBook, and stays pinned to the screen from the moment it reaches the top */
+.stage{position:sticky;top:0;height:100vh;z-index:1}
+.work-title{position:absolute;left:0;right:0;top:calc(var(--tb) * .2 + 6px);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#0a0a0a;z-index:2;will-change:transform,opacity}
+@media (max-width:700px){.work-title{top:clamp(76px,10vh,104px);font-size:15vw;padding:0 4vw}}
+/* the MacBook is a real-time 3D model (mac/src/mac.js) */
+#mac{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* a shade over the closed lid, so the services read clearly on it */
+.lid-shade{position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 0%,rgba(0,0,0,.08),rgba(0,0,0,.42));opacity:0;pointer-events:none;z-index:1}
 body.no-mac .mac-hint{display:none}
 .mac-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));margin:0;text-align:center;font:600 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6c7076;opacity:0;transition:opacity .4s;z-index:2}
+/* this stretch of scrolling closes the lid while the stage stays pinned */
+.close-track{height:150vh}
 
 @media (prefers-reduced-motion: reduce){#hint{animation:none}}
 
@@ -74,7 +83,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
 @media (prefers-reduced-motion: reduce){.menu,.menu li a,.menu-foot{transition:none}}
 
 </style>
-<link rel="stylesheet" href="info/info.css?v=1">
+<link rel="stylesheet" href="info/info.css?v=2">
 </head>
 <body>
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA. Dev reel 2026.</h1>
@@ -84,14 +93,17 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   <div id="hint"></div>
 </div>
 
-<section id="work" aria-label="Project gallery">
-  <h2 class="work-title">Project Gallery</h2>
-  <canvas id="mac" aria-hidden="true"></canvas>
-  <p class="mac-hint" aria-hidden="true">Scroll to close</p>
-</section>
+<div class="intro" aria-hidden="true"></div>
 
-<section id="info" aria-label="Services we offer" inert>
-  <div class="info-scroll ff">
+<section id="work" aria-label="Project gallery">
+  <div class="stage">
+    <h2 class="work-title">Project Gallery</h2>
+    <canvas id="mac" aria-hidden="true"></canvas>
+    <div class="lid-shade"></div>
+    <p class="mac-hint" aria-hidden="true">Scroll to close</p>
+  </div>
+  <div class="close-track" aria-hidden="true"></div>
+  <div id="info" class="ff">
     <section class="ff-sec ff-only" id="ff-services">
       <div class="ff-head rv"><h3>Services we offer</h3><span>03 services</span></div>
       <div class="ff-services">
@@ -133,7 +145,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     <div><a href="#top" data-go="home">Back to start</a><span>Lennon Helman · Greencastle, PA</span></div>
   </div>
 </nav>
-<script type="module" src="mac/mac.min.js?v=1"></script>
+<script type="module" src="mac/mac.min.js?v=2"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -172,36 +184,26 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   pickVideo();
   portraitMq.addEventListener("change", pickVideo);
 
-  /* ---------- three stops: 0 reel, 1 open MacBook, 2 closed lid filling the screen + info ---------- */
-  const LAST = 2;
-  let target = 0, shown = 0;
-  // every move is a fixed-length tween that starts from wherever the page is, so it can be reversed mid-way.
-  // Reel ↔ MacBook is eased here; closing the lid is timed linearly, because the model eases the lid and the camera itself
-  const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  const tw = { from: 0, to: 0, t0: 0, dur: 0.85, ease: easeInOut };
-  function goTo(t) {
-    t = Math.min(LAST, Math.max(0, t));
-    if (t === target) return;
-    target = t;
-    const lo = Math.min(shown, t), hi = Math.max(shown, t);
-    const a = Math.max(0, Math.min(1, hi) - lo), b = Math.max(0, hi - Math.max(1, lo));  // distance in each leg
-    tw.from = shown; tw.to = t; tw.t0 = performance.now();
-    tw.dur = reduce ? 0 : Math.max(0.35, 0.85 * a + 2.1 * b);
-    tw.ease = a > 0 ? easeInOut : x => x;
-    kick();
-  }
-  const go = dir => goTo(target + dir);
-  function sample(now) {
-    const t = tw.dur ? clamp01((now - tw.t0) / (tw.dur * 1000)) : 1;
-    return t >= 1 ? tw.to : tw.from + (tw.to - tw.from) * tw.ease(t);
-  }
-
-  /* ---------- services page, on the closed lid ---------- */
+  /* ---------- scroll positions ---------- */
+  // three stretches of the page: the card rising over the reel, the lid closing (stage pinned), the services
+  const work = document.getElementById("work");
+  const stage = work.querySelector(".stage");
+  const track = work.querySelector(".close-track");
   const info = document.getElementById("info");
-  const infoScroll = info.querySelector(".info-scroll");
-  // its content rises in once the lid has settled, and again on every visit
-  const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add("in")), { root: infoScroll, threshold: 0.12 });
-  const reveals = info.querySelectorAll(".rv");
+  let riseLen = 1, closeAt = 1, closeLen = 1, infoAt = 1, vh = 1;
+  function measure() {
+    riseLen = Math.max(1, work.offsetTop);            // the reel's screen of scrolling
+    closeAt = work.offsetTop + track.offsetTop - stage.offsetHeight;   // where the stage pins
+    closeLen = Math.max(1, track.offsetHeight);
+    infoAt = work.offsetTop + info.offsetTop;
+    vh = stage.offsetHeight;
+  }
+  measure();
+  const scrollTo = top => window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+
+  /* ---------- services: they rise in as they scroll into view ---------- */
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 });
+  info.querySelectorAll(".rv").forEach(el => io.observe(el));
 
   /* ---------- menu ---------- */
   const menuBtn = document.getElementById("menu-btn"), menu = document.getElementById("menu");
@@ -209,6 +211,7 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   function setMenu(open) {
     menuOpen = open;
     document.body.classList.toggle("menu-open", open);
+    document.documentElement.classList.toggle("menu-open", open);   // the page doesn't scroll under the menu
     menuBtn.setAttribute("aria-expanded", open);
     menuBtn.querySelector("span").textContent = open ? "Close" : "Menu";
     menu.inert = !open;
@@ -222,143 +225,56 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     e.preventDefault();
     const where = a.dataset.go;
     setMenu(false);
-    // move while the menu slides away
-    if (where === "home") goTo(0);
-    else if (where === "gallery") goTo(1);
-    else { infoScroll.scrollTo({ top: 0, behavior: shown === LAST && !reduce ? "smooth" : "auto" }); goTo(LAST); }
+    // scroll there while the menu slides away; the animations play along the way
+    scrollTo(where === "home" ? 0 : where === "gallery" ? closeAt : infoAt);
   });
   addEventListener("keydown", e => { if (e.key === "Escape" && menuOpen) { e.stopPropagation(); setMenu(false); } }, true);
 
-  // on the info page its content scrolls natively; at its top, scrolling up opens the MacBook again
-  let innerAt = 0;
-  infoScroll.addEventListener("scroll", () => { innerAt = performance.now(); }, { passive: true });
-  function innerScroller(node) {
-    if (target !== LAST || !node || !node.closest || !node.closest("#info")) return null;
-    return infoScroll;
-  }
-  const canScroll = (el, dy) => (dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0);
-
-  // the first event of a wheel or trackpad gesture moves one stop at once; the rest of that gesture, including
-  // trackpad momentum, is absorbed. A new gesture is a pause in events or a sudden jump in strength.
-  let lastWheel = 0, lastMag = 0, lastStep = 0, armed = true;
-  addEventListener("wheel", e => {
-    if (menuOpen) { e.preventDefault(); return; }
-    const dy = e.deltaMode ? e.deltaY * 16 : e.deltaY;
-    const el = innerScroller(e.target);
-    if (el && canScroll(el, dy)) return;              // let the page content scroll itself
-    e.preventDefault();
-    // event timestamps, not handling time, so a busy frame can't split one gesture into two
-    const now = e.timeStamp || performance.now(), mag = Math.abs(dy);
-    const fresh = now - lastWheel > 180 || (mag > lastMag * 1.8 && mag > 15);
-    lastWheel = now; lastMag = mag;
-    if (el && now - innerAt < 300) { armed = false; return; }   // tail of a scroll inside the content
-    if (fresh) armed = true;
-    if (armed && mag >= 4 && now - lastStep > 380) { armed = false; lastStep = now; go(Math.sign(dy)); }
-  }, { passive: false });
-
-  let touchY = null, touchEl = null;
-  addEventListener("touchstart", e => { touchY = e.touches[0].clientY; touchEl = innerScroller(e.target); }, { passive: true });
-  addEventListener("touchmove", e => {
-    if (touchY === null) return;
-    if (touchEl && canScroll(touchEl, touchY - e.touches[0].clientY)) return;
-    if (e.cancelable) e.preventDefault();
-  }, { passive: false });
-  addEventListener("touchend", e => {
-    if (touchY === null) return;
-    if (menuOpen) { touchY = null; return; }
-    const dy = touchY - e.changedTouches[0].clientY, el = touchEl;
-    touchY = null;
-    if (Math.abs(dy) < 40 || performance.now() - innerAt < 300) return;
-    if (el && canScroll(el, dy)) return;
-    go(Math.sign(dy));
-  }, { passive: true });
-
-  addEventListener("keydown", e => {
-    if (menuOpen || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
-    const a = document.activeElement;
-    const down = e.key === "ArrowDown" || e.key === "PageDown" || (e.key === " " && !(a && a.closest && a.closest("button, a")));
-    const up = e.key === "ArrowUp" || e.key === "PageUp";
-    if (e.key === "Home" || e.key === "End") { e.preventDefault(); goTo(e.key === "Home" ? 0 : LAST); return; }
-    if (!down && !up) return;
-    const el = innerScroller(a) || (target === LAST && shown === LAST ? infoScroll : null);
-    if (el && canScroll(el, down ? 1 : -1)) {
-      if (innerScroller(a)) return;                    // focus is in the content: the browser scrolls it
-      e.preventDefault();                              // otherwise scroll it here
-      const page = e.key === "PageDown" || e.key === "PageUp" || e.key === " ";
-      el.scrollBy({ top: (down ? 1 : -1) * (page ? el.clientHeight * 0.85 : 90), behavior: reduce ? "auto" : "smooth" });
-      return;
-    }
-    e.preventDefault();
-    go(down ? 1 : -1);
-  });
-
   /* ---------- the MacBook page ---------- */
-  const work = document.getElementById("work");
-  const canvas = document.getElementById("mac");
   const title = work.querySelector(".work-title");
+  const shade = work.querySelector(".lid-shade");
   const macHint = work.querySelector(".mac-hint");
   const hint = document.getElementById("hint");
-  let lapY = innerHeight, lapV = 0, isLight = false, infoOn = false, hintTimer = 0;
+  let isLight = false;
 
-  /* ---------- one animation loop, which sleeps when nothing moves ---------- */
+  /* ---------- one animation loop: it runs while the page scrolls or the gallery plays, and sleeps otherwise ---------- */
   let running = false, last = 0;
   function kick() { if (!running) { running = true; last = performance.now(); requestAnimationFrame(loop); } }
+  addEventListener("scroll", kick, { passive: true });
   addEventListener("mac-ready", kick);
-  // without WebGL the MacBook can't draw: the info page gets a plain background instead
-  addEventListener("load", () => { if (!window.Mac) document.body.classList.add("no-mac"); });
+  // without WebGL the MacBook can't draw: the services get a plain background instead
+  addEventListener("load", () => { if (!window.Mac) document.body.classList.add("no-mac"); measure(); kick(); });
 
   function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    shown = sample(now);
+    const y = window.scrollY;
+    const w = clamp01(y / riseLen);                   // the card covering the reel
+    const c = clamp01((y - closeAt) / closeLen);      // the lid closing
 
-    // reel: hidden and paused once the card fully covers it
-    set(reelBox, "visibility", shown >= 1 ? "hidden" : "visible");
-    set(hint, "opacity", String(Math.max(0, 1 - shown * 5)));
-    set(hint, "animationPlayState", shown > 0.2 ? "paused" : "running");  // a hidden looping animation still costs frames
-    if (!reduce) shown >= 1 ? !video.paused && video.pause() : video.paused && video.play().catch(() => {});
+    // reel: hidden and paused once the card covers it
+    set(reelBox, "visibility", w >= 1 ? "hidden" : "visible");
+    set(hint, "opacity", String(Math.max(0, 1 - w * 5)));
+    set(hint, "animationPlayState", w > 0.2 ? "paused" : "running");  // a hidden looping animation still costs frames
+    if (!reduce) w >= 1 ? !video.paused && video.pause() : video.paused && video.play().catch(() => {});
 
-    // MacBook page: rises as a rounded card; the laptop glides up after it, then closes and fills the screen
-    const w = clamp01(shown), c = clamp01(shown - 1);
-    set(work, "visibility", shown > 0 ? "visible" : "hidden");
-    const light = shown > 0.5 && shown < 1.55;
+    // the menu button turns dark over the white card, and light again once the lid covers it
+    const light = w > 0.5 && c < 0.55;
     if (light !== isLight) { isLight = light; document.body.classList.toggle("light", light); }
-    set(work, "transform", `translate3d(0, ${((1 - w) * 100).toFixed(3)}%, 0)`);
-    const ty = (1 - smooth(0.25, 0.85, w)) * 60 - smooth(0, 0.35, c) * 40;
-    set(title, "transform", `translate3d(0, ${ty.toFixed(2)}px, 0)`);
-    set(title, "opacity", (smooth(0.3, 0.9, w) * (1 - smooth(0, 0.3, c))).toFixed(3));
-    const lapTarget = (1 - smooth(0.35, 0.95, w)) * innerHeight;
-    if (reduce) { lapY = lapTarget; lapV = 0; }
-    else {
-      lapV += (110 * (lapTarget - lapY) - 19 * lapV) * dt;  // nearly critically damped: a hint of settle, no bounce
-      lapY += lapV * dt;
-      if (Math.abs(lapTarget - lapY) < 0.3 && Math.abs(lapV) < 2) { lapY = lapTarget; lapV = 0; }
-    }
-    set(canvas, "transform", `translate3d(0, ${lapY.toFixed(2)}px, 0)`);
-    // "scroll to close" shows once the laptop has settled open
-    if (shown === 1 && !hintTimer) hintTimer = setTimeout(() => set(macHint, "opacity", "1"), 1600);
-    if (shown !== 1) { clearTimeout(hintTimer); hintTimer = 0; set(macHint, "opacity", "0"); }
-    if (window.Mac && shown > 0) Mac.update(w, c, now, dt);
+    // the headline lifts away as the lid starts to close; a shade settles over the closed lid
+    set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
+    set(title, "opacity", (1 - smooth(0, 0.3, c)).toFixed(3));
+    set(shade, "opacity", smooth(0.8, 1, c).toFixed(3));
+    set(macHint, "opacity", w > 0.98 && c < 0.02 ? "1" : "0");
+    if (window.Mac && w > 0) Mac.update(w, c, now, dt);
 
-    // the services page appears on the closed lid as the camera settles over it
-    const k = smooth(0.84, 1, c);
-    set(info, "visibility", k > 0 ? "visible" : "hidden");
-    set(info, "opacity", k.toFixed(3));
-    const on = shown === LAST;
-    if (on !== infoOn) {
-      infoOn = on;
-      info.inert = !on;
-      if (on) reveals.forEach(el => io.observe(el));
-      else { io.disconnect(); reveals.forEach(el => el.classList.remove("in")); }
-    }
-
-    const settled = shown === tw.to && lapV === 0 && lapY === lapTarget;
-    const stripMoving = window.Mac && shown > 0 && c < 0.75 && !reduce;   // the gallery on the display keeps flowing
-    if (!settled || stripMoving) requestAnimationFrame(loop);
+    // keep going while the gallery plays on the open laptop's screen
+    const playing = window.Mac && w > 0 && c < 0.75 && !reduce;
+    if (playing) requestAnimationFrame(loop);
     else running = false;
   }
 
-  addEventListener("resize", () => { lapY = (1 - smooth(0.35, 0.95, clamp01(shown))) * innerHeight; kick(); });
+  addEventListener("resize", () => { measure(); kick(); });
   kick();
 </script>
 </body>
