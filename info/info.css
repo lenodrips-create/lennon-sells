@@ -1,0 +1,69 @@
+/* The info page: Services, About and Contact. It sits over the closed MacBook, so the lid that filled the
+   screen becomes the page's background; the content scrolls inside .info-scroll. */
+#info{
+  --line:rgba(255,255,255,.1);--surface:rgba(255,255,255,.045);--surface-2:rgba(255,255,255,.08);
+  --ink:#f2f1ee;--muted:#9a999f;--accent:#ff3d00;
+  position:fixed;inset:0;z-index:5;color:var(--ink);opacity:0;visibility:hidden;will-change:opacity;
+  font-family:system-ui,-apple-system,"Segoe UI",Inter,sans-serif;
+}
+/* a light shade over the aluminium keeps small text easy to read */
+#info::before{content:"";position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 0%,rgba(0,0,0,.08),rgba(0,0,0,.42));pointer-events:none}
+body.no-mac #info{background:#232428}
+.info-scroll{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;container-type:inline-size;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent}
+
+.ff{--pad:clamp(18px,5cqw,72px);font-size:clamp(14px,1.25cqw,17px);line-height:1.55;color:var(--ink)}
+.ff a{color:inherit;text-decoration:none}
+.ff-brand{display:block;padding:max(26px,env(safe-area-inset-top)) var(--pad) 0;font-family:"League Spartan",sans-serif;font-weight:700;font-size:1.15em;letter-spacing:-.01em;line-height:42px}
+.ff-pill{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;background:var(--ink);color:#0b0b0c !important;font-weight:600;font-size:.92em;transition:transform .25s cubic-bezier(.2,.8,.2,1),background .2s}
+.ff-pill:hover,.ff-pill:focus-visible{transform:translateY(-1px);background:#fff}
+
+.ff-hero{padding:clamp(48px,9cqw,150px) var(--pad) clamp(28px,5cqw,80px)}
+.ff-kicker{display:inline-flex;align-items:center;gap:8px;margin:0 0 20px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:.85em;background:rgba(0,0,0,.18)}
+.ff-kicker b{width:7px;height:7px;border-radius:50%;background:#2bd46b;box-shadow:0 0 12px #2bd46b}
+.ff-title{margin:0;font-family:"League Spartan",sans-serif;font-weight:900;font-size:clamp(46px,9.6cqw,168px);line-height:.86;letter-spacing:-.04em;text-transform:uppercase}
+.ff-title em{font-style:normal;color:var(--accent)}
+.ff-lede{max-width:34em;margin:24px 0 0;color:#c9c8cd;font-size:1.15em}
+
+.ff-sec{padding:clamp(24px,4cqw,64px) var(--pad);scroll-margin-top:20px}
+.ff-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.ff-head h3{margin:0;font-family:"League Spartan",sans-serif;font-weight:900;font-size:clamp(26px,3.4cqw,52px);line-height:.95;letter-spacing:-.025em;text-transform:uppercase}
+.ff-head span{color:var(--muted);font-size:.9em}
+
+/* services: three cards, one column on narrow screens */
+.ff-services{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.6cqw,22px)}
+.ff-svc{display:flex;flex-direction:column;gap:12px;padding:clamp(20px,2.2cqw,32px);border:1px solid var(--line);border-radius:22px;background:var(--surface);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  transition:transform .45s cubic-bezier(.2,.8,.2,1),border-color .3s,background .3s}
+.ff-svc:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.24);background:var(--surface-2)}
+.ff-svc-num{font-family:"League Spartan",sans-serif;font-weight:900;font-size:clamp(36px,4.4cqw,64px);line-height:.9;color:var(--accent)}
+.ff-svc h4{margin:0;font-family:"League Spartan",sans-serif;font-weight:700;font-size:clamp(21px,2.2cqw,32px);line-height:1.05;letter-spacing:-.01em}
+.ff-svc p{margin:0;color:#c9c8cd;flex:1}
+.ff-svc .ff-ghost{align-self:flex-start}
+.ff-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ff-tags span{padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.07);color:var(--muted);font-size:.78em}
+
+.ff-about{display:grid;grid-template-columns:1.3fr 1fr;gap:clamp(18px,3cqw,48px)}
+.ff-about p{margin:0 0 12px;color:#c9c8cd}
+.ff-about p:first-child{color:var(--ink);font-size:1.3em;line-height:1.3}
+.ff-facts{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.ff-facts li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ff-facts span{color:var(--muted)}
+.ff-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.ff-chips span{padding:5px 11px;border:1px solid var(--line);border-radius:999px;font-size:.82em;color:#c9c8cd}
+
+.ff-big{display:inline-block;font-family:"League Spartan",sans-serif;font-weight:900;font-size:clamp(32px,6.8cqw,112px);line-height:.95;letter-spacing:-.035em;overflow-wrap:anywhere;transition:color .25s}
+.ff-big:hover,.ff-big:focus-visible{color:var(--accent)}
+.ff-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.ff-ghost{display:inline-flex;align-items:center;gap:6px;padding:9px 15px;border:1px solid var(--line);border-radius:999px;transition:border-color .2s,background .2s}
+.ff-ghost:hover,.ff-ghost:focus-visible{border-color:rgba(255,255,255,.38);background:rgba(255,255,255,.06)}
+.ff-foot{display:flex;justify-content:space-between;gap:12px;padding:24px var(--pad) max(28px,env(safe-area-inset-bottom));color:var(--muted);font-size:.85em;border-top:1px solid var(--line);margin-top:clamp(24px,4cqw,56px)}
+
+/* content rises in as it scrolls into view */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.8,.2,1),transform .7s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--i,0) * 70ms)}
+.rv.in{opacity:1;transform:none}
+
+@container (max-width:760px){
+  .ff-services{grid-template-columns:1fr}
+  .ff-about{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion: reduce){.rv{transition:none}}

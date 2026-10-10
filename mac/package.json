@@ -1,0 +1,12 @@
+{
+  "name": "lennonh-mac",
+  "private": true,
+  "description": "The 3D MacBook on lennonh.com, bundled with three.js into mac.min.js",
+  "scripts": {
+    "build": "esbuild src/mac.js --bundle --minify --format=esm --outfile=mac.min.js"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "three": "0.180.0"
+  }
+}
