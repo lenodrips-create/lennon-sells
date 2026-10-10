@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Lennon Helman — Intro</title>
+<script src="vendor/gsap.min.js"></script>
+<style>
+@font-face{font-family:"Inter";font-style:normal;font-weight:300;src:url("fonts/inter-latin-300-normal.woff2") format("woff2")}
+@font-face{font-family:"Inter";font-style:normal;font-weight:500;src:url("fonts/inter-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"Playfair Display";font-style:italic;font-weight:400;src:url("fonts/playfair-display-latin-400-italic.woff2") format("woff2")}
+html,body{height:100%}
+body{margin:0;background:#000;color:#f4f2ef}
+#root{position:relative;width:100%;height:100%;overflow:hidden;background:#000}
+.clip{position:absolute;inset:0}
+#stars{position:absolute;inset:0}
+.star{position:absolute;border-radius:50%;background:#fff}
+#glow{position:absolute;left:50%;top:50%;width:1400px;height:900px;margin:-450px 0 0 -700px;
+  background:radial-gradient(closest-side, rgba(120,140,255,.22), rgba(170,90,255,.08) 55%, rgba(0,0,0,0) 100%)}
+#stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;perspective:900px}
+#name{margin:0;font-family:"Inter",sans-serif;font-weight:500;font-size:168px;line-height:1;text-transform:uppercase;
+  letter-spacing:.06em;white-space:nowrap;padding:0 0 12px}
+.ch,.tch{display:inline-block;transform-origin:50% 100%}
+.gap{display:inline-block;width:.32em}
+#rule{position:relative;width:1180px;height:2px;margin:46px 0 40px}
+#line{position:absolute;inset:0;background:linear-gradient(90deg, rgba(255,255,255,0), #fff 50%, rgba(255,255,255,0))}
+#spark{position:absolute;top:-7px;left:0;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#fff;
+  box-shadow:0 0 18px 6px rgba(160,180,255,.9), 0 0 60px 20px rgba(140,110,255,.45)}
+#town{margin:0;font-family:"Playfair Display",serif;font-style:italic;font-weight:400;font-size:84px;line-height:1.1;
+  letter-spacing:.1em;white-space:nowrap}
+#coords{display:flex;align-items:center;gap:22px;margin-top:30px;font-family:"Inter",sans-serif;font-weight:300;
+  font-size:26px;letter-spacing:.42em;text-transform:uppercase;color:#a9a4a0}
+#pin{position:relative;width:14px;height:14px}
+#pin-dot{position:absolute;inset:0;border-radius:50%;background:#ff4d6d}
+#pin-ring{position:absolute;inset:0;border-radius:50%;border:2px solid #ff4d6d}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="intro" data-start="0" data-width="1920" data-height="1080" data-duration="8">
+    <div id="stars"></div>
+    <div id="glow"></div>
+    <div id="stage">
+      <h1 id="name"><span class="ch">L</span><span class="ch">e</span><span class="ch">n</span><span class="ch">n</span><span class="ch">o</span><span class="ch">n</span><span class="gap"></span><span class="ch">H</span><span class="ch">e</span><span class="ch">l</span><span class="ch">m</span><span class="ch">a</span><span class="ch">n</span></h1>
+      <div id="rule"><div id="line"></div><div id="spark"></div></div>
+      <p id="town"><span class="tch">G</span><span class="tch">r</span><span class="tch">e</span><span class="tch">e</span><span class="tch">n</span><span class="tch">c</span><span class="tch">a</span><span class="tch">s</span><span class="tch">t</span><span class="tch">l</span><span class="tch">e</span><span class="tch">,</span><span class="tch">&nbsp;</span><span class="tch">P</span><span class="tch">A</span></p>
+      <div id="coords"><div id="pin"><div id="pin-ring"></div><div id="pin-dot"></div></div><span id="coords-text">39.79° N · 77.73° W</span></div>
+    </div>
+</div>
+<script>
+  // seeded star field, so every play and every render is the same frame for frame
+  let seed = 7;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const field = document.getElementById("stars");
+  for (let i = 0; i < 140; i++) {
+    const s = document.createElement("div");
+    const r = 1 + rand() * 2.2;
+    s.className = "star";
+    s.style.cssText = `left:${rand() * 1920}px;top:${rand() * 1080}px;width:${r}px;height:${r}px;opacity:0`;
+    field.appendChild(s);
+  }
+
+  const tl = gsap.timeline({ paused: true });
+
+  // stars and glow come up out of the black
+  tl.to(".star", { opacity: () => 0.25 + rand() * 0.6, duration: 1.4, stagger: { each: 0.008, from: "random" }, ease: "power1.out" }, 0);
+  tl.to(".star", { opacity: 0.12, duration: 0.9, stagger: { each: 0.01, from: "random", yoyo: true, repeat: 3 }, ease: "sine.inOut" }, 1.6);
+  tl.fromTo("#glow", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 2.2, ease: "power2.out" }, 0);
+  tl.to("#glow", { scale: 1.12, duration: 2.6, yoyo: true, repeat: 1, ease: "sine.inOut" }, 2.2);
+
+  // LENNON HELMAN: letters flip up from below and the spacing pulls together
+  tl.fromTo(".ch",
+    { yPercent: 115, rotationX: -85, opacity: 0, filter: "blur(14px)", x: (i, el, all) => (i - (all.length - 1) / 2) * 46 },
+    { yPercent: 0, rotationX: 0, x: 0, opacity: 1, filter: "blur(0px)", duration: 1.1, ease: "expo.out", stagger: { each: 0.055, from: "center" } }, 0.25);
+  tl.fromTo("#name", { textShadow: "0 0 0px rgba(160,180,255,0)" }, { textShadow: "0 0 40px rgba(160,180,255,.55)", duration: 0.5, yoyo: true, repeat: 1, ease: "sine.inOut" }, 1.5);
+
+  // a light line draws across with a spark riding it
+  tl.fromTo("#line", { scaleX: 0 }, { scaleX: 1, duration: 1, ease: "power3.inOut" }, 2.0);
+  tl.fromTo("#spark", { x: 0, opacity: 0 }, { x: 1180, opacity: 1, duration: 1, ease: "power3.inOut" }, 2.0);
+  tl.to("#spark", { opacity: 0, scale: 2.5, duration: 0.4, ease: "power2.out" }, 3.0);
+
+  // Greencastle, PA: letters drift in from blur and settle
+  tl.fromTo(".tch",
+    { opacity: 0, y: 30, filter: "blur(10px)", x: (i, el, all) => (i - (all.length - 1) / 2) * 34 },
+    { opacity: 1, y: 0, x: 0, filter: "blur(0px)", duration: 0.9, ease: "power3.out", stagger: 0.045 }, 2.6);
+
+  // coordinates and a pulsing pin
+  tl.fromTo("#coords", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 3.6);
+  tl.fromTo("#pin-dot", { scale: 0 }, { scale: 1, duration: 0.5, ease: "back.out(3)" }, 3.7);
+  tl.fromTo("#pin-ring", { scale: 1, opacity: 0.9 }, { scale: 3.2, opacity: 0, duration: 1.2, repeat: 2, ease: "power1.out" }, 3.9);
+
+  // the HyperFrames CLI pre-creates the registry; a plain browser load through the player does not
+  tl.set({}, {}, 8); // hold the last frame to the 8s mark
+
+  window.__timelines = window.__timelines || {};
+  window.__timelines["intro"] = tl;
+</script>
+</body>
+</html>
