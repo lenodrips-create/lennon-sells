@@ -22,8 +22,8 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 /* 1. the showreel: the HyperFrames compositions in reel/ (16:9) and reel-portrait/ (9:16) rendered to video,
    so the device's video hardware plays it; the page picks the one that matches the screen's shape.
    It sits in a rounded frame a little inside the screen edges. */
-#reel{position:fixed;top:var(--gap);left:var(--gap);right:var(--gap);bottom:var(--gap);overflow:hidden;border-radius:clamp(16px,2.2vw,32px);background:#151515}
-#reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#151515}
+#reel{position:fixed;top:var(--gap);left:var(--gap);right:var(--gap);bottom:var(--gap);overflow:hidden;border-radius:clamp(16px,2.2vw,32px);background:#fff}
+#reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
 /* a scroll button at the bottom middle of the video, in the navigation's style; the card scrolls up over it */
 #hint{position:fixed;left:50%;bottom:calc(var(--gap) + clamp(16px,3vh,28px));transform:translateX(-50%);z-index:0;display:flex;align-items:center;gap:10px;padding:12px 18px 12px 22px;border:0;border-radius:999px;cursor:pointer;
   background:rgba(23,23,23,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#d4d4d4;font:400 14px/1.25 "Readex Pro",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;transition:color .15s}
