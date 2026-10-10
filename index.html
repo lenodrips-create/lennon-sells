@@ -50,6 +50,42 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 @media (prefers-reduced-motion: reduce){
   #hint{animation:none}
 }
+/* ---------- menu ---------- */
+.menu-btn{position:fixed;top:max(18px,env(safe-area-inset-top));right:max(18px,env(safe-area-inset-right));z-index:50;display:flex;align-items:center;gap:10px;height:42px;padding:0 16px 0 18px;border:0;border-radius:999px;
+  font:700 14px/1 "League Spartan",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
+  background:#f5f3ee;color:#0a0a0a;transition:background .35s,color .35s,transform .25s cubic-bezier(.2,.8,.2,1)}
+.menu-btn:hover{transform:scale(1.04)}
+.menu-btn:focus-visible{outline:2px solid #ff3d00;outline-offset:3px}
+.menu-btn i{position:relative;display:block;width:18px;height:10px}
+.menu-btn i::before,.menu-btn i::after{content:"";position:absolute;left:0;right:0;height:2px;border-radius:1px;background:currentColor;transition:transform .45s cubic-bezier(.2,.8,.2,1),top .45s cubic-bezier(.2,.8,.2,1)}
+.menu-btn i::before{top:0}.menu-btn i::after{top:8px}
+body.light .menu-btn{background:#0a0a0a;color:#f5f3ee}
+body.menu-open .menu-btn{background:#f5f3ee;color:#0a0a0a}
+body.menu-open .menu-btn i::before{top:4px;transform:rotate(45deg)}
+body.menu-open .menu-btn i::after{top:4px;transform:rotate(-45deg)}
+
+.menu{position:fixed;inset:0;z-index:40;background:#0a0a0a;color:#f5f3ee;display:flex;flex-direction:column;justify-content:space-between;
+  padding:clamp(80px,12vh,120px) clamp(20px,5vw,72px) clamp(22px,4vh,40px);
+  transform:translate3d(0,-100%,0);visibility:hidden;transition:transform .7s cubic-bezier(.76,0,.24,1),visibility 0s .7s;will-change:transform}
+body.menu-open .menu{transform:none;visibility:visible;transition:transform .7s cubic-bezier(.76,0,.24,1)}
+.menu ol{list-style:none;margin:0;padding:0;counter-reset:m}
+.menu li{overflow:hidden;border-bottom:1px solid rgba(245,243,238,.12)}
+.menu li a{display:flex;align-items:baseline;gap:clamp(12px,2vw,28px);padding:clamp(10px,1.6vh,18px) 0;color:inherit;text-decoration:none;
+  font:900 clamp(44px,9.5vw,148px)/.86 "League Spartan",system-ui,sans-serif;letter-spacing:-.04em;text-transform:uppercase;
+  transform:translate3d(0,105%,0);transition:transform .8s cubic-bezier(.2,.8,.2,1),color .25s}
+.menu li a span{font:500 clamp(12px,1.1vw,15px)/1 system-ui,sans-serif;letter-spacing:.1em;color:#8e8d93;transform:translateY(-.4em)}
+body.menu-open .menu li a{transform:none}
+body.menu-open .menu li:nth-child(1) a{transition-delay:.18s,0s}
+body.menu-open .menu li:nth-child(2) a{transition-delay:.25s,0s}
+body.menu-open .menu li:nth-child(3) a{transition-delay:.32s,0s}
+.menu li a:hover,.menu li a:focus-visible{color:#ff3d00;outline:none}
+.menu-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px 28px;font-size:14px;color:#8e8d93;opacity:0;transition:opacity .4s}
+body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
+.menu-foot a{color:#f5f3ee;text-decoration:none;border-bottom:1px solid rgba(245,243,238,.3)}
+.menu-foot a:hover,.menu-foot a:focus-visible{color:#ff3d00;border-color:#ff3d00;outline:none}
+.menu-foot div{display:flex;flex-wrap:wrap;gap:10px 24px}
+@media (prefers-reduced-motion: reduce){.menu,.menu li a,.menu-foot{transition:none}}
+
 </style>
 <link rel="stylesheet" href="fold/fold.css?v=4">
 </head>
@@ -183,7 +219,20 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
     <span class="fold-hint">Scroll to unfold</span>
   </div>
 </section>
-<script src="fold/fold.js?v=4"></script>
+
+<button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="menu"><span>Menu</span><i aria-hidden="true"></i></button>
+<nav class="menu" id="menu" aria-label="Site" inert>
+  <ol>
+    <li><a href="#gallery" data-go="gallery"><span>01</span>Project Gallery</a></li>
+    <li><a href="#about" data-go="about"><span>02</span>About</a></li>
+    <li><a href="#contact" data-go="contact"><span>03</span>Contact</a></li>
+  </ol>
+  <div class="menu-foot">
+    <div><a href="mailto:lenodrips@gmail.com">lenodrips@gmail.com</a><a href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a></div>
+    <div><a href="#top" data-go="home">Back to start</a><span>Lennon Helman · Greencastle, PA</span></div>
+  </div>
+</nav>
+<script src="fold/fold.js?v=5"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -228,6 +277,45 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
     if (reduce) { stageTw.t0 = openTw.t0 = -1e9; }
     kick();
   }
+  // jump straight to a stop; when that means unfolding too, the phone waits until its card has arrived
+  function goTo(t) {
+    if (t === target) return;
+    const dir = t - target;
+    target = t;
+    retarget(stageTw, shown, Math.min(t, 2));
+    retarget(openTw, opened, t === LAST ? 1 : 0);
+    if (t === LAST && shown < 1.99) openTw.t0 += stageTw.dur * 1000;
+    if (reduce) { stageTw.t0 = openTw.t0 = -1e9; }
+    kick();
+    return dir;
+  }
+
+  /* ---------- menu ---------- */
+  const menuBtn = document.getElementById("menu-btn"), menu = document.getElementById("menu");
+  let menuOpen = false;
+  function setMenu(open) {
+    menuOpen = open;
+    document.body.classList.toggle("menu-open", open);
+    menuBtn.setAttribute("aria-expanded", open);
+    menuBtn.querySelector("span").textContent = open ? "Close" : "Menu";
+    menu.inert = !open;
+    if (open) setTimeout(() => menu.querySelector("a").focus({ preventScroll: true }), 300);
+    else menuBtn.focus({ preventScroll: true });
+  }
+  menuBtn.addEventListener("click", () => setMenu(!menuOpen));
+  menu.addEventListener("click", e => {
+    const a = e.target.closest("a[data-go]");
+    if (!a) return;
+    e.preventDefault();
+    const where = a.dataset.go;
+    setMenu(false);
+    // move while the menu slides away
+    if (where === "home") goTo(0);
+    else if (where === "gallery") goTo(1);
+    else { Fold.jump(where === "about" ? "#ff-about" : "#ff-contact"); goTo(LAST); }
+  });
+  addEventListener("keydown", e => { if (e.key === "Escape" && menuOpen) { e.stopPropagation(); setMenu(false); } }, true);
+
   // inside the unfolded phone the display and the project sheet scroll natively
   const liveScroll = document.querySelector("#fold .live .ff-scroll");
   const liveSheet = document.querySelector("#fold .live .ff-sheet");
@@ -243,6 +331,7 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   // trackpad momentum, is absorbed. A new gesture is a pause in events or a sudden jump in strength.
   let lastWheel = 0, lastMag = 0, lastStep = 0, armed = true;
   addEventListener("wheel", e => {
+    if (menuOpen) { e.preventDefault(); return; }
     const dy = e.deltaMode ? e.deltaY * 16 : e.deltaY;
     const el = innerScroller(e.target);
     if (el && canScroll(el, dy)) return;              // let the display scroll itself
@@ -264,6 +353,7 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   }, { passive: false });
   addEventListener("touchend", e => {
     if (touchY === null) return;
+    if (menuOpen) { touchY = null; return; }
     const dy = touchY - e.changedTouches[0].clientY, el = touchEl;
     touchY = null;
     if (Math.abs(dy) < 40 || performance.now() - innerAt < 300) return;
@@ -272,7 +362,7 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   }, { passive: true });
 
   addEventListener("keydown", e => {
-    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (menuOpen || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
     const a = document.activeElement;
     const down = e.key === "ArrowDown" || e.key === "PageDown" || (e.key === " " && !(a && a.closest && a.closest("button, a")));
     const up = e.key === "ArrowUp" || e.key === "PageUp";
@@ -290,7 +380,7 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   const title = work.querySelector(".work-title");
   const hint = document.getElementById("hint");
   const foldEl = document.getElementById("fold");
-  let lapY = innerHeight, lapV = 0;
+  let lapY = innerHeight, lapV = 0, isLight = false;
 
   /* ---------- pictures flow along a waving ribbon ---------- */
   const screen = document.querySelector(".screen");
@@ -377,6 +467,8 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
     // laptop page: rises as a rounded card that grows to fill the screen; the laptop glides up after it
     const w = clamp01(shown);
     set(work, "visibility", shown > 0 && shown < 2 ? "visible" : "hidden");
+    const light = shown > 0.5 && shown < 1.5;
+    if (light !== isLight) { isLight = light; document.body.classList.toggle("light", light); }
     set(work, "transform", `translate3d(0, ${((1 - w) * 100).toFixed(3)}%, 0)`);
     const ty = (1 - smooth(0.25, 0.85, w)) * 60;
     set(title, "transform", `translate3d(0, ${ty.toFixed(2)}px, 0)`);

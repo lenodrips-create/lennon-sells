@@ -191,5 +191,17 @@ window.Fold = (function () {
     }
   }
 
-  return { update };
+  // jump the display to a section: instantly (and in the folding copies too) when closed, smoothly when open
+  function jump(sel) {
+    const t = live.querySelector(sel);
+    if (!t) return;
+    const top = Math.max(0, t.offsetTop - 70);
+    if (isOn && !reduce) { scroller.scrollTo({ top, behavior: "smooth" }); return; }
+    scroller.style.scrollBehavior = "auto";
+    scroller.scrollTop = top;
+    scroller.style.scrollBehavior = "";
+    clones.forEach(c => (c.scrollTop = top));
+  }
+
+  return { update, jump };
 })();
