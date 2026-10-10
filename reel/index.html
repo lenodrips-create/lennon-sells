@@ -9,8 +9,8 @@
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:500;src:url("fonts/league-spartan-latin-500-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;src:url("fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;src:url("fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
-/* white backgrounds and black type, grey icons in the code chapter, orange and blue accents */
-:root{--bg:#ffffff;--fg:#0a0a0a;--grey:#a3a3a8;--orange:#ff3d00;--blue:#2440ff}
+/* white backgrounds and black type, black accents, grey icons, and a blue triangle */
+:root{--bg:#ffffff;--fg:#0a0a0a;--grey:#a3a3a8;--accent:#0a0a0a;--blue:#2440ff}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",sans-serif}
 #root{position:relative;width:100%;height:100%;overflow:hidden;background:var(--bg)}
@@ -22,8 +22,9 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
 
 /* 1. name */
 #s1{background:var(--bg)}
-.ring{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;border:8px solid var(--orange)}
+.ring{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;border:8px solid var(--accent)}
 #made{display:flex;flex-direction:column;align-items:center;justify-content:center}
+#made-sub{margin-top:40px;font-weight:500;font-size:40px;letter-spacing:.3em;padding-left:.3em;color:var(--fg);white-space:nowrap}
 .made-line{font-weight:900;font-size:290px;line-height:.86;letter-spacing:-.02em;white-space:nowrap;color:var(--fg)}
 #wipeA{position:absolute;left:50%;top:50%;width:2400px;height:2400px;margin:-1200px 0 0 -1200px;border-radius:50%;background:var(--fg)}
 
@@ -40,7 +41,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
 #s3{background:var(--bg)}
 .dot{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--fg)}
 #shapes{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:120px;padding-bottom:80px}
-#circ{width:300px;height:300px;border-radius:50%;background:var(--orange)}
+#circ{width:300px;height:300px;border-radius:50%;background:var(--accent)}
 #sq{width:270px;height:270px;background:var(--fg)}
 #tri{width:320px;height:290px}
 #s3-word{position:absolute;left:150px;bottom:110px;font-weight:900;font-size:250px;line-height:.9;color:var(--bg);-webkit-text-stroke:3px var(--fg)}
@@ -52,14 +53,13 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
 #ring7{position:absolute;left:50%;top:50%;width:780px;height:780px;margin:-390px 0 0 -390px}
 #end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
 #end-name{font-weight:900;font-size:156px;line-height:.95;letter-spacing:-.01em;color:var(--fg);white-space:nowrap}
-#end-line{width:720px;height:6px;margin:34px 0 30px;background:var(--orange)}
+#end-line{width:720px;height:6px;margin:34px 0 30px;background:var(--accent)}
 #end-town{font-weight:500;font-size:44px;letter-spacing:.35em;color:var(--fg);padding-left:.35em}
-#end-tag{margin-top:22px;font-weight:700;font-size:28px;letter-spacing:.45em;color:var(--orange);padding-left:.45em}
+#end-tag{margin-top:22px;font-weight:700;font-size:28px;letter-spacing:.45em;color:var(--accent);padding-left:.45em}
 
 /* HUD over everything, in plain black (a full-frame blend mode cost ~25% CPU).
    Inset 150px so it survives the page cropping the frame to fill 16:10 screens */
 #hud{position:absolute;inset:0;color:var(--fg);font-weight:500;font-size:24px;letter-spacing:.22em;text-transform:uppercase}
-#hud-lh{position:absolute;left:150px;top:80px;font-weight:900;letter-spacing:.04em;font-size:34px}
 #hud-yr{position:absolute;right:150px;top:84px}
 .hud-label{position:absolute;left:150px;bottom:80px;visibility:hidden}
 #hud-reel{position:absolute;right:150px;bottom:80px}
@@ -75,6 +75,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
       <div id="made" class="fill">
         <div class="made-line split">LENNON</div>
         <div class="made-line split">HELMAN</div>
+        <div id="made-sub">SOFTWARE ENGINEER · GREENCASTLE, PA</div>
       </div>
     </div>
   </div>
@@ -100,11 +101,11 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
   </div>
 
   <div class="scene" id="s7">
-    <svg id="ring7" viewBox="0 0 780 780"><circle cx="390" cy="390" r="370" fill="none" stroke="#ff3d00" stroke-width="4" stroke-dasharray="10 22"/></svg>
+    <svg id="ring7" viewBox="0 0 780 780"><circle cx="390" cy="390" r="370" fill="none" stroke="#0a0a0a" stroke-width="4" stroke-dasharray="10 22"/></svg>
     <div id="end">
       <div id="end-name" class="split">LENNON HELMAN</div>
       <div id="end-line"></div>
-      <div id="end-town">SOFTWARE DEVELOPER</div>
+      <div id="end-town">SOFTWARE ENGINEER</div>
       <div id="end-tag">GREENCASTLE, PA</div>
     </div>
   </div>
@@ -114,7 +115,6 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
   <div id="wipeD"></div>
 
   <div id="hud">
-    <div id="hud-lh" data-layout-allow-overlap>LH</div>
     <div id="hud-yr" data-layout-allow-overlap>Dev Reel — 2026</div>
     <div class="hud-label" id="lab1" data-layout-allow-overlap>01 / Code</div>
     <div class="hud-label" id="lab2" data-layout-allow-overlap>02 / Build</div>
@@ -177,7 +177,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"League Spartan",
   tl.fromTo("#r1", { scale: 0.2, opacity: 1 }, { scale: 4.2, opacity: 0, duration: 0.8, ease: "power2.out" }, 0.3);
   tl.to("#s1-cam", { keyframes: { x: [0, -24, 18, -10, 5, 0], y: [0, 14, -15, 8, -3, 0] }, duration: 0.38, ease: "none" }, 0.28);
   tl.fromTo("#made", { scale: 1 }, { scale: 1.08, duration: 1.9, ease: "none" }, 0.15);
-  tl.to("#made .ch", { color: "#ff3d00", duration: 0.1, stagger: { each: 0.03, from: "center" } }, 1.05);
+  tl.fromTo("#made-sub", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.75);
 
   /* transition A: black circle iris */
   tl.fromTo("#wipeA", { scale: 0 }, { scale: 1, duration: 0.6, ease: "power3.in" }, 1.5);
