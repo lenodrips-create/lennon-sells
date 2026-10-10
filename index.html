@@ -10,32 +10,52 @@
 html,body{margin:0;min-height:100%;background:#fff;color:#000}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* the HyperFrames intro sits at the top, full width, 16:9; the 1920x1080 frame is scaled to fit */
-#intro{position:relative;width:100%;aspect-ratio:16/9;max-height:100vh;overflow:hidden;background:#fff}
-#intro iframe{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;transform-origin:0 0;pointer-events:none}
+/* the showreel follows, same treatment, on black */
+.stage{position:relative;width:100%;aspect-ratio:16/9;max-height:100vh;overflow:hidden}
+#intro{background:#fff}
+#reel{background:#0a0a0a}
+.stage iframe{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;transform-origin:0 0;pointer-events:none}
 </style>
 </head>
 <body>
 <h1 class="sr-only">Lennon Helman, Greencastle, PA</h1>
-<div id="intro" aria-hidden="true"><iframe src="intro/index.html?v=5" title="Intro" tabindex="-1"></iframe></div>
+<div id="intro" class="stage" aria-hidden="true"><iframe src="intro/index.html?v=6" title="Intro" tabindex="-1"></iframe></div>
+<section aria-label="Showreel 2026">
+  <h2 class="sr-only">Showreel 2026: type, shape, motion, rhythm, signal</h2>
+  <div id="reel" class="stage" aria-hidden="true"><iframe src="reel/index.html?v=1" title="Showreel" tabindex="-1"></iframe></div>
+</section>
 <script>
-  const box = document.getElementById("intro");
-  const frame = box.querySelector("iframe");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  function fit() {
+  // each composition is 1920x1080; scale its frame to fit the stage
+  function fit(box, frame) {
     const s = Math.min(box.clientWidth / 1920, box.clientHeight / 1080);
     frame.style.transform = `translate(${(box.clientWidth - 1920 * s) / 2}px, ${(box.clientHeight - 1080 * s) / 2}px) scale(${s})`;
   }
-  fit();
-  addEventListener("resize", fit);
 
-  // the composition registers a paused GSAP timeline; play it once the frame has loaded
-  function start(tries) {
-    const tl = frame.contentWindow && frame.contentWindow.__timelines && frame.contentWindow.__timelines.intro;
-    if (!tl) return tries > 0 && setTimeout(() => start(tries - 1), 100);
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) tl.progress(1);
-    else tl.play(0);
+  // each composition registers a paused GSAP timeline under its id; hand it over once the frame loads
+  function mount(id, ready) {
+    const box = document.getElementById(id);
+    const frame = box.querySelector("iframe");
+    const refit = () => fit(box, frame);
+    refit();
+    addEventListener("resize", refit);
+    frame.addEventListener("load", function find(tries = 50) {
+      const tl = frame.contentWindow && frame.contentWindow.__timelines && frame.contentWindow.__timelines[id];
+      if (tl) ready(tl, box);
+      else if (tries > 0) setTimeout(() => find(tries - 1), 100);
+    });
   }
-  frame.addEventListener("load", () => start(50));
+
+  // intro: plays once on load
+  mount("intro", tl => (reduce ? tl.progress(1) : tl.play(0)));
+
+  // showreel: loops while it is on screen, pauses when scrolled away
+  mount("reel", (tl, box) => {
+    if (reduce) return tl.progress(1);
+    tl.eventCallback("onComplete", () => tl.play(0));
+    new IntersectionObserver(([e]) => (e.isIntersecting ? tl.play() : tl.pause()), { threshold: 0.35 }).observe(box);
+  });
 </script>
 </body>
 </html>

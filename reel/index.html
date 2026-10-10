@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Lennon Helman — Showreel 2026</title>
+<script src="vendor/gsap.min.js"></script>
+<style>
+@font-face{font-family:"League Spartan";font-style:normal;font-weight:500;src:url("fonts/league-spartan-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"League Spartan";font-style:normal;font-weight:700;src:url("fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
+@font-face{font-family:"League Spartan";font-style:normal;font-weight:900;src:url("fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
+:root{--ink:#0a0a0a;--paper:#f5f3ee;--orange:#ff3d00;--blue:#2440ff}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:"League Spartan",sans-serif}
+#root{position:relative;width:100%;height:100%;overflow:hidden;background:var(--ink)}
+.scene{position:absolute;inset:0;overflow:hidden;visibility:hidden}
+.fill{position:absolute;inset:0}
+.center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.mask{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .02em}
+.ch{display:inline-block}
+
+/* 1. slam */
+#s1{background:var(--ink)}
+.slam{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:470px;line-height:1;letter-spacing:-.03em}
+#w2{color:var(--orange)}
+.ring{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;border:8px solid var(--orange)}
+#s1-bar{position:absolute;left:0;top:50%;width:1920px;height:34px;margin-top:-17px;background:var(--orange)}
+#wipeA{position:absolute;left:50%;top:50%;width:2400px;height:2400px;margin:-1200px 0 0 -1200px;border-radius:50%;background:var(--orange)}
+
+/* 2. type */
+#s2{background:var(--orange)}
+#s2-tilt{position:absolute;left:-800px;top:-400px;width:3520px;height:1880px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.row{font-weight:900;font-size:236px;line-height:.9;white-space:nowrap;color:var(--ink);letter-spacing:-.01em}
+.row .outline{color:var(--orange);-webkit-text-stroke:3px var(--ink)}
+#typo{font-weight:900;font-size:262px;line-height:.9;white-space:nowrap;color:var(--ink);padding-left:820px;letter-spacing:-.02em}
+.stripe{position:absolute;top:0;width:194px;height:1080px;background:var(--ink)}
+
+/* 3. shape */
+#s3{background:var(--ink)}
+.dot{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--paper)}
+#shapes{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:120px;padding-bottom:80px}
+#circ{width:300px;height:300px;border-radius:50%;background:var(--orange)}
+#sq{width:270px;height:270px;background:var(--paper)}
+#tri{width:320px;height:290px}
+#s3-word{position:absolute;left:70px;bottom:40px;font-weight:900;font-size:250px;line-height:.9;color:var(--ink);-webkit-text-stroke:3px var(--paper)}
+
+/* 4. motion */
+#s4{background:var(--paper);color:var(--ink)}
+#s4-word{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:340px;line-height:1;letter-spacing:-.02em;color:var(--ink)}
+.layer.outline{color:var(--paper);-webkit-text-stroke:2px var(--ink)}
+.sl{position:absolute;left:0;background:var(--ink)}
+#wipeD{position:absolute;left:0;top:-200px;width:3400px;height:1480px;background:var(--blue)}
+
+/* 5. rhythm */
+#s5{background:var(--blue)}
+.barw{position:absolute;bottom:0;width:60px;height:1080px}
+.bar{position:absolute;left:10px;bottom:0;width:40px;height:1080px;background:var(--paper)}
+#s5-word{position:absolute;left:80px;top:130px;font-weight:900;font-size:280px;line-height:.9;color:var(--paper)}
+#ticker{position:absolute;left:0;bottom:110px;width:1920px;height:92px;background:var(--ink);overflow:hidden}
+#ticker-text{position:absolute;left:0;top:0;height:92px;display:flex;align-items:center;white-space:nowrap;font-weight:700;font-size:46px;letter-spacing:.06em;color:var(--orange)}
+
+/* 6. signal */
+#s6{background:var(--ink)}
+#glitch{position:absolute;inset:0}
+.gl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:320px;line-height:.86;letter-spacing:-.02em}
+.gl div{white-space:nowrap}
+.g-base{color:var(--paper)}
+.g-r{color:#ff2d55;mix-blend-mode:screen}
+.g-c{color:#00e0ff;mix-blend-mode:screen}
+.g-slice{color:var(--paper)}
+#scan{position:absolute;inset:0;background:repeating-linear-gradient(rgba(255,255,255,.05) 0 2px, rgba(0,0,0,0) 2px 5px)}
+#sweep{position:absolute;left:0;top:0;width:1920px;height:3px;background:var(--paper);box-shadow:0 0 24px 4px rgba(0,224,255,.6)}
+
+/* 7. end card */
+#s7{background:var(--ink)}
+#ring7{position:absolute;left:50%;top:50%;width:780px;height:780px;margin:-390px 0 0 -390px}
+#end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#end-name{font-weight:900;font-size:156px;line-height:.95;letter-spacing:-.01em;color:var(--paper);white-space:nowrap}
+#end-line{width:720px;height:6px;margin:34px 0 30px;background:var(--orange)}
+#end-town{font-weight:500;font-size:44px;letter-spacing:.35em;color:var(--paper);padding-left:.35em}
+#end-tag{margin-top:22px;font-weight:700;font-size:28px;letter-spacing:.45em;color:var(--orange);padding-left:.45em}
+
+/* HUD over everything; difference blend keeps it readable on any background */
+#hud{position:absolute;inset:0;mix-blend-mode:difference;color:#fff;font-weight:500;font-size:24px;letter-spacing:.22em;text-transform:uppercase}
+#hud-lh{position:absolute;left:60px;top:50px;font-weight:900;letter-spacing:.04em;font-size:34px}
+#hud-yr{position:absolute;right:60px;top:54px}
+.hud-label{position:absolute;left:60px;bottom:50px;visibility:hidden}
+#hud-reel{position:absolute;right:60px;bottom:50px}
+#hud-prog{position:absolute;left:60px;right:60px;bottom:32px;height:2px;background:#fff;transform-origin:0 50%}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="reel" data-start="0" data-width="1920" data-height="1080" data-duration="24">
+
+  <div class="scene" id="s1">
+    <div id="s1-cam" class="fill">
+      <div class="ring" id="r1"></div><div class="ring" id="r2"></div><div class="ring" id="r3"></div>
+      <div id="s1-bar"></div>
+      <div class="slam" id="w1">MAKE</div>
+      <div class="slam" id="w2">IT</div>
+      <div class="slam" id="w3">MOVE</div>
+    </div>
+  </div>
+
+  <div class="scene" id="s2">
+    <div id="s2-tilt">
+      <div class="row" data-layout-ignore data-dir="1"><span class="outline">TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE</span></div>
+      <div class="row" data-layout-ignore data-dir="-1">FORM ✦ FORM ✦ FORM ✦ FORM ✦ FORM ✦ FORM ✦ FORM</div>
+      <div id="typo" class="split">TYPOGRAPHY</div>
+      <div class="row" data-layout-ignore data-dir="-1">WORDS ✦ WORDS ✦ WORDS ✦ WORDS ✦ WORDS ✦ WORDS</div>
+      <div class="row" data-layout-ignore data-dir="1"><span class="outline">TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE ✦ TYPE</span></div>
+    </div>
+  </div>
+
+  <div class="scene" id="s3">
+    <div id="dots" class="fill"></div>
+    <div id="shapes">
+      <div id="circ"></div>
+      <div id="sq"></div>
+      <svg id="tri" viewBox="0 0 320 290"><polygon points="160,0 320,290 0,290" fill="#2440ff"/></svg>
+    </div>
+    <div id="s3-word" class="split">SHAPE</div>
+  </div>
+
+  <div class="scene" id="s4">
+    <div id="speed" class="fill"></div>
+    <div id="s4-word">
+      <div class="layer outline" id="L4" data-layout-ignore>MOTION</div>
+      <div class="layer outline" id="L3" data-layout-ignore>MOTION</div>
+      <div class="layer outline" id="L2" data-layout-ignore>MOTION</div>
+      <div class="layer outline" id="L1" data-layout-ignore>MOTION</div>
+      <div class="layer" id="L0">MOTION</div>
+    </div>
+  </div>
+
+  <div class="scene" id="s5">
+    <div id="bars" class="fill"></div>
+    <div id="s5-word" class="split">RHYTHM</div>
+    <div id="ticker"><div id="ticker-text">LENNON HELMAN ✦ GREENCASTLE, PA ✦ SHOWREEL 2026 ✦ LENNON HELMAN ✦ GREENCASTLE, PA ✦ SHOWREEL 2026 ✦ LENNON HELMAN ✦</div></div>
+  </div>
+
+  <div class="scene" id="s6">
+    <div id="glitch">
+      <div class="gl g-c" data-layout-ignore><div>LENNON</div><div>HELMAN</div></div>
+      <div class="gl g-r" data-layout-ignore><div>LENNON</div><div>HELMAN</div></div>
+      <div class="gl g-base"><div>LENNON</div><div>HELMAN</div></div>
+    </div>
+    <div id="scan"></div>
+    <div id="sweep"></div>
+  </div>
+
+  <div class="scene" id="s7">
+    <svg id="ring7" viewBox="0 0 780 780"><circle cx="390" cy="390" r="370" fill="none" stroke="#ff3d00" stroke-width="4" stroke-dasharray="10 22"/></svg>
+    <div id="end">
+      <div id="end-name" class="split">LENNON HELMAN</div>
+      <div id="end-line"></div>
+      <div id="end-town">GREENCASTLE, PA</div>
+      <div id="end-tag">SHOWREEL 2026</div>
+    </div>
+  </div>
+
+  <div id="wipeA"></div>
+  <div id="wipeB" class="fill"></div>
+  <div id="wipeD"></div>
+
+  <div id="hud">
+    <div id="hud-lh" data-layout-allow-overlap>LH</div>
+    <div id="hud-yr" data-layout-allow-overlap>Showreel — 2026</div>
+    <div class="hud-label" id="lab1" data-layout-allow-overlap>01 / Type</div>
+    <div class="hud-label" id="lab2" data-layout-allow-overlap>02 / Shape</div>
+    <div class="hud-label" id="lab3" data-layout-allow-overlap>03 / Motion</div>
+    <div class="hud-label" id="lab4" data-layout-allow-overlap>04 / Rhythm</div>
+    <div class="hud-label" id="lab5" data-layout-allow-overlap>05 / Signal</div>
+    <div id="hud-reel" data-layout-allow-overlap>Greencastle, PA</div>
+    <div id="hud-prog"></div>
+  </div>
+</div>
+<script>
+  // seeded randomness: every play and every render is identical
+  let seed = 11;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+
+  // wrap each character of .split elements in a mask, so letters can rise into view
+  $$(".split").forEach(el => {
+    const text = el.textContent;
+    el.textContent = "";
+    for (const c of text) {
+      const m = document.createElement("span");
+      m.className = "mask";
+      const ch = document.createElement("span");
+      ch.className = "ch";
+      ch.textContent = c === " " ? " " : c;
+      m.appendChild(ch);
+      el.appendChild(m);
+    }
+  });
+  // MOTION layers get per-letter spans (no masks: the letters fall in from above)
+  $$(".layer").forEach(el => {
+    const text = el.textContent;
+    el.textContent = "";
+    for (const c of text) {
+      const ch = document.createElement("span");
+      ch.className = "ch";
+      ch.textContent = c;
+      el.appendChild(ch);
+    }
+  });
+
+  // build generated pieces
+  const wipeB = $("#wipeB");
+  for (let i = 0; i < 10; i++) {
+    const s = document.createElement("div");
+    s.className = "stripe";
+    s.style.left = i * 192 + "px";
+    wipeB.appendChild(s);
+  }
+  const dots = $("#dots");
+  for (let r = 0; r < 9; r++) for (let c = 0; c < 16; c++) {
+    const d = document.createElement("div");
+    d.className = "dot";
+    d.style.left = 60 + c * 120 - 6 + "px";
+    d.style.top = 60 + r * 120 - 6 + "px";
+    dots.appendChild(d);
+  }
+  const speed = $("#speed");
+  for (let i = 0; i < 10; i++) {
+    const b = document.createElement("div");
+    b.className = "sl";
+    b.style.top = 120 + rand() * 840 + "px";
+    b.style.height = 4 + Math.round(rand() * 16) + "px";
+    b.style.width = 500 + Math.round(rand() * 900) + "px";
+    speed.appendChild(b);
+  }
+  const bars = $("#bars");
+  for (let i = 0; i < 32; i++) {
+    const w = document.createElement("div");
+    w.className = "barw";
+    w.style.left = i * 60 + "px";
+    const b = document.createElement("div");
+    b.className = "bar";
+    w.appendChild(b);
+    bars.appendChild(w);
+  }
+  const glitch = $("#glitch");
+  const SLICES = [[30, 58], [44, 70], [52, 84], [66, 92], [18, 38]];
+  SLICES.forEach(([top, bottom]) => {
+    const g = document.createElement("div");
+    g.className = "gl g-slice";
+    g.setAttribute("data-layout-ignore", "");
+    g.innerHTML = "<div>LENNON</div><div>HELMAN</div>";
+    g.style.clipPath = `inset(${top}% 0 ${100 - bottom}% 0)`;
+    g.style.visibility = "hidden";
+    glitch.appendChild(g);
+  });
+
+  // static transforms (kept out of CSS so GSAP owns every transform)
+  gsap.set("#s2-tilt", { rotation: -8 });
+  gsap.set("#wipeD", { skewX: -18 });
+  gsap.set(".stripe", { transformOrigin: i => (i % 2 ? "50% 100%" : "50% 0%") });
+  gsap.set("#circ, #sq, #tri", { transformOrigin: "50% 100%" });
+  gsap.set(".bar", { transformOrigin: "50% 100%" });
+
+  const tl = gsap.timeline({ paused: true });
+  const show = (id, t) => tl.set(id, { autoAlpha: 1 }, t);
+  const hide = (id, t) => tl.set(id, { autoAlpha: 0 }, t);
+  const ORANGE = "#ff3d00";
+
+  // HUD
+  tl.fromTo("#hud", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.1);
+  tl.fromTo("#hud-prog", { scaleX: 0 }, { scaleX: 1, duration: 24, ease: "none" }, 0);
+  [["#lab1", 2.95, 6.45], ["#lab2", 6.45, 9.9], ["#lab3", 9.9, 13.6], ["#lab4", 13.6, 17.05], ["#lab5", 17.05, 20.95]].forEach(([id, a, b]) => { show(id, a); hide(id, b); });
+
+  /* ---------- 1. MAKE / IT / MOVE (0 - 2.95) ---------- */
+  show("#s1", 0);
+  tl.set(".slam", { opacity: 0 }, 0);
+  tl.set("#s1-bar", { scaleX: 0 }, 0);
+  [["#w1", "#r1", 0.12], ["#w2", "#r2", 0.78], ["#w3", "#r3", 1.44]].forEach(([w, r, t], i) => {
+    tl.fromTo(w, { scale: 2.8, opacity: 0, filter: "blur(30px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.34, ease: "expo.out", immediateRender: false }, t);
+    tl.fromTo(r, { scale: 0.2, opacity: 1 }, { scale: 4.2, opacity: 0, duration: 0.8, ease: "power2.out" }, t + 0.08);
+    tl.to("#s1-cam", { keyframes: { x: [0, -24, 18, -10, 5, 0], y: [0, 14, -15, 8, -3, 0] }, duration: 0.38, ease: "none" }, t + 0.06);
+    if (i < 2) tl.to(w, { scale: 0.55, opacity: 0, filter: "blur(14px)", duration: 0.22, ease: "power2.in" }, t + 0.5);
+  });
+  tl.fromTo("#s1-bar", { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.35, ease: "expo.inOut", immediateRender: false }, 1.95);
+  tl.to("#w3", { scaleX: 1.12, scaleY: 0.9, duration: 0.3, ease: "power2.out" }, 1.95);
+  tl.to("#s1-bar", { scaleX: 0, transformOrigin: "100% 50%", duration: 0.3, ease: "expo.in" }, 2.3);
+
+  /* transition A: orange circle iris */
+  tl.fromTo("#wipeA", { scale: 0 }, { scale: 1, duration: 0.6, ease: "power3.in" }, 2.35);
+  hide("#s1", 2.95); show("#s2", 2.95); hide("#wipeA", 2.95);
+
+  /* ---------- 2. TYPE (2.95 - 6.45) ---------- */
+  $$("#s2 .row").forEach(row => {
+    const d = Number(row.dataset.dir);
+    tl.fromTo(row, { x: -d * 360 }, { x: d * 360, duration: 3.6, ease: "none" }, 2.9);
+  });
+  tl.fromTo("#typo .ch", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "expo.out", stagger: 0.045 }, 3.05);
+  tl.to("#typo .ch", { color: "#f5f3ee", duration: 0.12, stagger: { each: 0.05, from: "center" } }, 4.5);
+  tl.to("#typo .ch", { yPercent: -12, duration: 0.25, ease: "sine.inOut", stagger: { each: 0.04, yoyo: true, repeat: 1 } }, 4.9);
+  tl.fromTo("#s2-tilt", { scale: 1 }, { scale: 1.16, duration: 0.6, ease: "power4.in" }, 5.4);
+
+  /* transition B: alternating black stripes */
+  tl.fromTo(".stripe", { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.inOut", stagger: 0.03 }, 5.9);
+  hide("#s2", 6.45); show("#s3", 6.45); hide("#wipeB", 6.45);
+
+  /* ---------- 3. SHAPE (6.45 - 9.9) ---------- */
+  tl.fromTo(".dot", { scale: 0 }, { scale: 1, duration: 0.5, ease: "back.out(3)", stagger: { grid: [9, 16], from: "center", amount: 0.6 } }, 6.5);
+  [["#circ", 6.7, -30], ["#sq", 6.88, 45], ["#tri", 7.06, -60]].forEach(([s, t, r]) => {
+    tl.fromTo(s, { y: -950, rotation: r }, { y: 0, rotation: 0, duration: 0.45, ease: "power3.in" }, t);
+    tl.to(s, { keyframes: { scaleX: [1, 1.38, 0.9, 1.05, 1], scaleY: [1, 0.62, 1.12, 0.96, 1] }, duration: 0.55, ease: "none" }, t + 0.45);
+  });
+  tl.fromTo("#s3-word .ch", { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: "expo.out", stagger: 0.06 }, 7.4);
+  tl.to("#sq", { rotation: 225, duration: 0.7, ease: "back.inOut(2)" }, 8.1);
+  tl.to("#tri", { rotation: -360, duration: 0.8, ease: "power3.inOut" }, 8.15);
+  tl.to("#circ", { keyframes: { scale: [1, 1.3, 0.92, 1] }, duration: 0.6, ease: "none" }, 8.2);
+  tl.to(".dot", { keyframes: { scale: [1, 2.8, 1] }, duration: 0.6, ease: "none", stagger: { grid: [9, 16], from: "center", amount: 0.5 } }, 8.5);
+  tl.to("#circ, #sq, #tri", { scale: 0, duration: 0.3, ease: "back.in(2)", stagger: 0.06 }, 9.1);
+  tl.to("#s3-word .ch", { yPercent: 115, duration: 0.3, ease: "power3.in", stagger: 0.03 }, 9.1);
+
+  /* transition C: dots swell until they fill the frame */
+  tl.to(".dot", { scale: 24, duration: 0.5, ease: "power3.in", stagger: { grid: [9, 16], from: "center", amount: 0.3 } }, 9.25);
+  hide("#s3", 9.9); show("#s4", 9.9);
+
+  /* ---------- 4. MOTION (9.9 - 13.6) ---------- */
+  const ROT = [-40, 25, -15, 35, -25, 20];
+  ["#L4", "#L3", "#L2", "#L1", "#L0"].forEach((L, k) => {
+    tl.fromTo(`${L} .ch`, { y: -950, rotation: i => ROT[i] }, { y: 0, rotation: 0, duration: 0.75, ease: "back.out(1.7)", stagger: 0.07 }, 10.0 + (4 - k) * 0.05);
+  });
+  tl.fromTo(".sl", { x: 2100 }, { x: -2400, duration: 0.55, ease: "power2.in", stagger: 0.035 }, 11.1);
+  tl.to("#s4-word", { skewX: -18, x: -80, duration: 0.18, ease: "power2.out" }, 11.25);
+  tl.to("#s4-word", { skewX: 0, x: 0, duration: 0.7, ease: "elastic.out(1, 0.4)" }, 11.43);
+  tl.to("#s4-word", { scaleX: 1.3, scaleY: 0.8, duration: 0.2, ease: "power2.out" }, 12.0);
+  tl.to("#s4-word", { scaleX: 1, scaleY: 1, duration: 0.7, ease: "elastic.out(1, 0.35)" }, 12.2);
+  ["#L1", "#L2", "#L3", "#L4"].forEach((L, k) => {
+    tl.to(L, { x: (k + 1) * 26, y: (k + 1) * 26, duration: 0.6, ease: "expo.out" }, 12.55);
+  });
+
+  /* transition D: skewed blue panel slides across */
+  tl.fromTo("#wipeD", { x: -3800 }, { x: -700, duration: 0.6, ease: "power3.inOut" }, 13.0);
+  hide("#s4", 13.6); show("#s5", 13.6); hide("#wipeD", 13.6);
+
+  /* ---------- 5. RHYTHM (13.6 - 17.05) ---------- */
+  const H1 = Array.from({ length: 32 }, () => 0.12 + rand() * 0.42);
+  const H2 = Array.from({ length: 32 }, () => 0.1 + rand() * 0.5);
+  tl.fromTo(".bar", { scaleY: 0 }, { scaleY: i => H1[i], duration: 0.45, ease: "expo.out", stagger: 0.015 }, 13.65);
+  tl.to(".bar", { scaleY: i => H2[i], duration: 0.18, ease: "sine.inOut", stagger: { each: 0.02, from: "center", yoyo: true, repeat: 5 } }, 14.2);
+  tl.to(".bar", { scaleY: i => 0.3 + 0.22 * Math.sin(i * 0.45), duration: 0.5, ease: "power2.inOut", stagger: 0.012 }, 15.9);
+  tl.fromTo("#s5-word .ch", { yPercent: 115 }, { yPercent: 0, duration: 0.6, ease: "expo.out", stagger: 0.05 }, 13.75);
+  tl.to("#s5-word .ch", { y: -40, duration: 0.2, ease: "power1.out", stagger: { each: 0.08, yoyo: true, repeat: 5 } }, 14.5);
+  tl.fromTo("#ticker", { yPercent: 100 }, { yPercent: 0, duration: 0.4, ease: "expo.out" }, 13.8);
+  tl.fromTo("#ticker-text", { x: 0 }, { x: -1400, duration: 3.4, ease: "none" }, 13.8);
+
+  /* transition E: bars rise and widen into a white wall */
+  tl.to("#s5-word .ch", { yPercent: 115, duration: 0.3, ease: "power3.in", stagger: 0.03 }, 16.45);
+  tl.to("#ticker", { yPercent: 100, duration: 0.3, ease: "power3.in" }, 16.5);
+  tl.to(".bar", { scaleY: 1, scaleX: 1.55, duration: 0.45, ease: "power3.in", stagger: { each: 0.01, from: "edges" } }, 16.55);
+  hide("#s5", 17.05); show("#s6", 17.05);
+
+  /* ---------- 6. SIGNAL (17.05 - 20.95) ---------- */
+  tl.fromTo("#glitch", { scale: 1.6, opacity: 0, filter: "blur(28px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.55, ease: "expo.out" }, 17.1);
+  tl.fromTo("#sweep", { y: -20 }, { y: 1100, duration: 1.4, ease: "power1.inOut" }, 17.6);
+  const slices = $$(".g-slice");
+  [17.75, 18.6, 19.45, 20.15].forEach(t => {
+    tl.to(".g-r", { keyframes: { x: [0, -38, 24, -12, 0] }, duration: 0.3, ease: "none" }, t);
+    tl.to(".g-c", { keyframes: { x: [0, 34, -26, 10, 0] }, duration: 0.3, ease: "none" }, t);
+    slices.forEach(s => {
+      const dx = (rand() < 0.5 ? -1 : 1) * (60 + rand() * 120);
+      tl.set(s, { autoAlpha: 1 }, t);
+      tl.to(s, { keyframes: { x: [0, dx, -dx * 0.5, 0] }, duration: 0.26, ease: "none" }, t);
+      tl.set(s, { autoAlpha: 0 }, t + 0.27);
+    });
+  });
+  tl.fromTo(".g-r", { x: 0 }, { x: -10, duration: 1.2, ease: "none", immediateRender: false }, 18.0);
+  tl.fromTo(".g-c", { x: 0 }, { x: 10, duration: 1.2, ease: "none", immediateRender: false }, 18.0);
+
+  /* transition F: zoom through the type */
+  tl.to("#glitch", { scale: 7, opacity: 0, filter: "blur(18px)", duration: 0.5, ease: "power3.in" }, 20.45);
+  hide("#s6", 20.95); show("#s7", 20.95);
+
+  /* ---------- 7. END CARD (20.95 - 24) ---------- */
+  tl.fromTo("#ring7", { scale: 0, rotation: -90 }, { scale: 1, rotation: 0, duration: 0.9, ease: "expo.out" }, 21.0);
+  tl.to("#ring7", { rotation: 60, duration: 2.1, ease: "none" }, 21.9);
+  tl.fromTo("#end-name .ch", { yPercent: 115 }, { yPercent: 0, duration: 0.8, ease: "expo.out", stagger: 0.035 }, 21.15);
+  tl.fromTo("#end-line", { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "expo.inOut" }, 21.6);
+  tl.fromTo("#end-town", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 21.9);
+  tl.fromTo("#end-tag", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 22.15);
+
+  tl.set({}, {}, 24);
+
+  // the HyperFrames CLI pre-creates the registry; a plain browser load does not
+  window.__timelines = window.__timelines || {};
+  window.__timelines["reel"] = tl;
+</script>
+</body>
+</html>
