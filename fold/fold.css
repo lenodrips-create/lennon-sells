@@ -7,19 +7,20 @@
   --bg:#0b0b0c;--surface:#151517;--surface-2:#1d1d20;--line:rgba(255,255,255,.09);
   --ink:#f2f1ee;--muted:#8e8d93;--accent:#ff3d00;
   --f1:#4a4a4f;--f2:#1b1b1e;--f3:#2c2c30;
-  position:fixed;inset:0;overflow:hidden;color:var(--ink);
+  --lip:56px;position:fixed;left:0;right:0;bottom:0;top:calc(-1 * var(--lip));overflow:hidden;color:var(--ink);
   background:radial-gradient(120% 80% at 50% 115%,rgba(255,61,0,.16),rgba(255,61,0,0) 60%),var(--bg);
-  transform:translateY(100%);transform-origin:50% 0;border-radius:56px;
+  transform:translate3d(0,100%,0);border-radius:var(--lip) var(--lip) 0 0;
   box-shadow:0 -30px 90px rgba(0,0,0,.55);visibility:hidden;will-change:transform;
   font-family:system-ui,-apple-system,"Segoe UI",Inter,sans-serif;
 }
 #fold[data-finish="silver"]{--f1:#e4e5e9;--f2:#9fa1a8;--f3:#c4c6cc}
 #fold[data-finish="ember"]{--f1:#ff7a4d;--f2:#9a2400;--f3:#d84a17}
 
-.fold-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;perspective:2400px;perspective-origin:50% 40%}
+.fold-stage{position:absolute;inset:var(--lip) 0 0 0;display:flex;align-items:center;justify-content:center;perspective:2400px;perspective-origin:50% 40%}
 
 /* ---------- the device ---------- */
 .device{position:relative;width:var(--dw);height:var(--dh);transform-style:preserve-3d;will-change:transform}
+.half-b{will-change:transform}
 .half{position:absolute;transform-style:preserve-3d}
 .device:not(.portrait) .half{top:0;bottom:0;width:50%}
 .device:not(.portrait) .half-a{left:0}
@@ -57,11 +58,11 @@
 .device.portrait .half-b .pane .clone{top:calc(var(--bz) - var(--dh) / 2)}
 .clone .ff-scroll{overflow:hidden}
 /* a soft crease shadow that deepens as the screen folds */
-.pane::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:var(--crease,0)}
-.device:not(.portrait) .half-a .pane::after{background:linear-gradient(270deg,rgba(0,0,0,.75),rgba(0,0,0,0) 45%)}
-.device:not(.portrait) .half-b .pane::after{background:linear-gradient(90deg,rgba(0,0,0,.75),rgba(0,0,0,0) 45%)}
-.device.portrait .half-a .pane::after{background:linear-gradient(0deg,rgba(0,0,0,.75),rgba(0,0,0,0) 45%)}
-.device.portrait .half-b .pane::after{background:linear-gradient(180deg,rgba(0,0,0,.75),rgba(0,0,0,0) 45%)}
+.crease{position:absolute;inset:0;pointer-events:none;opacity:0;will-change:opacity}
+.device:not(.portrait) .half-a .crease{background:linear-gradient(270deg,rgba(0,0,0,.75),rgba(0,0,0,0) 45%)}
+.device:not(.portrait) .half-b .crease{background:linear-gradient(90deg,rgba(0,0,0,.75),rgba(0,0,0,0) 45%)}
+.device.portrait .half-a .crease{background:linear-gradient(0deg,rgba(0,0,0,.75),rgba(0,0,0,0) 45%)}
+.device.portrait .half-b .crease{background:linear-gradient(180deg,rgba(0,0,0,.75),rgba(0,0,0,0) 45%)}
 
 /* the outer cover screen, seen while the phone is closed */
 .cover{position:absolute;inset:var(--bz);border-radius:var(--ri);overflow:hidden;
@@ -80,7 +81,7 @@
 
 /* while shut, the inner screen under the cover is hidden so no edge of it peeks out in perspective */
 .device.shut .half-a .pane{visibility:hidden}
-.hinge{position:absolute;pointer-events:none;opacity:var(--hinge,1)}
+.hinge{position:absolute;pointer-events:none;will-change:opacity}
 .device:not(.portrait) .hinge{left:calc(50% - 1px);top:var(--bz);bottom:var(--bz);width:2px;background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.08) 20%,rgba(255,255,255,.08) 80%,rgba(255,255,255,0))}
 .device.portrait .hinge{top:calc(50% - 1px);left:var(--bz);right:var(--bz);height:2px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.08) 20%,rgba(255,255,255,.08) 80%,rgba(255,255,255,0))}
 .device-shadow{position:absolute;left:8%;right:8%;bottom:-7%;height:12%;border-radius:50%;background:rgba(0,0,0,.6);filter:blur(28px);transform:translateZ(-60px)}

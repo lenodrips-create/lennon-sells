@@ -55,6 +55,10 @@ window.Fold = (function () {
     c.inert = true;
     pane.appendChild(c);
     clones.push(copy);
+    // a soft crease shadow that deepens as the screen folds (its own layer, so only its opacity changes)
+    const cr = document.createElement("div");
+    cr.className = "crease";
+    pane.appendChild(cr);
   });
 
   /* ---------- size the device to the screen ---------- */
@@ -142,17 +146,16 @@ window.Fold = (function () {
   addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
 
   /* ---------- per-frame update ---------- */
-  let isOn = false, lastRise = -1, lastOpen = -1, hintText = "";
+  let isOn = false, lastRise = -1, lastOpen = -1, hintText = "", wasShut = null;
+  const creases = Array.from(root.querySelectorAll(".crease")), hingeEl = root.querySelector(".hinge");
   live.inert = true;
   // the hero is already on screen in the folding copies, so it starts visible rather than fading in at hand-over
   live.querySelectorAll(".ff-hero .rv").forEach(el => el.classList.add("in"));
   function update(rise, open) {
     if (rise === lastRise && open === lastOpen) return;  // nothing moved: skip all style writes
     lastRise = rise; lastOpen = open;
-    // the dark card rises over the laptop as a rounded card and grows to full bleed, like the white one before it
-    const e = smooth(0, 1, rise), grow = smooth(0.55, 1, rise);
-    root.style.transform = `translate3d(0, ${(1 - e) * 100}%, 0) scale(${0.9 + 0.1 * grow})`;
-    root.style.borderRadius = `${56 * (1 - grow)}px`;
+    // the dark card slides up over the laptop; its rounded top ends just above the screen
+    root.style.transform = `translate3d(0, ${((1 - rise) * 100).toFixed(3)}%, 0)`;
     if (rise <= 0) return;
 
     // unfold: the second half swings 180° on the hinge; while closed the device turns slightly to show its depth
@@ -161,14 +164,16 @@ window.Fold = (function () {
     const lift = 1 - o;
     if (portrait) {
       halfB.style.transform = `rotateX(${angle}deg)`;
-      device.style.transform = `translate3d(0, ${(dh / 4) * lift}px, 0) rotateX(${14 * lift}deg) rotateZ(${-2 * lift}deg) scale(${(0.94 + 0.06 * smooth(0.6, 1, rise)) * (1 - 0.08 * lift)})`;
+      device.style.transform = `translate3d(0, ${(dh / 4) * lift}px, 0) rotateX(${14 * lift}deg) rotateZ(${-2 * lift}deg)`;
     } else {
       halfB.style.transform = `rotateY(${-angle}deg)`;
-      device.style.transform = `translate3d(${(dw / 4) * lift}px, 0, 0) rotateY(${-16 * lift}deg) rotateX(${8 * lift}deg) scale(${0.94 + 0.06 * smooth(0.6, 1, rise)})`;
+      device.style.transform = `translate3d(${(dw / 4) * lift}px, 0, 0) rotateY(${-16 * lift}deg) rotateX(${8 * lift}deg)`;
     }
-    device.classList.toggle("shut", angle > 176);
-    device.style.setProperty("--crease", (Math.sin(Math.PI * Math.min(1, angle / 180)) * 0.9).toFixed(3));
-    device.style.setProperty("--hinge", (1 - 0.6 * o).toFixed(3));
+    const isShut = angle > 176;
+    if (isShut !== wasShut) { wasShut = isShut; device.classList.toggle("shut", isShut); }
+    const cr = (Math.sin(Math.PI * Math.min(1, angle / 180)) * 0.9).toFixed(3);
+    creases.forEach(el => { if (el.style.opacity !== cr) el.style.opacity = cr; });
+    hingeEl.style.opacity = (1 - 0.6 * o).toFixed(3);
     const text = o > 0.98 ? "Scroll up to fold" : "Scroll to unfold";
     if (text !== hintText) hint.textContent = hintText = text;
     hint.style.opacity = rise > 0.98 && (o < 0.04 || o > 0.98) ? 1 : 0;
