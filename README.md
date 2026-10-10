@@ -27,6 +27,6 @@ cd intro && npx hyperframes check .
 
 ## Deploying
 
-Every push to the `claude/gifted-pascal-xbq24p` branch runs `deploy.yml`, which copies the files into `_site` and publishes them to GitHub Pages.
+Every push to the `claude/gifted-pascal-xbq24p` or `claude/confident-fermi-3kad7m` branch runs `deploy.yml`, which copies the files into `_site` and publishes them to GitHub Pages.
 
 The previous portfolio (photo sphere, night sky, projects, legal pages) is still in the git history if you want it back.
