@@ -16,9 +16,9 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 html.menu-open{overflow:hidden}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* The page scrolls normally, and everything moves with the scroll: the white card scrolls up over the reel, the
-   MacBook pins to the screen while the next stretch of scrolling closes its lid, and then the services scroll up
-   over the closed lid. Scrolling back up plays it all in reverse. */
+/* The page scrolls normally: the white card scrolls up over the reel and the MacBook pins to the screen. There,
+   one scroll down closes the lid by itself, and further scrolling brings the services up over the closed lid.
+   Scrolling back up to the laptop opens it again, and the card scrolls back down off the reel. */
 
 /* 1. the showreel: the HyperFrames compositions in reel/ (16:9) and reel-portrait/ (9:16) rendered to video,
    so the device's video hardware plays it; the page picks the one that matches the screen's shape.
@@ -41,8 +41,6 @@ html.menu-open{overflow:hidden}
 .lid-shade{position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 0%,rgba(0,0,0,.08),rgba(0,0,0,.42));opacity:0;pointer-events:none;z-index:1}
 body.no-mac .mac-hint{display:none}
 .mac-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));margin:0;text-align:center;font:600 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6c7076;opacity:0;transition:opacity .4s;z-index:2}
-/* this stretch of scrolling closes the lid while the stage stays pinned */
-.close-track{height:150vh}
 
 @media (prefers-reduced-motion: reduce){#hint{animation:none}}
 
@@ -102,7 +100,6 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     <div class="lid-shade"></div>
     <p class="mac-hint" aria-hidden="true">Scroll to close</p>
   </div>
-  <div class="close-track" aria-hidden="true"></div>
   <div id="info" class="ff">
     <section class="ff-sec ff-only" id="ff-services">
       <div class="ff-head rv"><h3>Services we offer</h3><span>03 services</span></div>
@@ -185,21 +182,93 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   portraitMq.addEventListener("change", pickVideo);
 
   /* ---------- scroll positions ---------- */
-  // three stretches of the page: the card rising over the reel, the lid closing (stage pinned), the services
+  // the card rises over the reel's screen of scrolling; at closeAt the stage pins and the services follow it
   const work = document.getElementById("work");
-  const stage = work.querySelector(".stage");
-  const track = work.querySelector(".close-track");
   const info = document.getElementById("info");
-  let riseLen = 1, closeAt = 1, closeLen = 1, infoAt = 1, vh = 1;
+  let riseLen = 1, closeAt = 1, infoAt = 1;
   function measure() {
-    riseLen = Math.max(1, work.offsetTop);            // the reel's screen of scrolling
-    closeAt = work.offsetTop + track.offsetTop - stage.offsetHeight;   // where the stage pins
-    closeLen = Math.max(1, track.offsetHeight);
+    riseLen = closeAt = Math.max(1, work.offsetTop);
     infoAt = work.offsetTop + info.offsetTop;
-    vh = stage.offsetHeight;
   }
   measure();
-  const scrollTo = top => window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";   // always start on the reel
+  // scroll smoothly and resolve on arrival
+  function scrollToAsync(top) {
+    window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+    const t0 = performance.now();
+    return new Promise(done => (function check() {
+      if (Math.abs(window.scrollY - top) < 2 || performance.now() - t0 > 2500) done();
+      else requestAnimationFrame(check);
+    })());
+  }
+
+  /* ---------- the lid: one scroll at the laptop closes it, one scroll back up opens it ---------- */
+  // it closes in its own time rather than following the scroll; the page holds still at the laptop meanwhile
+  const LID_DUR = reduce ? 0 : 1.7;
+  let c = 0, lidFrom = 0, lidTo = 0, lidT0 = 0, lidDone = Promise.resolve(), lidResolve = null;
+  function moveLid(to) {
+    if (to === lidTo) return lidDone;
+    if (lidResolve) lidResolve();
+    lidFrom = c; lidTo = to; lidT0 = performance.now();
+    lidDone = new Promise(r => (lidResolve = r));
+    kick();
+    return lidDone;
+  }
+  function stepLid(now) {
+    if (c === lidTo) return;
+    const dur = LID_DUR * 1000 * Math.abs(lidTo - lidFrom);
+    const t = dur ? clamp01((now - lidT0) / dur) : 1;
+    c = t >= 1 ? lidTo : lidFrom + (lidTo - lidFrom) * t;
+    if (c === lidTo && lidResolve) { lidResolve(); lidResolve = null; }
+  }
+  // what a scroll at the laptop does to the lid, if anything: down while it isn't closed closes it, up while it
+  // isn't open opens it. Either way the page holds still there instead of scrolling. Only a scroll that starts at
+  // the laptop moves the lid: one that arrives there from above or below stops there, so the open laptop (or the
+  // closed lid) is always seen before it changes.
+  let fromLaptop = false;
+  const atLaptop = () => Math.abs(window.scrollY - closeAt) <= 1;
+  function lidIntent(dir) {
+    if (menuOpen) return null;
+    const y = window.scrollY;
+    if (dir > 0 && c < 1 && y >= closeAt - 1) return 1;
+    if (dir < 0 && c > 0 && y <= closeAt + 1) return 0;
+    return null;
+  }
+  // a wheel or trackpad gesture is a run of events without a pause; a sudden jump in strength starts a new one,
+  // so a fresh swipe isn't mistaken for the momentum of the last
+  let lastWheel = -1e9, lastMag = 0;
+  addEventListener("wheel", e => {
+    const ts = e.timeStamp || performance.now(), mag = Math.abs(e.deltaY);
+    if (ts - lastWheel > 200 || (mag > lastMag * 1.8 && mag > 15)) fromLaptop = atLaptop();
+    lastWheel = ts; lastMag = mag;
+    const to = e.deltaY ? lidIntent(Math.sign(e.deltaY)) : null;
+    if (to === null) return;
+    e.preventDefault();
+    if (fromLaptop) moveLid(to);
+  }, { passive: false });
+  let touchY = null;
+  addEventListener("touchstart", e => { touchY = e.touches[0].clientY; fromLaptop = atLaptop(); }, { passive: true });
+  addEventListener("touchmove", e => {
+    if (touchY === null) return;
+    const dy = touchY - e.touches[0].clientY;            // positive: finger moving up, page scrolling down
+    const to = dy ? lidIntent(Math.sign(dy)) : null;
+    if (to === null) return;
+    if (e.cancelable) e.preventDefault();                 // from the first move, or the browser takes over the scroll
+    if (fromLaptop && Math.abs(dy) > 8) moveLid(to);
+  }, { passive: false });
+  addEventListener("touchend", () => { touchY = null; }, { passive: true });
+  addEventListener("keydown", e => {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    const a = document.activeElement;
+    const down = ["ArrowDown", "PageDown", "End"].includes(e.key) || (e.key === " " && !e.shiftKey && !(a && a.closest && a.closest("button, a")));
+    const up = ["ArrowUp", "PageUp", "Home"].includes(e.key) || (e.key === " " && e.shiftKey);
+    if (!down && !up) return;
+    fromLaptop = atLaptop();
+    const to = lidIntent(down ? 1 : -1);
+    if (to === null) return;
+    e.preventDefault();
+    moveLid(to);
+  });
 
   /* ---------- services: they rise in as they scroll into view ---------- */
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 });
@@ -225,9 +294,20 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     e.preventDefault();
     const where = a.dataset.go;
     setMenu(false);
-    // scroll there while the menu slides away; the animations play along the way
-    scrollTo(where === "home" ? 0 : where === "gallery" ? closeAt : infoAt);
+    navigate(where);
   });
+  // go there while the menu slides away, passing through the laptop: open or close its lid on the way
+  let navId = 0;
+  async function navigate(where) {
+    const id = ++navId, lid = where === "services" ? 1 : 0;
+    if (c !== lid) {
+      if (Math.abs(window.scrollY - closeAt) > 1) await scrollToAsync(closeAt);
+      if (id !== navId) return;
+      await moveLid(lid);
+      if (id !== navId) return;
+    }
+    scrollToAsync(where === "home" ? 0 : where === "gallery" ? closeAt : infoAt);
+  }
   addEventListener("keydown", e => { if (e.key === "Escape" && menuOpen) { e.stopPropagation(); setMenu(false); } }, true);
 
   /* ---------- the MacBook page ---------- */
@@ -248,9 +328,17 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
   function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    const y = window.scrollY;
+    stepLid(now);
+    // the services only show over a closed lid, and the card only scrolls down off an open one: anything else
+    // that scrolls past the laptop (a flick's momentum, the scrollbar) is held there, and moves the lid if the
+    // gesture started at the laptop
+    let y = window.scrollY;
+    if (!menuOpen && ((y > closeAt + 1 && c < 1) || (y < closeAt - 1 && c > 0))) {
+      if (fromLaptop) moveLid(y > closeAt ? 1 : 0);
+      window.scrollTo(0, closeAt);
+      y = closeAt;
+    }
     const w = clamp01(y / riseLen);                   // the card covering the reel
-    const c = clamp01((y - closeAt) / closeLen);      // the lid closing
 
     // reel: hidden and paused once the card covers it
     set(reelBox, "visibility", w >= 1 ? "hidden" : "visible");
@@ -265,12 +353,12 @@ body.menu-open .menu-foot{opacity:1;transition-delay:.45s}
     set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
     set(title, "opacity", (1 - smooth(0, 0.3, c)).toFixed(3));
     set(shade, "opacity", smooth(0.8, 1, c).toFixed(3));
-    set(macHint, "opacity", w > 0.98 && c < 0.02 ? "1" : "0");
+    set(macHint, "opacity", w > 0.98 && c === 0 && lidTo === 0 ? "1" : "0");
     if (window.Mac && w > 0) Mac.update(w, c, now, dt);
 
-    // keep going while the gallery plays on the open laptop's screen
+    // keep going while the lid moves, or the gallery plays on the open laptop's screen
     const playing = window.Mac && w > 0 && c < 0.75 && !reduce;
-    if (playing) requestAnimationFrame(loop);
+    if (playing || c !== lidTo) requestAnimationFrame(loop);
     else running = false;
   }
 
