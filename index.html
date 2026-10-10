@@ -58,6 +58,13 @@ body.no-mac .mac-hint{display:none}
 @media (max-width:560px){.topnav{top:max(16px,env(safe-area-inset-top));gap:0;padding:6px 8px}.topnav a{padding:8px 10px;font-size:13px}.topnav .long{display:none}}
 @media (max-width:380px){.topnav{padding:5px 6px}.topnav a{padding:8px 7px;font-size:12.5px}}
 
+/* ---------- the LH logo, top left: black and white, with a code symbol ---------- */
+.logo{position:fixed;top:max(24px,env(safe-area-inset-top));left:max(24px,env(safe-area-inset-left));z-index:50;display:flex;align-items:center;gap:10px;height:42px;padding:0 16px;border-radius:999px;
+  background:#0a0a0a;color:#fff;text-decoration:none;box-shadow:0 0 0 1px rgba(255,255,255,.14)}
+.logo b{font:900 20px/1 "League Spartan",system-ui,sans-serif;letter-spacing:-.02em;padding-top:3px}
+.logo span{font:400 14px/1 "Readex Pro",system-ui,sans-serif;color:#fff;opacity:.85}
+@media (max-width:760px){.logo{display:none}}   /* phones: the nav pill takes the whole top */
+
 /* ---------- after the services: a white card with the about me ---------- */
 /* one more scroll at the end of the services pops it up from the bottom, like the first card; scrolling up takes
    it back down. It's taller than the screen by its corner radius, so its rounded top ends just above the screen.
@@ -146,6 +153,8 @@ body.no-mac .mac-hint{display:none}
     </section>
   </div>
 </div>
+
+<a class="logo" href="#top" data-go="home" aria-label="Lennon Helman, back to the start"><b>LH</b><span aria-hidden="true">&lt;/&gt;</span></a>
 
 <nav class="topnav" aria-label="Site">
   <a href="#top" data-go="home">home</a>
@@ -341,6 +350,7 @@ body.no-mac .mac-hint{display:none}
   /* ---------- navigation ---------- */
   const nav = document.querySelector(".topnav");
   const navLinks = [...nav.querySelectorAll("a[data-go]")];
+  document.querySelector(".logo").addEventListener("click", e => { e.preventDefault(); goTo("home"); });
   nav.addEventListener("click", e => {
     const a = e.target.closest("a[data-go]");
     if (!a) return;
