@@ -308,7 +308,7 @@ body.no-mac .mac-hint{display:none}
         { const u = r() - 0.5; puff(cx + u * w, cy - Math.abs(r() * r()) * h * (1 - Math.abs(u) * 1.4), w * (0.08 + r() * 0.14), `rgba(255,255,255,${0.75 * alpha})`); }
     }
   }
-  // LENNON HELMAN, with GREENCASTLE, PA under it: drawn by hand, so the O's middle is known exactly and the
+  // LENNON HELMAN, with SOFTWARE ENGINEER · GREENCASTLE, PA under it: drawn by hand, so the O's middle is known exactly and the
   // camera can fly into it at any scale with the letters staying sharp
   function layoutWord() {
     const two = iw / ih < 1.05;                       // upright screens: the name on two lines
@@ -318,9 +318,10 @@ body.no-mac .mac-hint{display:none}
     const widthOf = t => [...t].reduce((a, c) => a + wctx.measureText(c).width + track, -track);
     const fs = Math.min((iw * (two ? 0.84 : 0.86)) / Math.max(...lines.map(widthOf)) * 100, ih * (two ? 0.22 : 0.3));
     const k = fs / 100, lh = fs * 0.86, sub = Math.max(18, fs * (two ? 0.2 : 0.19));
-    const blockH = lh * lines.length + sub * 2.2;
+    const subs = two ? ["SOFTWARE ENGINEER", "GREENCASTLE, PA"] : ["SOFTWARE ENGINEER  ·  GREENCASTLE, PA"];
+    const blockH = lh * lines.length + sub * (1.1 + 1.25 * subs.length);
     const top = ih * 0.5 - blockH / 2 + fs * 0.72;
-    const out = { fs, sub, lines: [], two, ox: 0, oy: 0, subY: top + lh * (lines.length - 1) + sub * 2.1 };
+    const out = { fs, sub, subs, lines: [], two, ox: 0, oy: 0, subY: top + lh * (lines.length - 1) + sub * 2.1 };
     lines.forEach((t, li) => {
       const w = widthOf(t) * k, x0 = (iw - w) / 2, by = top + li * lh, chars = [];
       let x = x0;
@@ -334,7 +335,10 @@ body.no-mac .mac-hint{display:none}
     out.oy = out.lines[0].by + ((m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2) * k;
     word = out;
   }
-  function drawWord(scale) {
+  // t: seconds since the letters started rising in. Each letter rises into place in turn, then they all bob gently,
+  // each a little out of step, like they're floating in the sky; the line underneath fades up after them
+  let wordT0 = 0;
+  function drawWord(scale, t) {
     const w = word, c = wctx;
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.clearRect(0, 0, wordEl.width, wordEl.height);
@@ -342,13 +346,22 @@ body.no-mac .mac-hint{display:none}
     c.fillStyle = "#0a0a0a";                          // solid black, so it reads on both the sky and the clouds
     c.shadowColor = "transparent";
     c.font = `900 ${w.fs}px "League Spartan", system-ui, sans-serif`;
-    for (const l of w.lines) for (const [ch, x] of l.chars) c.fillText(ch, x, l.by);
+    let i = 0;
+    for (const l of w.lines) for (const [ch, x] of l.chars) {
+      const rise = reduce ? 1 : clamp01((t - i * 0.06) / 0.7), e = 1 - Math.pow(1 - rise, 3);
+      const bob = reduce ? 0 : Math.sin(t * 1.6 - i * 0.55) * w.fs * 0.018 * smooth(0.6, 1.4, t - i * 0.06);
+      c.globalAlpha = e;
+      c.fillText(ch, x, l.by + (1 - e) * w.fs * 0.5 + bob);
+      i++;
+    }
+    c.globalAlpha = reduce ? 1 : smooth(0.6, 1.4, t - i * 0.06 + 0.6);
     c.font = `900 ${w.sub}px "League Spartan", system-ui, sans-serif`;
     c.textAlign = "center";
     if ("letterSpacing" in c) c.letterSpacing = `${w.sub * 0.2}px`;
-    c.fillText("GREENCASTLE, PA", iw / 2 + w.sub * 0.1, w.subY);
+    w.subs.forEach((txt, k) => c.fillText(txt, iw / 2 + w.sub * 0.1, w.subY + k * w.sub * 1.3));
     if ("letterSpacing" in c) c.letterSpacing = "0px";
     c.textAlign = "left";
+    c.globalAlpha = 1;
   }
   function sizeIntro() {
     iw = innerWidth; ih = innerHeight;
@@ -364,8 +377,10 @@ body.no-mac .mac-hint{display:none}
   }
   let lastP = -1, introOn = true;
   // p: 0 at the top of the page, 1 on the laptop
-  function flyIntro(p) {
-    if (p === lastP) return;
+  // the name and clouds keep moving while they can be seen, so this also runs when the scroll hasn't changed
+  function flyIntro(p, now) {
+    const live = p < 0.34 && !reduce && word;
+    if (p === lastP && !live) return;
     lastP = p;
     const on = p < 1;
     if (on !== introOn) { introOn = on; intro.style.visibility = on ? "visible" : "hidden"; }
@@ -374,13 +389,15 @@ body.no-mac .mac-hint{display:none}
     // wider than the screen and the letters are gone past its edges
     const a = clamp01(p / 0.34);
     const scale = Math.exp(Math.log(70) * Math.pow(a, 1.6));
-    drawWord(scale);
+    if (!wordT0) wordT0 = now;
+    drawWord(scale, (now - wordT0) / 1000);
     set(wordEl, "opacity", a >= 1 ? "0" : "1");
     // the clouds behind come closer more slowly, then the camera passes through them (0.3–0.62)
     const b = smooth(0.28, 0.62, p);
-    set(farEl, "transform", `scale(${(1 + 0.5 * a + 3 * b * b).toFixed(4)})`);
+    const drift = reduce ? 0 : now / 1000;           // the clouds drift slowly across the sky
+    set(farEl, "transform", `translate3d(${(Math.sin(drift * 0.05) * 3).toFixed(2)}vw,0,0) scale(${(1 + 0.5 * a + 3 * b * b).toFixed(4)})`);
     set(farEl, "opacity", (1 - smooth(0.4, 0.5, p)).toFixed(3));
-    set(nearEl, "transform", `scale(${(1 + 0.9 * a + 5 * b * b).toFixed(4)})`);
+    set(nearEl, "transform", `translate3d(${(Math.sin(drift * 0.07 + 1) * 5).toFixed(2)}vw,0,0) scale(${(1 + 0.9 * a + 5 * b * b).toFixed(4)})`);
     set(nearEl, "opacity", (1 - smooth(0.36, 0.48, p)).toFixed(3));
     set(fogEl, "opacity", (smooth(0.3, 0.4, p) * (1 - smooth(0.43, 0.53, p))).toFixed(3));
     // inside the cloud the sky gives way to the lawn far below
@@ -389,7 +406,7 @@ body.no-mac .mac-hint{display:none}
   addEventListener("resize", () => { sizeIntro(); kick(); });
   sizeIntro();
   (document.fonts ? document.fonts.load('900 100px "League Spartan"').then(() => document.fonts.ready) : Promise.resolve())
-    .then(() => { sizeIntro(); kick(); });
+    .then(() => { sizeIntro(); wordT0 = 0; kick(); });   // the letters rise in once the font is ready
 
   /* ---------- the MacBook page ---------- */
   const title = work.querySelector(".work-title");
@@ -420,7 +437,7 @@ body.no-mac .mac-hint{display:none}
     }
     const c = lid.v;
     const p = clamp01(y / closeAt);                 // 0 in the sky, 1 on the laptop
-    flyIntro(p);
+    flyIntro(p, now);
     // the headline lifts away as the lid starts to close; a shade settles over the closed lid
     set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
     set(title, "opacity", (smooth(0.86, 1, p) * (1 - smooth(0, 0.3, c))).toFixed(3));
@@ -433,7 +450,7 @@ body.no-mac .mac-hint{display:none}
     markCurrent(c >= 0.5 ? "services" : p >= 1 ? "gallery" : "");
 
     // keep going while something moves, or the gallery plays on the open laptop's screen
-    const playing = window.Mac && p > 0.38 && c < 0.75 && !reduce;
+    const playing = (window.Mac && p > 0.38 && c < 0.75 && !reduce) || (p < 0.34 && !reduce);   // the gallery, or the sky
     if (playing || lid.moving()) requestAnimationFrame(loop);
     else running = false;
   }
