@@ -7,7 +7,7 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA: project gallery and services.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="mac/mac.min.js?v=4">
+<link rel="modulepreload" href="mac/mac.min.js?v=5">
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
@@ -19,17 +19,17 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
    closes its lid and brings the services up over it; one scroll up from the services opens it again. */
 
 /* the page: the white MacBook page, then the services over its closed lid */
-#work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#f5f9fc}
+#work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#3d6a22}   /* grass green until the 3D lawn draws */
 /* the stage holds the headline and the MacBook, and stays pinned to the screen from the moment it reaches the top */
 .stage{position:sticky;top:0;height:100vh;z-index:1}
-.work-title{position:absolute;left:0;right:0;top:calc(var(--tb) * .2 + 70px);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#0a0a0a;z-index:2;will-change:transform,opacity}
+.work-title{position:absolute;left:0;right:0;top:calc(var(--tb) * .2 + 70px);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#fff;text-shadow:0 2px 30px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.25);z-index:2;will-change:transform,opacity}
 @media (max-width:700px){.work-title{top:clamp(76px,10vh,104px);font-size:15vw;padding:0 4vw}}
 /* the MacBook is a real-time 3D model (mac/src/mac.js) */
 #mac{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* a shade over the closed lid, so the services read clearly on it */
 .lid-shade{position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 0%,rgba(0,0,0,.08),rgba(0,0,0,.42));opacity:0;pointer-events:none;z-index:1}
 body.no-mac .mac-hint{display:none}
-.mac-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));margin:0;text-align:center;font:600 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6c7076;opacity:0;transition:opacity .4s;z-index:2}
+.mac-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));margin:0;text-align:center;font:600 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5);opacity:0;transition:opacity .4s;z-index:2}
 
 
 /* ---------- navigation: a pill of buttons in the top middle ---------- */
@@ -90,7 +90,7 @@ body.no-mac .mac-hint{display:none}
   <a href="#gallery" data-go="gallery">project gallery</a>
   <a href="#services" data-go="services">services</a>
 </nav>
-<script type="module" src="mac/mac.min.js?v=4"></script>
+<script type="module" src="mac/mac.min.js?v=5"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;

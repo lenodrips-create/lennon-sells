@@ -4,6 +4,7 @@
 // Mac.update(rise, close, now, dt): rise is how far the card has come up (0..1), close how far the lid has shut.
 // Build: cd mac && npm install && npm run build  (bundles three.js into mac/mac.min.js)
 import * as THREE from "three";
+import { makeLawn, outdoorEnvironment } from "./grass.js";
 
 const canvas = document.getElementById("mac");
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -15,36 +16,28 @@ const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 0.92;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
-// a white photo studio for the metal to reflect, matching the page it sits on: softboxes in front and behind, two
-// strip lights, and a black flag overhead so the top of the closed lid reads as deep, dark aluminium.
-// Reflections are what make anodised aluminium look like metal rather than paint.
-function studio() {
-  const s = new THREE.Scene();
-  const room = new THREE.Mesh(new THREE.BoxGeometry(220, 140, 220), new THREE.MeshBasicMaterial({ color: 0xd9dce0, side: THREE.BackSide }));
-  room.position.y = 50;
-  s.add(room);
-  const panel = (w, h, rgb, x, y, z) => {
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(...rgb), side: THREE.DoubleSide }));
-    m.position.set(x, y, z); m.lookAt(0, 0, 0);
-    s.add(m);
-  };
-  panel(110, 80, [0.5, 0.51, 0.53], 0, 100, 0);           // grey flag overhead
-  panel(90, 32, [4, 4, 4], 0, 55, -88);                    // softbox behind
-  panel(90, 32, [2.6, 2.6, 2.6], 0, 50, 92);               // softbox in front
-  panel(18, 80, [2.6, 2.6, 2.6], -95, 30, 10);             // strip, left
-  panel(18, 80, [1.8, 1.8, 1.8], 95, 30, -10);             // strip, right
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(220, 220), new THREE.MeshBasicMaterial({ color: 0xeef0f3 }));
-  floor.rotation.x = -Math.PI / 2; floor.position.y = -19.9;
-  s.add(floor);
-  return s;
-}
+// outdoors on a sunny lawn: the sun to the left and a little in front, so the laptop throws its shadow across the grass to the right, a blue sky and the grass's green bounce. The sky
+// is also what the aluminium reflects, which is what makes it read as metal.
+const quality = Math.min(innerWidth, innerHeight) < 700 || matchMedia("(pointer: coarse)").matches ? "low" : "high";
+const sunDir = new THREE.Vector3(-0.78, 0.58, 0.22);
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(studio(), 0.02).texture;
-const key = new THREE.DirectionalLight(0xffffff, 0.9);
-key.position.set(-18, 40, 26);
-scene.add(key);
+scene.environment = pmrem.fromScene(outdoorEnvironment(sunDir), 0.02, 0.1, 500).texture;   // the sky sphere is 200 out
+scene.environmentIntensity = 0.8;
+const sun = new THREE.DirectionalLight(0xfff1dc, 3.0);
+sun.position.copy(sunDir).multiplyScalar(120);
+sun.castShadow = true;
+sun.shadow.mapSize.set(quality === "high" ? 2048 : 1024, quality === "high" ? 2048 : 1024);
+Object.assign(sun.shadow.camera, { left: -48, right: 48, top: 48, bottom: -48, near: 10, far: 260 });
+sun.shadow.camera.updateProjectionMatrix();
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.04;
+sun.shadow.radius = 3;
+scene.add(sun, sun.target);
+scene.add(new THREE.HemisphereLight(0xcfe2ff, 0x3a5a1c, 0.25));
 
 /* ---------- dimensions (cm) ---------- */
 const W = 30.41, D = 21.5;           // footprint
@@ -337,11 +330,15 @@ function softShadow(pw, pd, blur, alpha, z) {
   x.fill();
   const t = new THREE.CanvasTexture(c);
   const m = new THREE.Mesh(new THREE.PlaneGeometry(pw, pd), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, toneMapped: false }));
-  m.rotation.x = -Math.PI / 2; m.position.set(0, -0.02, z);
+  m.rotation.x = -Math.PI / 2; m.position.set(0, -0.25, z);
   mac.add(m);
 }
-softShadow(W * 1.9, D * 2.2, 5.5, 0.32, -1.2);
-softShadow(W + 5, D + 5, 0.7, 0.8, 0);
+softShadow(W + 6, D + 6, 1.2, 0.55, 0);
+
+// every solid part casts and receives the sun's shadow (only the laptop and the daisies cast, so the shadow pass
+// stays cheap enough to redraw every frame)
+mac.traverse(o => { if (o.isMesh && !o.material.transparent && !o.material.polygonOffset) { o.castShadow = true; o.receiveShadow = true; } });
+const lawn = makeLawn(scene, { w: W, d: D }, quality);
 
 /* ---------- camera ---------- */
 const camera = new THREE.PerspectiveCamera(26, 1, 1, 400);
@@ -365,9 +362,9 @@ function place(target, elev, dist, az) {
   camera.up.set(-Math.sin(e) * Math.sin(a), Math.cos(e), -Math.sin(e) * Math.cos(a));
   camera.lookAt(target);
 }
-// open: a low three-quarter view, like a product photo; narrow screens look more from the front
-const T_OPEN = new THREE.Vector3(0, 7.2, 0.6), E_OPEN = 15;
-const azOpen = () => (vw < 700 ? -14 : -24);
+// open: looking down at the laptop on the grass from in front, a little to one side
+const T_OPEN = new THREE.Vector3(0, 6, 1.5), E_OPEN = 55;
+const azOpen = () => (vw < 700 ? -5 : -8);
 function fitOpen() {
   const pts = corners(), v = new THREE.Vector3();
   // the headline takes the top of the card; frame the laptop in the space below it
@@ -440,6 +437,7 @@ function update(rise, close, now, dt) {
     renderer.render(screenScene, screenCam);
     renderer.setRenderTarget(null);
   }
+  lawn.update(reduce ? 0 : now / 1000);   // the grass sways while the laptop is open
   renderer.render(scene, camera);
 }
 
