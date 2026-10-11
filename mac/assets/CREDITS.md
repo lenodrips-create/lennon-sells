@@ -8,3 +8,6 @@
   the textures resized and recompressed to WebP.
 - **chair.glb**: "Sheen Chair", © 2020 Wayfair, LLC, by Eric Chadwick, CC0, from the Khronos glTF Sample Assets.
   Changed: simplified and the textures resized and recompressed to WebP.
+
+The whiteboard's handwriting uses **Permanent Marker** (Apache License 2.0) and **Caveat** (SIL Open Font License
+1.1), in `fonts/` with their licences.

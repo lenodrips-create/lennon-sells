@@ -7,6 +7,7 @@
 import * as THREE from "three";
 import { makeLawn, outdoorEnvironment } from "./grass.js";
 import { makeHouse, OFFICE } from "./house.js";
+import { WRITE_SECONDS } from "./board.js";
 
 const canvas = document.getElementById("mac");
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -370,7 +371,7 @@ const house = makeHouse(quality, renderer, () => renderer.compileAsync(scene, ca
   aimSun(sunT);
   dirty = true;
   window.dispatchEvent(new Event("mac-ready"));
-}));
+}), innerWidth < innerHeight);
 house.group.rotation.y = HOUSE_ROT;
 house.group.position.set(-Math.sin(HOUSE_ROT) * HOUSE_DIST, 0, -Math.cos(HOUSE_ROT) * HOUSE_DIST);
 scene.add(house.group);
@@ -476,7 +477,7 @@ function planTour() {
     toWorld(0, OFFICE.eye, 430), toWorld(0, OFFICE.eye, endZ)], false, "centripetal");
   const look = new THREE.CatmullRomCurve3([openFit.target.clone(), toWorld(0, 310, 330), toWorld(0, 440, 0),
     toWorld(0, B.y, B.z), toWorld(0, B.y, B.z - 1)], false, "centripetal");
-  const share = portrait ? 0.86 : aspect < 1.35 ? 0.62 : 0.5;   // how much of the width the board takes at the end
+  const share = portrait ? 0.92 : aspect < 1.35 ? 0.62 : 0.5;   // how much of the width the board takes at the end
   const tanH = B.w / share / 2 / (endZ - B.z);
   const fovEnd = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(tanH / aspect)), 32, 80);
   return { pos, look, fovMid: portrait ? 64 : 44, fovEnd };
@@ -515,12 +516,20 @@ function resize() {
 /* ---------- per-frame update ---------- */
 let dirty = true, last = { rise: -1, go: -1 };
 const descT = new THREE.Vector3(), look = new THREE.Vector3(), SKY_T = new THREE.Vector3(0, 0, 0);
+// the services write themselves on the whiteboard once the camera has arrived in front of it, and are wiped again
+// once it has left the room, so they're written afresh on each visit
+let writing = 0, busy = false;
 function update(rise, go, now, dt) {
   if (!openFit) resize();
   // the gallery flows while the laptop's in view
   const stripOn = rise > 0 && go < 0.35;
   if (stripOn && !reduce) offset = (offset + dt * 38) % TOTAL;
-  if (!stripOn && !dirty && rise === last.rise && go === last.go) return;
+  const was = writing;
+  if (go >= 0.999) writing = reduce ? 1 : Math.min(1, writing + dt / WRITE_SECONDS);
+  else if (go < 0.6) writing = 0;
+  busy = go >= 0.999 && writing < 1;
+  house.board.reveal.value = writing;
+  if (!stripOn && !dirty && rise === last.rise && go === last.go && writing === was) return;
   const redraw = stripOn || dirty;   // the display's picture needs drawing again
   last.rise = rise; last.go = go; dirty = false;
 
@@ -566,7 +575,7 @@ function update(rise, go, now, dt) {
 addEventListener("resize", () => { resize(); });
 // once the web fonts are in, redraw the display's text and re-measure the headline the laptop sits under
 document.fonts && document.fonts.ready.then(() => { drawBackground(bgImg.complete && bgImg.naturalWidth ? bgImg : null); resize(); });
-window.Mac = { update, resize };
+window.Mac = { update, resize, busy: () => busy };
 // draw once while the reel plays, so shaders and textures are ready before the laptop first rises
 (window.requestIdleCallback || (f => setTimeout(f, 200)))(() => update(0, 0, performance.now(), 0));
 window.dispatchEvent(new Event("mac-ready"));
