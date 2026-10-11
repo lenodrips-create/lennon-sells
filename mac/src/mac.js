@@ -346,7 +346,7 @@ const lawn = makeLawn(scene, { w: W, d: D }, quality);
 // the laptop lies on the line through the office door and the chalkboard, 10 m out in front of the house, which is
 // turned a little towards the sun so its front is lit
 const HOUSE_DIST = 1000, HOUSE_ROT = -Math.PI / 6;
-const house = makeHouse(quality);
+const house = makeHouse(quality, renderer, () => { dirty = true; window.dispatchEvent(new Event("mac-ready")); });   // redraw as its parts arrive
 house.group.rotation.y = HOUSE_ROT;
 house.group.position.set(-Math.sin(HOUSE_ROT) * HOUSE_DIST, 0, -Math.cos(HOUSE_ROT) * HOUSE_DIST);
 scene.add(house.group);
@@ -496,7 +496,7 @@ function update(rise, go, now, dt) {
   // near and far planes follow the height, so the whole lawn shows from up high and the laptop stays crisp close up
   let near = Math.max(0.5, dD * 0.04), far = dD * 3 + 400, fov = FOV, shift = openFit.shift * k;
   // then over to the house and into the office
-  const g = clamp01(go), t = g * g * (3 - 2 * g);
+  const t = clamp01(go);   // the page eases the scroll itself
   if (t > 0) {
     tour.pos.getPoint(t, camera.position);
     tour.look.getPoint(t, look);
