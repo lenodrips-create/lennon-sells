@@ -7,7 +7,7 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA: project gallery and services.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="mac/mac.min.js?v=5">
+<link rel="modulepreload" href="mac/mac.min.js?v=6">
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
@@ -15,8 +15,17 @@ html{--gap:clamp(10px,2.6vw,40px);background:#0a0a0a;overscroll-behavior-y:none}
 body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* Two stops: the project gallery (a 3D MacBook, pinned to the screen) and the services. One scroll at the laptop
-   closes its lid and brings the services up over it; one scroll up from the services opens it again. */
+/* The page opens in the sky: LENNON HELMAN over clouds. Scrolling flies the camera through the O, through the
+   clouds and down onto the laptop lying on a lawn (the 3D MacBook, pinned to the screen). There, one scroll closes
+   its lid and brings the services up over it; one scroll up from the services opens it again. */
+
+/* ---------- the sky at the top: layers over the 3D lawn, moved and faded by the scroll ---------- */
+#intro{position:fixed;inset:0;z-index:3;overflow:hidden;pointer-events:none;contain:strict}
+#intro > *{position:absolute;inset:0;width:100%;height:100%;will-change:transform,opacity}
+.sky{background:linear-gradient(180deg,#2c78d0 0%,#5ea6e6 38%,#a7d1f4 72%,#dcedfb 100%)}
+.fog{background:radial-gradient(120% 120% at 50% 50%,#fff 30%,#eef5fc 70%,#dbe9f7);opacity:0}
+/* the fly-through: this much scrolling takes the camera from the sky down to the laptop */
+.fly{height:260vh}
 
 /* the page: the white MacBook page, then the services over its closed lid */
 #work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#3d6a22}   /* grass green until the 3D lawn draws */
@@ -48,6 +57,14 @@ body.no-mac .mac-hint{display:none}
 <body>
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA.</h1>
 
+<div id="intro" aria-hidden="true">
+  <div class="sky"></div>
+  <canvas class="clouds far"></canvas>
+  <canvas class="clouds near"></canvas>
+  <canvas class="wordmark"></canvas>
+  <div class="fog"></div>
+</div>
+
 <section id="work" aria-label="Project gallery">
   <div class="stage">
     <h2 class="work-title">Project Gallery</h2>
@@ -55,6 +72,7 @@ body.no-mac .mac-hint{display:none}
     <div class="lid-shade"></div>
     <p class="mac-hint" aria-hidden="true">Scroll to close</p>
   </div>
+  <div class="fly" aria-hidden="true"></div>
   <div id="info" class="ff">
     <section class="ff-sec ff-only" id="ff-services">
       <div class="ff-head rv"><h3>Services we offer</h3><span>03 services</span></div>
@@ -90,7 +108,7 @@ body.no-mac .mac-hint{display:none}
   <a href="#gallery" data-go="gallery">project gallery</a>
   <a href="#services" data-go="services">services</a>
 </nav>
-<script type="module" src="mac/mac.min.js?v=5"></script>
+<script type="module" src="mac/mac.min.js?v=6"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -105,18 +123,18 @@ body.no-mac .mac-hint{display:none}
   }
 
   /* ---------- scroll positions ---------- */
-  // the page opens on the laptop (closeAt, where the stage is pinned); the services start at infoAt, a screen
-  // further on, over the closed lid
+  // the stage is pinned from the top; the fly-through from the sky takes the first stretch of scrolling and ends
+  // on the laptop (closeAt); the services start at infoAt, a screen further on, over the closed lid
   const work = document.getElementById("work");
   const info = document.getElementById("info");
   const stage = work.querySelector(".stage");
-  let closeAt = 0, infoAt = 1;
+  let closeAt = 1, infoAt = 1;
   function measure() {
-    closeAt = work.offsetTop + stage.offsetTop;
     infoAt = work.offsetTop + info.offsetTop;
+    closeAt = Math.max(1, infoAt - stage.offsetHeight);
   }
   measure();
-  if ("scrollRestoration" in history) history.scrollRestoration = "manual";   // always start on the laptop
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";   // always start in the sky
   const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
   const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   // scroll the page to a position over a set time, eased; `at` = [fraction, fn] runs fn once partway
@@ -260,6 +278,117 @@ body.no-mac .mac-hint{display:none}
     navLinks.forEach(a => a.setAttribute("aria-current", a.dataset.go === where));
   }
 
+  /* ---------- the sky: clouds and the wordmark, flown through on the way down ---------- */
+  const intro = document.getElementById("intro");
+  const skyEl = intro.querySelector(".sky"), fogEl = intro.querySelector(".fog");
+  const farEl = intro.querySelector(".clouds.far"), nearEl = intro.querySelector(".clouds.near");
+  const wordEl = intro.querySelector(".wordmark"), wctx = wordEl.getContext("2d");
+  let iw = 1, ih = 1, idpr = 1, word = null;
+
+  // soft cumulus clouds: puffs of white over a greyer, flatter underside, seeded so they're the same each visit
+  function drawClouds(cv, seed, n, minW, maxW, bands, alpha) {
+    const r = (() => { let s = seed; return () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646; })();
+    cv.width = Math.round(iw * idpr); cv.height = Math.round(ih * idpr);
+    const x = cv.getContext("2d");
+    x.setTransform(idpr, 0, 0, idpr, 0, 0);
+    for (let i = 0; i < n; i++) {
+      const [y0, y1] = bands[i % bands.length];
+      const w = (minW + r() * (maxW - minW)) * Math.max(iw, ih * 0.8), cx = r() * iw, cy = (y0 + r() * (y1 - y0)) * ih, h = w * 0.32;
+      const puff = (px, py, pr, col) => {
+        const g = x.createRadialGradient(px, py, 0, px, py, pr);
+        g.addColorStop(0, col); g.addColorStop(1, "rgba(255,255,255,0)");
+        x.fillStyle = g; x.beginPath(); x.arc(px, py, pr, 0, Math.PI * 2); x.fill();
+      };
+      for (let k = 0; k < 26; k++)        // the shaded underside
+        puff(cx + (r() - 0.5) * w, cy + r() * h * 0.25, w * (0.1 + r() * 0.12), `rgba(176,196,222,${0.32 * alpha})`);
+      for (let k = 0; k < 40; k++)        // the sunlit tops, heaped higher in the middle
+        { const u = r() - 0.5; puff(cx + u * w, cy - Math.abs(r() * r()) * h * (1 - Math.abs(u) * 1.4), w * (0.08 + r() * 0.14), `rgba(255,255,255,${0.75 * alpha})`); }
+    }
+  }
+  // LENNON HELMAN, with GREENCASTLE, PA under it: drawn by hand, so the O's middle is known exactly and the
+  // camera can fly into it at any scale with the letters staying sharp
+  function layoutWord() {
+    const two = iw / ih < 1.05;                       // upright screens: the name on two lines
+    const lines = two ? ["LENNON", "HELMAN"] : ["LENNON HELMAN"];
+    wctx.font = '900 100px "League Spartan", system-ui, sans-serif';
+    const track = -0.04 * 100;
+    const widthOf = t => [...t].reduce((a, c) => a + wctx.measureText(c).width + track, -track);
+    const fs = Math.min((iw * (two ? 0.84 : 0.86)) / Math.max(...lines.map(widthOf)) * 100, ih * (two ? 0.22 : 0.3));
+    const k = fs / 100, lh = fs * 0.86, sub = Math.max(14, fs * (two ? 0.16 : 0.15));
+    const blockH = lh * lines.length + sub * 2.2;
+    const top = ih * 0.5 - blockH / 2 + fs * 0.72;
+    const out = { fs, sub, lines: [], two, ox: 0, oy: 0, subY: top + lh * (lines.length - 1) + sub * 2.1 };
+    lines.forEach((t, li) => {
+      const w = widthOf(t) * k, x0 = (iw - w) / 2, by = top + li * lh, chars = [];
+      let x = x0;
+      for (const c of t) { chars.push([c, x]); x += (wctx.measureText(c).width + track) * k; }
+      out.lines.push({ by, chars });
+    });
+    // the centre of the O in LENNON, from the glyph's ink box
+    const [oc, ox] = out.lines[0].chars.find(([c]) => c === "O");
+    const m = wctx.measureText("O");
+    out.ox = ox + ((m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2) * k;
+    out.oy = out.lines[0].by + ((m.actualBoundingBoxDescent - m.actualBoundingBoxAscent) / 2) * k;
+    word = out;
+  }
+  function drawWord(scale) {
+    const w = word, c = wctx;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.clearRect(0, 0, wordEl.width, wordEl.height);
+    c.setTransform(idpr * scale, 0, 0, idpr * scale, idpr * w.ox * (1 - scale), idpr * w.oy * (1 - scale));
+    c.fillStyle = "#fff";
+    c.shadowColor = scale < 3 ? "rgba(20,50,90,.28)" : "transparent";
+    c.shadowBlur = 40 * idpr; c.shadowOffsetY = 6 * idpr;
+    c.font = `900 ${w.fs}px "League Spartan", system-ui, sans-serif`;
+    for (const l of w.lines) for (const [ch, x] of l.chars) c.fillText(ch, x, l.by);
+    c.font = `700 ${w.sub}px "League Spartan", system-ui, sans-serif`;
+    c.textAlign = "center";
+    if ("letterSpacing" in c) c.letterSpacing = `${w.sub * 0.32}px`;
+    c.fillText("GREENCASTLE, PA", iw / 2 + w.sub * 0.16, w.subY);
+    if ("letterSpacing" in c) c.letterSpacing = "0px";
+    c.textAlign = "left";
+  }
+  function sizeIntro() {
+    iw = innerWidth; ih = innerHeight;
+    idpr = Math.min(2, devicePixelRatio || 1);
+    wordEl.width = Math.round(iw * idpr); wordEl.height = Math.round(ih * idpr);
+    const cdpr = idpr; idpr = Math.min(1.5, idpr);         // clouds are soft: they don't need full resolution
+    // above and below the name, so it reads on open blue sky
+    drawClouds(farEl, 7, 10, 0.2, 0.38, [[0.04, 0.24], [0.74, 0.98]], 0.9);
+    drawClouds(nearEl, 31, 6, 0.4, 0.7, [[-0.05, 0.12], [0.86, 1.08]], 0.85);
+    idpr = cdpr;
+    layoutWord();
+    lastP = -1;
+  }
+  let lastP = -1, introOn = true;
+  // p: 0 at the top of the page, 1 on the laptop
+  function flyIntro(p) {
+    if (p === lastP) return;
+    lastP = p;
+    const on = p < 1;
+    if (on !== introOn) { introOn = on; intro.style.visibility = on ? "visible" : "hidden"; }
+    if (!on || !word) return;
+    // 0–0.34: into the O. The scale grows exponentially, so the flight feels even; by the end the O's middle is
+    // wider than the screen and the letters are gone past its edges
+    const a = clamp01(p / 0.34);
+    const scale = Math.exp(Math.log(70) * Math.pow(a, 1.6));
+    drawWord(scale);
+    set(wordEl, "opacity", a >= 1 ? "0" : "1");
+    // the clouds behind come closer more slowly, then the camera passes through them (0.3–0.62)
+    const b = smooth(0.28, 0.62, p);
+    set(farEl, "transform", `scale(${(1 + 0.5 * a + 3 * b * b).toFixed(4)})`);
+    set(farEl, "opacity", (1 - smooth(0.4, 0.5, p)).toFixed(3));
+    set(nearEl, "transform", `scale(${(1 + 0.9 * a + 5 * b * b).toFixed(4)})`);
+    set(nearEl, "opacity", (1 - smooth(0.36, 0.48, p)).toFixed(3));
+    set(fogEl, "opacity", (smooth(0.3, 0.4, p) * (1 - smooth(0.43, 0.53, p))).toFixed(3));
+    // inside the cloud the sky gives way to the lawn far below
+    set(skyEl, "opacity", (1 - smooth(0.4, 0.46, p)).toFixed(3));
+  }
+  addEventListener("resize", () => { sizeIntro(); kick(); });
+  sizeIntro();
+  (document.fonts ? document.fonts.load('900 100px "League Spartan"').then(() => document.fonts.ready) : Promise.resolve())
+    .then(() => { sizeIntro(); kick(); });
+
   /* ---------- the MacBook page ---------- */
   const title = work.querySelector(".work-title");
   const shade = work.querySelector(".lid-shade");
@@ -288,17 +417,21 @@ body.no-mac .mac-hint{display:none}
       }
     }
     const c = lid.v;
+    const p = clamp01(y / closeAt);                 // 0 in the sky, 1 on the laptop
+    flyIntro(p);
     // the headline lifts away as the lid starts to close; a shade settles over the closed lid
     set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
-    set(title, "opacity", (1 - smooth(0, 0.3, c)).toFixed(3));
+    set(title, "opacity", (smooth(0.86, 1, p) * (1 - smooth(0, 0.3, c))).toFixed(3));
     set(shade, "opacity", smooth(0.8, 1, c).toFixed(3));
-    set(macHint, "opacity", c === 0 && lid.to === 0 && !auto ? "1" : "0");
-    if (window.Mac) Mac.update(1, c, now, dt);
+    set(macHint, "opacity", p === 1 && c === 0 && lid.to === 0 && !auto ? "1" : "0");
+    // the 3D camera: from high above the lawn, once the clouds open (0.42), down to the laptop
+    const down = clamp01((p - 0.4) / 0.6);
+    if (window.Mac && p > 0.38) Mac.update(down, c, now, dt);
 
-    markCurrent(c >= 0.5 ? "services" : "gallery");
+    markCurrent(c >= 0.5 ? "services" : p >= 1 ? "gallery" : "");
 
     // keep going while something moves, or the gallery plays on the open laptop's screen
-    const playing = window.Mac && c < 0.75 && !reduce;
+    const playing = window.Mac && p > 0.38 && c < 0.75 && !reduce;
     if (playing || lid.moving()) requestAnimationFrame(loop);
     else running = false;
   }
