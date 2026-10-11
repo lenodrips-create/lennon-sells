@@ -218,8 +218,13 @@ export function makeLawn(scene, foot, quality) {
   far.position.y = GROUND_Y - 1;
   far.receiveShadow = true;
   scene.add(far);
-  const b = blades(rand, quality === "high" ? 96000 : 48000, foot);
+  const b = blades(rand, quality === "high" ? 80000 : 40000, foot);
   scene.add(b.mesh);
-  for (const d of daisies(rand, quality === "high" ? 34 : 22, foot)) scene.add(d);
-  return { update: t => { b.uTime.value = t; } };
+  const flowers = daisies(rand, quality === "high" ? 34 : 22, foot);
+  for (const d of flowers) scene.add(d);
+  return {
+    update: t => { b.uTime.value = t; },
+    // the blades and daisies only matter round the laptop: away from it, they're skipped
+    near: on => { b.mesh.visible = on; for (const d of flowers) d.visible = on; },
+  };
 }
