@@ -7,7 +7,7 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA: project gallery and services.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="mac/mac.min.js?v=10">
+<link rel="modulepreload" href="mac/mac.min.js?v=11">
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
@@ -18,7 +18,8 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 /* The page opens in the sky: LENNON HELMAN over clouds. Scrolling flies the camera through the O, through the
    clouds and down onto the laptop lying on a lawn (the 3D MacBook, pinned to the screen). There, scrolling on
    flies the camera across the lawn to the house next door and in through its balcony door to the office, where it
-   stops square on to a chalkboard; all of that follows the scroll. */
+   stops square on to a whiteboard with the services; one more scroll walks on through a doorway into the kitchen,
+   to a chalk menu board with what Lennon does and his prices. */
 
 /* ---------- the sky at the top: layers over the 3D lawn, moved and faded by the scroll ---------- */
 #intro{position:fixed;inset:0;z-index:3;overflow:hidden;pointer-events:none;contain:strict}
@@ -29,8 +30,9 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 .fog{background:radial-gradient(120% 120% at 50% 50%,#fff 30%,#eef5fc 70%,#dbe9f7);opacity:0}
 /* the fly-through: this much scrolling takes the camera from the sky down to the laptop */
 .fly{height:260vh}
-/* and this much from the laptop to the chalkboard in the office */
+/* and this much from the laptop to the whiteboard in the office, then on to the kitchen */
 .zoom{height:240vh}
+.walk{height:160vh}
 
 /* the page: the MacBook on the lawn, then the services on its screen */
 #work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#3d6a22}   /* grass green until the 3D lawn draws */
@@ -82,13 +84,16 @@ body.no-mac .mac-hint{display:none}
   </div>
   <div class="fly" aria-hidden="true"></div>
   <div class="zoom" aria-hidden="true"></div>
+  <div class="walk" aria-hidden="true"></div>
 </section>
 
 <nav class="topnav" aria-label="Site">
+  <a href="#home" data-go="home">home</a>
   <a href="#gallery" data-go="gallery">project gallery</a>
   <a href="#services" data-go="services">services</a>
+  <a href="#developer" data-go="developer">developer</a>
 </nav>
-<script type="module" src="mac/mac.min.js?v=10"></script>
+<script type="module" src="mac/mac.min.js?v=11"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -108,11 +113,12 @@ body.no-mac .mac-hint{display:none}
   // chalkboard in the office next door
   const work = document.getElementById("work");
   const stage = work.querySelector(".stage");
-  const zoomEl = work.querySelector(".zoom");
-  let closeAt = 1, officeAt = 2;
+  const zoomEl = work.querySelector(".zoom"), walkEl = work.querySelector(".walk");
+  let closeAt = 1, officeAt = 2, kitchenAt = 3;
   function measure() {
     closeAt = Math.max(1, work.offsetTop + zoomEl.offsetTop - stage.offsetHeight);
-    officeAt = Math.max(closeAt + 1, Math.min(closeAt + zoomEl.offsetHeight, maxScroll()));
+    officeAt = closeAt + zoomEl.offsetHeight;
+    kitchenAt = Math.max(officeAt + 1, Math.min(officeAt + walkEl.offsetHeight, maxScroll()));
   }
   const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
   measure();
@@ -154,6 +160,8 @@ body.no-mac .mac-hint{display:none}
     if (dir < 0 && y > 1 && y <= closeAt + 1) return { run: startedAt(closeAt) || y < closeAt - 1 ? () => run(() => scrollAnim(0, reduce ? 0 : 2.4)) : null };
     if (dir > 0 && y < officeAt - 1) return { run: startedAt(closeAt) || y > closeAt + 1 ? () => run(() => scrollAnim(officeAt, reduce ? 0 : 4.2)) : null };
     if (dir < 0 && y <= officeAt + 1) return { run: startedAt(officeAt) || y < officeAt - 1 ? () => run(() => scrollAnim(closeAt, reduce ? 0 : 3.6)) : null };
+    if (dir > 0 && y < kitchenAt - 1) return { run: startedAt(officeAt) || y > officeAt + 1 ? () => run(() => scrollAnim(kitchenAt, reduce ? 0 : 3.4)) : null };
+    if (dir < 0 && y <= kitchenAt + 1) return { run: startedAt(kitchenAt) || y < kitchenAt - 1 ? () => run(() => scrollAnim(officeAt, reduce ? 0 : 3.2)) : null };
     return null;
   }
   // a wheel or trackpad gesture is a run of events without a pause; a sudden jump in strength starts a new one,
@@ -203,7 +211,10 @@ body.no-mac .mac-hint{display:none}
   });
   // go there, flying into or out of the screen on the way
   function goTo(where) {
-    run(() => scrollAnim(where === "services" ? officeAt : closeAt, reduce ? 0 : where === "services" ? 4.2 : window.scrollY > closeAt ? 3.6 : 1.8));
+    const stops = [0, closeAt, officeAt, kitchenAt], to = { home: 0, gallery: 1, services: 2, developer: 3 }[where];
+    let from = 0;
+    stops.forEach((s, i) => { if (Math.abs(window.scrollY - s) < Math.abs(window.scrollY - stops[from])) from = i; });
+    run(() => scrollAnim(stops[to], reduce ? 0 : Math.min(6, 1.4 + 1.6 * Math.abs(to - from))));
   }
   let current = "";
   function markCurrent(where) {
@@ -357,7 +368,8 @@ body.no-mac .mac-hint{display:none}
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     const y = window.scrollY;
-    const c = clamp01((y - closeAt) / (officeAt - closeAt));     // 0 on the laptop, 1 at the chalkboard
+    const c = clamp01((y - closeAt) / (officeAt - closeAt));     // 0 on the laptop, 1 at the whiteboard
+    const k = clamp01((y - officeAt) / (kitchenAt - officeAt));  // 0 at the whiteboard, 1 at the kitchen's menu
     const p = clamp01(y / closeAt);                 // 0 in the sky, 1 on the laptop
     flyIntro(p, now);
     // the headline lifts away as the camera sets off
@@ -368,9 +380,9 @@ body.no-mac .mac-hint{display:none}
     if (atBoard !== boardCta.classList.contains("on")) { boardCta.classList.toggle("on", atBoard); boardCta.tabIndex = atBoard ? 0 : -1; }
     // the 3D camera: from high above the lawn, once the clouds open (0.42), down to the laptop, then on to the office
     const down = clamp01((p - 0.4) / 0.6);
-    if (window.Mac && p > 0.38) Mac.update(down, c, now, dt);
+    if (window.Mac && p > 0.38) Mac.update(down, c, k, now, dt);
 
-    markCurrent(c >= 0.5 ? "services" : p >= 1 ? "gallery" : "");
+    markCurrent(k >= 0.5 ? "developer" : c >= 0.5 ? "services" : p >= 1 ? "gallery" : "home");
 
     // keep going while something moves: the grass and the gallery on the laptop's screen, or the sky
     const playing = (window.Mac && p > 0.38 && c < 1 && !reduce) || (p < 0.34 && !reduce)   // the gallery, or the sky

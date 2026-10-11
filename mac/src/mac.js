@@ -351,7 +351,7 @@ const HOUSE_DIST = 1000, HOUSE_ROT = -Math.PI / 6;
 // sight, with the sun's shadow round it, so its shadow shaders are made and everything is on the GPU; then redraw.
 // Nothing has to be compiled or uploaded when the house first comes into view, which is what makes a flight stutter.
 const house = makeHouse(quality, renderer, () => renderer.compileAsync(scene, camera).catch(() => {}).then(() => {
-  // two draws from along the flight into one pixel of the canvas (the same shaders as a real frame; a render target
+  // three draws from along the flight (and in the kitchen) into one pixel of the canvas (the same shaders as a real frame; a render target
   // would get different ones), so the house's shaders are linked and its geometry and textures are on the GPU
   // before it's seen. The next frame draws over that pixel.
   if (!openFit) resize();
@@ -360,8 +360,8 @@ const house = makeHouse(quality, renderer, () => renderer.compileAsync(scene, ca
   aimSun(1);
   renderer.autoClear = false;
   renderer.setViewport(0, 0, 1, 1);
-  for (const t of [0.5, 0.97]) {
-    tour.pos.getPoint(t, warm.position); tour.look.getPoint(t, look);
+  for (const [path, t] of [["pos", 0.5], ["pos", 0.97], ["kpos", 1]]) {
+    tour[path].getPoint(t, warm.position); tour[path === "pos" ? "look" : "klook"].getPoint(t, look);
     warm.up.set(0, 1, 0); warm.lookAt(look);
     warm.near = 4; warm.far = 30000; warm.fov = 60; warm.updateProjectionMatrix();
     renderer.render(scene, warm);
@@ -480,7 +480,16 @@ function planTour() {
   const share = portrait ? 0.92 : aspect < 1.35 ? 0.62 : 0.5;   // how much of the width the board takes at the end
   const tanH = B.w / share / 2 / (endZ - B.z);
   const fovEnd = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(tanH / aspect)), 32, 80);
-  return { pos, look, fovMid: portrait ? 64 : 44, fovEnd };
+  // then on to the kitchen: turn left from the board, through the doorway, and stop square on to the menu board
+  const K = house.kitchen, kw = (x, y, z) => toWorld(x, y, z);
+  const dK = portrait ? 215 : 235, kEnd = K.center.clone().addScaledVector(K.normal, dK);
+  const kpos = new THREE.CatmullRomCurve3([kw(0, OFFICE.eye, endZ), kw(-150, OFFICE.eye, K.center.z + 2),
+    kw(-300, (OFFICE.eye + kEnd.y) / 2, K.center.z), kw(kEnd.x, kEnd.y, kEnd.z)], false, "centripetal");
+  const klook = new THREE.CatmullRomCurve3([kw(0, B.y, B.z), kw(-300, OFFICE.eye - 20, K.center.z), kw(K.center.x, K.center.y, K.center.z),
+    kw(K.center.x - 1, K.center.y, K.center.z)], false, "centripetal");
+  const kTanV = portrait ? K.size.w / 0.88 / 2 / dK / aspect : Math.max(K.size.h / 0.6 / 2 / dK, K.size.w / 0.4 / 2 / dK / aspect);
+  const fovK = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(kTanV)), 32, 76);
+  return { pos, look, fovMid: portrait ? 64 : 44, fovEnd, kpos, klook, fovK };
 }
 
 // Resolution: sharp but within a pixel budget, and lowered on the fly (then raised again) if frames run slow, so
@@ -514,24 +523,28 @@ function resize() {
 }
 
 /* ---------- per-frame update ---------- */
-let dirty = true, last = { rise: -1, go: -1 };
+let dirty = true, last = { rise: -1, go: -1, kit: -1 };
 const descT = new THREE.Vector3(), look = new THREE.Vector3(), SKY_T = new THREE.Vector3(0, 0, 0);
 // the services write themselves on the whiteboard once the camera has arrived in front of it, and are wiped again
-// once it has left the room, so they're written afresh on each visit
-let writing = 0, busy = false;
-function update(rise, go, now, dt) {
+// once it has left the room, so they're written afresh on each visit; the kitchen's menu board the same
+let writing = 0, menuWriting = 0, busy = false;
+function update(rise, go, kit, now, dt) {
   if (!openFit) resize();
   // the gallery flows while the laptop's in view
   const stripOn = rise > 0 && go < 0.35;
   if (stripOn && !reduce) offset = (offset + dt * 38) % TOTAL;
-  const was = writing;
-  if (go >= 0.999) writing = reduce ? 1 : Math.min(1, writing + dt / WRITE_SECONDS);
+  const was = writing + menuWriting * 2;
+  const atBoard = go >= 0.999 && kit <= 0.001, atMenu = kit >= 0.999;
+  if (atBoard) writing = reduce ? 1 : Math.min(1, writing + dt / WRITE_SECONDS);
   else if (go < 0.6) writing = 0;
-  busy = go >= 0.999 && writing < 1;
+  if (atMenu) menuWriting = reduce ? 1 : Math.min(1, menuWriting + dt / WRITE_SECONDS);
+  else if (kit < 0.6) menuWriting = 0;
+  busy = (atBoard && writing < 1) || (atMenu && menuWriting < 1);
   house.board.reveal.value = writing;
-  if (!stripOn && !dirty && rise === last.rise && go === last.go && writing === was) return;
+  house.menu.reveal.value = menuWriting;
+  if (!stripOn && !dirty && rise === last.rise && go === last.go && kit === last.kit && writing + menuWriting * 2 === was) return;
   const redraw = stripOn || dirty;   // the display's picture needs drawing again
-  last.rise = rise; last.go = go; dirty = false;
+  last.rise = rise; last.go = go; last.kit = kit; dirty = false;
 
   lid.rotation.x = -OPEN;
   // coming down from the sky: from high above the lawn, turning as it drops, to the view of the open laptop
@@ -553,6 +566,15 @@ function update(rise, go, now, dt) {
     near = L(near, 4, s); far = L(far, 30000, s);
     fov = t < 0.5 ? L(FOV, tour.fovMid, smooth(0, 0.2, t)) : L(tour.fovMid, tour.fovEnd, smooth(0.55, 1, t));
     shift *= 1 - smooth(0, 0.12, t);
+  }
+  // and from the office on into the kitchen
+  const u = clamp01(kit);
+  if (u > 0) {
+    tour.kpos.getPoint(u, camera.position);
+    tour.klook.getPoint(u, look);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(look);
+    fov = L(tour.fovEnd, tour.fovK, smooth(0.1, 0.9, u));
   }
   camera.fov = fov; camera.near = near; camera.far = far;
   camera.setViewOffset(vw, vh, 0, -shift, vw, vh);
@@ -577,5 +599,5 @@ addEventListener("resize", () => { resize(); });
 document.fonts && document.fonts.ready.then(() => { drawBackground(bgImg.complete && bgImg.naturalWidth ? bgImg : null); resize(); });
 window.Mac = { update, resize, busy: () => busy };
 // draw once while the reel plays, so shaders and textures are ready before the laptop first rises
-(window.requestIdleCallback || (f => setTimeout(f, 200)))(() => update(0, 0, performance.now(), 0));
+(window.requestIdleCallback || (f => setTimeout(f, 200)))(() => update(0, 0, 0, performance.now(), 0));
 window.dispatchEvent(new Event("mac-ready"));
