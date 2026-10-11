@@ -1,12 +1,13 @@
-/* The services. They follow the lid-closing stretch in the page's flow, so they scroll up over the MacBook's
-   pinned stage once its closed lid fills the screen: the lid becomes the page's background. */
+/* The services. They pop up on the MacBook's screen once the camera has flown in close enough for it to fill the
+   view: the screen, shaded and blurred, is the page's background. */
 #info{
   --line:rgba(255,255,255,.1);--surface:rgba(255,255,255,.045);--surface-2:rgba(255,255,255,.08);
   --ink:#f2f1ee;--muted:#9a999f;--accent:#ff3d00;
   position:relative;z-index:2;container-type:inline-size;color:var(--ink);
+  transform-origin:50% 50vh;   /* they pop up from the middle of the screen */
   font-family:system-ui,-apple-system,"Segoe UI",Inter,sans-serif;
 }
-/* without WebGL there's no lid behind them */
+/* without WebGL there is no screen behind them */
 body.no-mac #info{background:#232428}
 
 .ff{--pad:clamp(18px,5cqw,72px);font-size:clamp(14px,1.25cqw,17px);line-height:1.55;color:var(--ink)}

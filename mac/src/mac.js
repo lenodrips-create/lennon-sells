@@ -1,7 +1,7 @@
 // A real-time 3D MacBook (Air-like proportions, in centimetres) for the laptop page.
-// Its display shows the project gallery strip; further scrolling closes the lid on its hinge while the camera
-// cranes over it until the lid fills the screen. The page drives it from the scroll position with
-// Mac.update(rise, close, now, dt): rise is how far the card has come up (0..1), close how far the lid has shut.
+// Its display shows the project gallery strip; going on to the services, the camera flies in to face the display
+// until it fills the screen. The page drives it with Mac.update(rise, zoom, now, dt): rise is how far the camera
+// has come down from the sky (0..1), zoom how far it has flown into the display.
 // Build: cd mac && npm install && npm run build  (bundles three.js into mac/mac.min.js)
 import * as THREE from "three";
 import { makeLawn, outdoorEnvironment } from "./grass.js";
@@ -342,7 +342,7 @@ const lawn = makeLawn(scene, { w: W, d: D }, quality);
 
 /* ---------- camera ---------- */
 const camera = new THREE.PerspectiveCamera(26, 1, 1, 400);
-let vw = 1, vh = 1, headPx = 0, openFit = null, closedFit = null;
+let vw = 1, vh = 1, headPx = 0, openFit = null, screenFit = null;
 const box = new THREE.Box3();
 function corners() {
   lid.rotation.x = -OPEN;
@@ -380,12 +380,14 @@ function fitOpen() {
   }
   return { target: T_OPEN.clone(), elev: E_OPEN, az: azOpen(), dist: hi, shift: headPx / 2 };
 }
-function fitClosed() {
-  // straight down over the closed lid, close enough that the lid (minus its rounded corners) covers the screen
-  const aspect = vw / vh, inset = 2 * CORNER;
-  const visH = Math.min(D - inset, (W - inset) / aspect) * 0.98;
-  const dist = visH / 2 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) + 0.4;
-  return { target: new THREE.Vector3(0, BASE_H + REST + LID_H, 0), elev: 90, az: 0, dist, shift: 0 };
+function fitScreen() {
+  // square on to the open display, close enough that the picture covers the whole screen. The display tilts back
+  // OPEN - 90 degrees, so that's the elevation that faces it head on.
+  corners();
+  const target = display.getWorldPosition(new THREE.Vector3());
+  const visH = Math.min(SCR_H, SCR_W / (vw / vh)) * 0.97;
+  const dist = visH / 2 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  return { target, elev: THREE.MathUtils.radToDeg(OPEN) - 90, az: 0, dist, shift: 0 };
 }
 
 function resize() {
@@ -400,34 +402,34 @@ function resize() {
   // layout positions, not the on-screen ones: the page moves both elements with transforms while they rise
   headPx = title ? title.offsetTop + title.offsetHeight - canvas.offsetTop + 12 : 0;
   openFit = fitOpen();
-  closedFit = fitClosed();
+  screenFit = fitScreen();
   dirty = true;
 }
 
 /* ---------- per-frame update ---------- */
-let dirty = true, last = { rise: -1, close: -1 };
+let dirty = true, last = { rise: -1, zoom: -1 };
 const tgt = new THREE.Vector3(), descT = new THREE.Vector3(), SKY_T = new THREE.Vector3(0, 0, 0);
-function update(rise, close, now, dt) {
+function update(rise, zoom, now, dt) {
   if (!openFit) resize();
-  const stripOn = rise > 0 && close < 0.75;
+  // the gallery flows until the camera is right in front of it (then it holds still behind the services)
+  const stripOn = rise > 0 && zoom < 1;
   if (stripOn && !reduce) offset = (offset + dt * 38) % TOTAL;
-  if (!stripOn && !dirty && rise === last.rise && close === last.close) return;
-  last.rise = rise; last.close = close; dirty = false;
+  if (!stripOn && !dirty && rise === last.rise && zoom === last.zoom) return;
+  const redraw = stripOn || dirty;   // the display's picture needs drawing again
+  last.rise = rise; last.zoom = zoom; dirty = false;
 
-  // the lid closes over the first 60% of the move, with a soft landing
-  const lc = easeInOut(clamp01(close / 0.6));
-  lid.rotation.x = -OPEN * (1 - lc);
+  lid.rotation.x = -OPEN;
   // coming down from the sky: from high above the lawn, turning as it drops, to the view of the open laptop
   const k = 1 - Math.pow(1 - clamp01(rise), 2.4), L = THREE.MathUtils.lerp;   // quick to leave the heights, slow to land
   const skyDist = vw < 700 ? 1500 : 1100;
   descT.lerpVectors(SKY_T, openFit.target, k);
   const dE = L(90, openFit.elev, k), dA = L(34, openFit.az, k), dD = Math.exp(L(Math.log(skyDist), Math.log(openFit.dist), k));
-  // then the camera cranes up and over the lid, and settles straight above it
-  const m = easeInOut(clamp01((close - 0.08) / 0.92));
-  tgt.lerpVectors(descT, closedFit.target, m);
-  const elev = L(dE, closedFit.elev, m);
-  const dist = Math.exp(L(Math.log(dD), Math.log(closedFit.dist), m));
-  place(tgt, elev, dist, L(dA, closedFit.az, m));
+  // then it flies in to face the display, and stops when the picture fills the screen
+  const m = easeInOut(clamp01(zoom));
+  tgt.lerpVectors(descT, screenFit.target, m);
+  const elev = L(dE, screenFit.elev, m);
+  const dist = Math.exp(L(Math.log(dD), Math.log(screenFit.dist), m));
+  place(tgt, elev, dist, L(dA, screenFit.az, m));
   // near and far planes follow the height, so the whole lawn shows from up high and the laptop stays crisp close up
   camera.near = Math.max(0.5, dist * 0.04);
   camera.far = dist * 3 + 400;
@@ -435,7 +437,7 @@ function update(rise, close, now, dt) {
   camera.setViewOffset(vw, vh, 0, -shift, vw, vh);
   camera.updateProjectionMatrix();
 
-  if (stripOn || lc < 1) {
+  if (redraw) {
     layoutStrip(now / 1000);
     renderer.setRenderTarget(rt);
     renderer.render(screenScene, screenCam);
