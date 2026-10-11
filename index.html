@@ -7,7 +7,7 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA: project gallery and services.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="mac/mac.min.js?v=6">
+<link rel="modulepreload" href="mac/mac.min.js?v=7">
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
@@ -16,8 +16,8 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* The page opens in the sky: LENNON HELMAN over clouds. Scrolling flies the camera through the O, through the
-   clouds and down onto the laptop lying on a lawn (the 3D MacBook, pinned to the screen). There, one scroll closes
-   its lid and brings the services up over it; one scroll up from the services opens it again. */
+   clouds and down onto the laptop lying on a lawn (the 3D MacBook, pinned to the screen). There, one scroll flies
+   the camera into its screen and the services pop up there; one scroll up from the services flies back out. */
 
 /* ---------- the sky at the top: layers over the 3D lawn, moved and faded by the scroll ---------- */
 #intro{position:fixed;inset:0;z-index:3;overflow:hidden;pointer-events:none;contain:strict}
@@ -29,7 +29,7 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 /* the fly-through: this much scrolling takes the camera from the sky down to the laptop */
 .fly{height:260vh}
 
-/* the page: the white MacBook page, then the services over its closed lid */
+/* the page: the MacBook on the lawn, then the services on its screen */
 #work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#3d6a22}   /* grass green until the 3D lawn draws */
 /* the stage holds the headline and the MacBook, and stays pinned to the screen from the moment it reaches the top */
 .stage{position:sticky;top:0;height:100vh;z-index:1}
@@ -37,8 +37,8 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 @media (max-width:700px){.work-title{top:clamp(76px,10vh,104px);font-size:15vw;padding:0 4vw}}
 /* the MacBook is a real-time 3D model (mac/src/mac.js) */
 #mac{position:absolute;inset:0;width:100%;height:100%;display:block}
-/* a shade over the closed lid, so the services read clearly on it */
-.lid-shade{position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 0%,rgba(0,0,0,.08),rgba(0,0,0,.42));opacity:0;pointer-events:none;z-index:1}
+/* a dark, blurred shade over the screen once the camera is up close, so the services read clearly on it */
+.screen-shade{position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 0%,rgba(8,8,10,.5),rgba(8,8,10,.78));-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;pointer-events:none;z-index:1}
 body.no-mac .mac-hint{display:none}
 .mac-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));margin:0;text-align:center;font:600 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5);opacity:0;transition:opacity .4s;z-index:2}
 
@@ -54,7 +54,7 @@ body.no-mac .mac-hint{display:none}
 @media (max-width:380px){.topnav{padding:5px 6px}.topnav a{padding:8px 7px;font-size:12.5px}}
 
 </style>
-<link rel="stylesheet" href="info/info.css?v=3">
+<link rel="stylesheet" href="info/info.css?v=4">
 </head>
 <body>
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA.</h1>
@@ -71,8 +71,8 @@ body.no-mac .mac-hint{display:none}
   <div class="stage">
     <h2 class="work-title">Project Gallery</h2>
     <canvas id="mac" aria-hidden="true"></canvas>
-    <div class="lid-shade"></div>
-    <p class="mac-hint" aria-hidden="true">Scroll to close</p>
+    <div class="screen-shade"></div>
+    <p class="mac-hint" aria-hidden="true">Scroll for services</p>
   </div>
   <div class="fly" aria-hidden="true"></div>
   <div id="info" class="ff">
@@ -110,7 +110,7 @@ body.no-mac .mac-hint{display:none}
   <a href="#gallery" data-go="gallery">project gallery</a>
   <a href="#services" data-go="services">services</a>
 </nav>
-<script type="module" src="mac/mac.min.js?v=6"></script>
+<script type="module" src="mac/mac.min.js?v=7"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -126,7 +126,7 @@ body.no-mac .mac-hint{display:none}
 
   /* ---------- scroll positions ---------- */
   // the stage is pinned from the top; the fly-through from the sky takes the first stretch of scrolling and ends
-  // on the laptop (closeAt); the services start at infoAt, a screen further on, over the closed lid
+  // on the laptop (closeAt); the services start at infoAt, a screen further on, over its screen
   const work = document.getElementById("work");
   const info = document.getElementById("info");
   const stage = work.querySelector(".stage");
@@ -152,7 +152,6 @@ body.no-mac .mac-hint{display:none}
       if (t < 1) requestAnimationFrame(frame); else done();
     })(t0));
   }
-  const until = test => new Promise(done => (function check() { test() ? done() : requestAnimationFrame(check); })());
 
   /* ---------- moves that play in their own time ---------- */
   // a tween from 0 to 1 and back, timed linearly; whatever it drives eases itself. The returned promise settles
@@ -177,7 +176,8 @@ body.no-mac .mac-hint{display:none}
     tw.moving = () => tw.v !== tw.to;
     return tw;
   }
-  const lid = tween(reduce ? 0 : 1.7);       // the lid closes in its own time rather than following the scroll
+  const zoom = tween(reduce ? 0 : 1.6);      // the camera flies into the screen in its own time, not following the scroll
+  const pop = tween(reduce ? 0 : 0.45);      // then the services pop up on it
 
   /* ---------- the moves between stops ---------- */
   // While one runs, the page ignores scrolling. A new one doesn't start until it's done.
@@ -187,18 +187,23 @@ body.no-mac .mac-hint{display:none}
     auto = true;
     try { await fn(); } finally { auto = false; kick(); }
   }
-  // close the lid, and as it fills the screen bring the services up over it
+  // fly into the laptop's screen, and once it fills the view pop the services up on it (the page jumps to them
+  // while they're hidden, and the screen stays pinned behind)
+  const cards = [...info.querySelectorAll(".rv")];
   async function toServices() {
     if (Math.abs(window.scrollY - closeAt) > 1) await scrollAnim(closeAt);
-    const shut = lid.go(1);
-    await until(() => lid.v >= 0.88);
-    await scrollAnim(infoAt, 0.8);
-    await shut;
+    await zoom.go(1);
+    window.scrollTo(0, infoAt);
+    void info.offsetWidth;
+    cards.forEach(el => el.classList.add("in"));     // the cards rise in, one after another
+    await pop.go(1);
   }
-  // take the services back down off the lid, and open it as they go
+  // the services fade away, and the camera flies back out to the laptop on the lawn
   async function toLaptop() {
-    await scrollAnim(closeAt, 0.75, [0.7, () => lid.go(0)]);
-    await lid.go(0);
+    await pop.go(0);
+    cards.forEach(el => el.classList.remove("in"));
+    window.scrollTo(0, closeAt);
+    await zoom.go(0);
   }
 
   /* ---------- scroll gestures ---------- */
@@ -210,10 +215,10 @@ body.no-mac .mac-hint{display:none}
   function decide(dir) {
     if (auto) return { run: null };                 // something's moving: hold still
     const y = window.scrollY;
-    if (dir > 0 && lid.v === 0 && y < closeAt - 1) return { run: () => run(() => scrollAnim(closeAt, reduce ? 0 : 3.2)) };
-    if (dir < 0 && lid.v === 0 && y > 1 && y <= closeAt + 1) return { run: startedAt(closeAt) || y < closeAt - 1 ? () => run(() => scrollAnim(0, reduce ? 0 : 2.4)) : null };
-    if (dir > 0 && lid.v === 0 && y >= closeAt - 1) return { run: startedAt(closeAt) ? () => run(toServices) : null };
-    if (dir < 0 && lid.v === 1 && y <= infoAt + 1) return { run: startedAt(infoAt) ? () => run(toLaptop) : null };
+    if (dir > 0 && zoom.v === 0 && y < closeAt - 1) return { run: () => run(() => scrollAnim(closeAt, reduce ? 0 : 3.2)) };
+    if (dir < 0 && zoom.v === 0 && y > 1 && y <= closeAt + 1) return { run: startedAt(closeAt) || y < closeAt - 1 ? () => run(() => scrollAnim(0, reduce ? 0 : 2.4)) : null };
+    if (dir > 0 && zoom.v === 0 && y >= closeAt - 1) return { run: startedAt(closeAt) ? () => run(toServices) : null };
+    if (dir < 0 && zoom.v === 1 && y <= infoAt + 1) return { run: startedAt(infoAt) ? () => run(toLaptop) : null };
     return null;
   }
   // a wheel or trackpad gesture is a run of events without a pause; a sudden jump in strength starts a new one,
@@ -252,10 +257,6 @@ body.no-mac .mac-hint{display:none}
     if (d.run) d.run();
   });
 
-  /* ---------- services: they rise in as they scroll into view ---------- */
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 });
-  info.querySelectorAll(".rv").forEach(el => io.observe(el));
-
   /* ---------- navigation ---------- */
   const nav = document.querySelector(".topnav");
   const navLinks = [...nav.querySelectorAll("a[data-go]")];
@@ -265,13 +266,13 @@ body.no-mac .mac-hint{display:none}
     e.preventDefault();
     goTo(a.dataset.go);
   });
-  // go there, closing or opening the lid on the way
+  // go there, flying into or out of the screen on the way
   function goTo(where) {
     run(async () => {
       if (where === "services") {
-        if (lid.v < 1) await toServices(); else await scrollAnim(infoAt);
+        if (zoom.v < 1) await toServices(); else await scrollAnim(infoAt);
       } else {
-        if (lid.v > 0) await toLaptop();
+        if (zoom.v > 0) await toLaptop();
         await scrollAnim(closeAt);
       }
     });
@@ -413,7 +414,7 @@ body.no-mac .mac-hint{display:none}
 
   /* ---------- the MacBook page ---------- */
   const title = work.querySelector(".work-title");
-  const shade = work.querySelector(".lid-shade");
+  const shade = work.querySelector(".screen-shade");
   const macHint = work.querySelector(".mac-hint");
 
   /* ---------- one animation loop: it runs while something moves or the gallery plays, and sleeps otherwise ---------- */
@@ -427,25 +428,29 @@ body.no-mac .mac-hint{display:none}
   function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    lid.step(now);
+    zoom.step(now); pop.step(now);
     let y = window.scrollY;
     // between the laptop and the services the page only moves on its own: anything else that scrolls in there (a
     // flick's momentum, the scrollbar) is held at the stop it came from
     if (!auto) {
-      const hold = lid.v === 0 && y > closeAt + 1 ? closeAt : lid.v === 1 && y < infoAt - 1 ? infoAt : null;
+      const hold = zoom.v === 0 && y > closeAt + 1 ? closeAt : zoom.v === 1 && y < infoAt - 1 ? infoAt : null;
       if (hold !== null && Math.abs(y - hold) > 1) {
         window.scrollTo(0, hold);
         y = window.scrollY;
       }
     }
-    const c = lid.v;
+    const c = zoom.v;
     const p = clamp01(y / closeAt);                 // 0 in the sky, 1 on the laptop
     flyIntro(p, now);
-    // the headline lifts away as the lid starts to close; a shade settles over the closed lid
+    // the headline lifts away as the camera starts in; a shade settles over the screen; the services pop up on it
     set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
     set(title, "opacity", (smooth(0.86, 1, p) * (1 - smooth(0, 0.3, c))).toFixed(3));
-    set(shade, "opacity", smooth(0.8, 1, c).toFixed(3));
-    set(macHint, "opacity", p === 1 && c === 0 && lid.to === 0 && !auto ? "1" : "0");
+    set(shade, "opacity", smooth(0.75, 1, c).toFixed(3));
+    const e = 1 - Math.pow(1 - pop.v, 3);
+    set(info, "visibility", pop.v > 0 ? "visible" : "hidden");
+    set(info, "opacity", e.toFixed(3));
+    set(info, "transform", e === 1 ? "none" : `scale(${(0.94 + 0.06 * e).toFixed(4)})`);
+    set(macHint, "opacity", p === 1 && c === 0 && zoom.to === 0 && !auto ? "1" : "0");
     // the 3D camera: from high above the lawn, once the clouds open (0.42), down to the laptop
     const down = clamp01((p - 0.4) / 0.6);
     if (window.Mac && p > 0.38) Mac.update(down, c, now, dt);
@@ -453,8 +458,8 @@ body.no-mac .mac-hint{display:none}
     markCurrent(c >= 0.5 ? "services" : p >= 1 ? "gallery" : "");
 
     // keep going while something moves, or the gallery plays on the open laptop's screen
-    const playing = (window.Mac && p > 0.38 && c < 0.75 && !reduce) || (p < 0.34 && !reduce);   // the gallery, or the sky
-    if (playing || lid.moving()) requestAnimationFrame(loop);
+    const playing = (window.Mac && p > 0.38 && c < 1 && !reduce) || (p < 0.34 && !reduce);   // the gallery, or the sky
+    if (playing || zoom.moving() || pop.moving()) requestAnimationFrame(loop);
     else running = false;
   }
 
