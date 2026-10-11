@@ -200,6 +200,7 @@ body.no-mac .mac-hint{display:none}
   }
 
   /* ---------- scroll gestures ---------- */
+  // In the sky, one scroll flies all the way down to the laptop (and one scroll up at the laptop flies back up).
   // At the laptop, one scroll down goes to the services; at the top of the services, one scroll up goes back to
   // the laptop. Only a scroll that starts there does it: one that arrives from elsewhere stops there first.
   let gStartY = 0;
@@ -207,6 +208,8 @@ body.no-mac .mac-hint{display:none}
   function decide(dir) {
     if (auto) return { run: null };                 // something's moving: hold still
     const y = window.scrollY;
+    if (dir > 0 && lid.v === 0 && y < closeAt - 1) return { run: () => run(() => scrollAnim(closeAt, reduce ? 0 : 3.2)) };
+    if (dir < 0 && lid.v === 0 && y > 1 && y <= closeAt + 1) return { run: startedAt(closeAt) || y < closeAt - 1 ? () => run(() => scrollAnim(0, reduce ? 0 : 2.4)) : null };
     if (dir > 0 && lid.v === 0 && y >= closeAt - 1) return { run: startedAt(closeAt) ? () => run(toServices) : null };
     if (dir < 0 && lid.v === 1 && y <= infoAt + 1) return { run: startedAt(infoAt) ? () => run(toLaptop) : null };
     return null;
@@ -314,7 +317,7 @@ body.no-mac .mac-hint{display:none}
     const track = -0.04 * 100;
     const widthOf = t => [...t].reduce((a, c) => a + wctx.measureText(c).width + track, -track);
     const fs = Math.min((iw * (two ? 0.84 : 0.86)) / Math.max(...lines.map(widthOf)) * 100, ih * (two ? 0.22 : 0.3));
-    const k = fs / 100, lh = fs * 0.86, sub = Math.max(14, fs * (two ? 0.16 : 0.15));
+    const k = fs / 100, lh = fs * 0.86, sub = Math.max(18, fs * (two ? 0.2 : 0.19));
     const blockH = lh * lines.length + sub * 2.2;
     const top = ih * 0.5 - blockH / 2 + fs * 0.72;
     const out = { fs, sub, lines: [], two, ox: 0, oy: 0, subY: top + lh * (lines.length - 1) + sub * 2.1 };
@@ -336,15 +339,14 @@ body.no-mac .mac-hint{display:none}
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.clearRect(0, 0, wordEl.width, wordEl.height);
     c.setTransform(idpr * scale, 0, 0, idpr * scale, idpr * w.ox * (1 - scale), idpr * w.oy * (1 - scale));
-    c.fillStyle = "#fff";
-    c.shadowColor = scale < 3 ? "rgba(20,50,90,.28)" : "transparent";
-    c.shadowBlur = 40 * idpr; c.shadowOffsetY = 6 * idpr;
+    c.fillStyle = "#0a0a0a";                          // solid black, so it reads on both the sky and the clouds
+    c.shadowColor = "transparent";
     c.font = `900 ${w.fs}px "League Spartan", system-ui, sans-serif`;
     for (const l of w.lines) for (const [ch, x] of l.chars) c.fillText(ch, x, l.by);
-    c.font = `700 ${w.sub}px "League Spartan", system-ui, sans-serif`;
+    c.font = `900 ${w.sub}px "League Spartan", system-ui, sans-serif`;
     c.textAlign = "center";
-    if ("letterSpacing" in c) c.letterSpacing = `${w.sub * 0.32}px`;
-    c.fillText("GREENCASTLE, PA", iw / 2 + w.sub * 0.16, w.subY);
+    if ("letterSpacing" in c) c.letterSpacing = `${w.sub * 0.2}px`;
+    c.fillText("GREENCASTLE, PA", iw / 2 + w.sub * 0.1, w.subY);
     if ("letterSpacing" in c) c.letterSpacing = "0px";
     c.textAlign = "left";
   }
