@@ -7,7 +7,7 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA: project gallery and services.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="mac/mac.min.js?v=9">
+<link rel="modulepreload" href="mac/mac.min.js?v=10">
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
@@ -41,6 +41,12 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 /* the MacBook is a real-time 3D model (mac/src/mac.js) */
 #mac{position:absolute;inset:0;width:100%;height:100%;display:block}
 body.no-mac .mac-hint{display:none}
+.board-cta{position:absolute;left:50%;bottom:max(22px,calc(env(safe-area-inset-bottom) + 14px));transform:translateX(-50%);z-index:2;
+  padding:11px 20px;border-radius:999px;background:rgba(17,17,19,.86);color:#fff;text-decoration:none;font:500 14px/1 "Readex Pro",system-ui,sans-serif;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 6px 24px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .4s}
+/* it shows once the services have been written on the board */
+.board-cta.on{opacity:1;pointer-events:auto;transition-delay:4.2s}
+.board-cta:hover,.board-cta:focus-visible{background:#000}
 .mac-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));margin:0;text-align:center;font:600 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5);opacity:0;transition:opacity .4s;z-index:2}
 
 
@@ -72,6 +78,7 @@ body.no-mac .mac-hint{display:none}
     <h2 class="work-title">Project Gallery</h2>
     <canvas id="mac" aria-hidden="true"></canvas>
     <p class="mac-hint" aria-hidden="true">Keep scrolling</p>
+    <a class="board-cta" href="mailto:lenodrips@gmail.com?subject=New%20project" tabindex="-1">Start a project ↗</a>
   </div>
   <div class="fly" aria-hidden="true"></div>
   <div class="zoom" aria-hidden="true"></div>
@@ -81,7 +88,7 @@ body.no-mac .mac-hint{display:none}
   <a href="#gallery" data-go="gallery">project gallery</a>
   <a href="#services" data-go="services">services</a>
 </nav>
-<script type="module" src="mac/mac.min.js?v=9"></script>
+<script type="module" src="mac/mac.min.js?v=10"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -336,6 +343,7 @@ body.no-mac .mac-hint{display:none}
   /* ---------- the MacBook page ---------- */
   const title = work.querySelector(".work-title");
   const macHint = work.querySelector(".mac-hint");
+  const boardCta = work.querySelector(".board-cta");
 
   /* ---------- one animation loop: it runs while something moves or the gallery plays, and sleeps otherwise ---------- */
   let running = false, last = 0;
@@ -356,6 +364,8 @@ body.no-mac .mac-hint{display:none}
     set(title, "transform", `translate3d(0, ${(-smooth(0, 0.15, c) * 40).toFixed(2)}px, 0)`);
     set(title, "opacity", (smooth(0.86, 1, p) * (1 - smooth(0, 0.12, c))).toFixed(3));
     set(macHint, "opacity", p === 1 && c === 0 && !auto ? "1" : "0");
+    const atBoard = c >= 0.999;
+    if (atBoard !== boardCta.classList.contains("on")) { boardCta.classList.toggle("on", atBoard); boardCta.tabIndex = atBoard ? 0 : -1; }
     // the 3D camera: from high above the lawn, once the clouds open (0.42), down to the laptop, then on to the office
     const down = clamp01((p - 0.4) / 0.6);
     if (window.Mac && p > 0.38) Mac.update(down, c, now, dt);
@@ -363,7 +373,8 @@ body.no-mac .mac-hint{display:none}
     markCurrent(c >= 0.5 ? "services" : p >= 1 ? "gallery" : "");
 
     // keep going while something moves: the grass and the gallery on the laptop's screen, or the sky
-    const playing = (window.Mac && p > 0.38 && c < 1 && !reduce) || (p < 0.34 && !reduce);   // the gallery, or the sky
+    const playing = (window.Mac && p > 0.38 && c < 1 && !reduce) || (p < 0.34 && !reduce)   // the gallery, or the sky
+      || (window.Mac && p > 0.38 && Mac.busy());                                             // or the board being written
     if (playing) requestAnimationFrame(loop);
     else running = false;
   }

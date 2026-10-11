@@ -1,6 +1,6 @@
 // A modern two-storey house on the lawn, in centimetres like the laptop: white lap siding, black flat roofs with
 // deep fascias, black-framed windows, a glass garage door and a balcony with a cable railing over it. Behind the
-// balcony's open door is the office, with a chalkboard in the middle of its back wall.
+// balcony's open door is the office, with a whiteboard in the middle of its back wall, the services written on it.
 //
 // It's built to look real: the siding, decking, oak floor and concrete are painted with relief (normal maps) and
 // varied roughness; the house reflects a real sky (a Poly Haven HDRI, noon_grass, CC0) in its glass and metal;
@@ -8,12 +8,13 @@
 // see-through, with curtained rooms behind it; and the office is lit by a model of the daylight coming in through
 // its door and windows. Its plant and armchair are models with photographed materials, from the Khronos glTF samples.
 //
-// The house's own axes: +z is the front. The office's door, the balcony and the chalkboard all sit on x = 0, so
+// The house's own axes: +z is the front. The office's door, the balcony and the board all sit on x = 0, so
 // the camera flies straight in along that line. The laptop lies on the same line, out on the lawn in front.
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import painterSrc from "./paint.worker.txt";   // paint.js, built as text (see package.json)
+import { makeBoard, boardSize } from "./board.js";
 
 const T = 15;                         // wall thickness
 const FLOOR = 335.5;                  // the office floor, on top of the ground floor's roof
@@ -22,7 +23,7 @@ const ROOM = { x0: -290, x1: 290 - T, z0: -330 + T, z1: 120 - T, y0: FLOOR, y1: 
 export const OFFICE = {
   eye: EYE,
   door: 120,                          // the office's front wall (outer face), where the balcony door is
-  board: { y: EYE, z: -314.7 + 1.6, w: 252, h: 132 },   // the chalkboard's face, on the back wall
+  board: { y: EYE, z: -314.7 + 1.6, w: 252, h: 132 },   // the whiteboard's face, on the back wall (sized in makeHouse)
 };
 const ASSETS = "mac/assets/";
 const SKY_K = 2.7;                    // brings the HDRI to the brightness of the rest of the scene's sky
@@ -46,28 +47,6 @@ const surfaceMaps = s => {
   return { map: dataTex(s.col, s.w, s.h, true, rep), normalMap: dataTex(s.nrm, s.w, s.h, false, rep), roughnessMap: dataTex(s.rgh, s.w, s.h, false, rep) };
 };
 
-// a well-used slate: dark green-black, a fine tooth, and the faint swirls of a board that's been wiped many times
-function slateTex() {
-  const c = document.createElement("canvas"); c.width = 1024; c.height = 512;
-  const x = c.getContext("2d"), r = rng(4242), w = 1024, h = 512;
-  x.fillStyle = "#1e2924"; x.fillRect(0, 0, w, h);
-  const img = x.getImageData(0, 0, w, h), d = img.data;
-  for (let i = 0; i < d.length; i += 4) { const v = (r() - 0.5) * 10; d[i] += v; d[i + 1] += v; d[i + 2] += v; }
-  x.putImageData(img, 0, 0);
-  x.lineCap = "round";
-  for (let i = 0; i < 70; i++) {
-    x.strokeStyle = `rgba(230,236,232,${0.012 + r() * 0.025})`;
-    x.lineWidth = 30 + r() * 60;
-    const cx = r() * w, cy = r() * h, rad = 40 + r() * 160, a0 = r() * 6.3;
-    x.beginPath(); x.arc(cx, cy, rad, a0, a0 + 0.8 + r() * 2); x.stroke();
-  }
-  const g = x.createRadialGradient(w / 2, h / 2, h * 0.2, w / 2, h / 2, w * 0.62);
-  g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.28)");
-  x.fillStyle = g; x.fillRect(0, 0, w, h);
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
-  return t;
-}
 // a soft contact shadow, for under furniture: a blurred dark square (drawn as the shadow of one off the canvas)
 function contactTex() {
   const c = document.createElement("canvas"); c.width = c.height = 128;
@@ -136,8 +115,7 @@ function mats(q) {
     floor: shaded(std({ roughness: 1 }), "floor", "aoRoom(p)"),
     rug: shaded(std({ roughness: 1 }), "rug", "aoRoom(p)"),
     oak: shaded(std({ roughness: 1 }), "oak", "aoRoom(p)"),
-    slate: shaded(std({ map: slateTex(), roughness: 0.9 }), "slate", "aoRoom(p)"),
-    chalk: std({ color: 0xf4f2ea, roughness: 1 }),
+    boardFrame: std({ color: 0xc5c8cc, roughness: 0.32, metalness: 0.85 }),   // brushed aluminium
     felt: std({ color: 0x3a3d42, roughness: 1 }),
     ceramic: std({ color: 0xf2f0ec, roughness: 0.3 }),
     blackMetal: std({ color: 0x141416, roughness: 0.4, metalness: 0.7 }),
@@ -145,7 +123,7 @@ function mats(q) {
     contact: new THREE.MeshBasicMaterial({ color: 0x000000, map: contactTex(), transparent: true, opacity: 0.5, depthWrite: false }),
   };
   M.exterior = [M.siding, M.corner, M.found, M.alu, M.fascia, M.soffit, M.deck, M.cedar, M.concrete, M.cable, M.steel, M.glass, M.frosted];
-  M.interior = [M.paint, M.ceiling, M.skirting, M.floor, M.rug, M.oak, M.slate, M.chalk, M.felt, M.ceramic, M.blackMetal, M.books];
+  M.interior = [M.paint, M.ceiling, M.skirting, M.floor, M.rug, M.oak, M.boardFrame, M.felt, M.ceramic, M.blackMetal, M.books];
   // the painted surfaces, and what paint.js calls them
   M.surfaces = [[M.siding, "siding"], [M.floor, "floor"], [M.deck, "deck"], [M.cedar, "cedar"], [M.oak, "oak"], [M.concrete, "concrete"], [M.rug, "rug"]];
   return M;
@@ -190,6 +168,7 @@ function collector() {
   };
   return { put, box, boxGeo, flatXZ, build };
 }
+const std0 = o => new THREE.MeshStandardMaterial(o);
 const mat4 = (x, y, z, ry = 0) => new THREE.Matrix4().makeRotationY(ry).setPosition(x, y, z);
 const withTop = (g, top) => g.setAttribute("aoTop", new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count).fill(top), 1));
 
@@ -236,8 +215,13 @@ const vcol = (g, top, bottom) => {
 };
 
 /* ---------- the house ---------- */
-export function makeHouse(quality, renderer, ready = () => {}) {
+export function makeHouse(quality, renderer, ready = () => {}, portrait = false) {
   const q = quality === "high", M = mats(q), C = collector(), group = new THREE.Group();
+  // the whiteboard: upright on a phone held upright, wide otherwise; its frame is 6 cm all round
+  const board = makeBoard(portrait), bs = boardSize(portrait);
+  OFFICE.board.w = bs.w + 12; OFFICE.board.h = bs.h + 12;
+  M.board = board.writeOn(shaded(std0({ map: board.base, roughness: 0.3 }), "board", "aoRoom(p)"));
+  M.interior.push(M.board);
   const lights = [];
   const r = rng(909);
 
@@ -416,21 +400,34 @@ export function makeHouse(quality, renderer, ready = () => {}) {
     C.flatXZ(M.rug, -150, 150, -215, -5, FLOOR + 0.6);
     C.box(M.rug, -150, 150, FLOOR, FLOOR + 0.6, -215, -5);
 
-    // the chalkboard: an oak frame round a slate, with a chalk ledge underneath
+    // the whiteboard: a white board in a brushed aluminium frame with grey corner caps, and a tray underneath with
+    // three markers and an eraser
     const b = OFFICE.board, bw = b.w - 12, bh = b.h - 12, z = zb + 0.3;
-    C.put(M.slate, new THREE.PlaneGeometry(bw, bh).translate(0, b.y, z + 1.3));
-    C.box(M.oak, -b.w / 2, b.w / 2, b.y + bh / 2, b.y + b.h / 2, z, z + 3);
-    C.box(M.oak, -b.w / 2, b.w / 2, b.y - b.h / 2, b.y - bh / 2, z, z + 3);
-    C.box(M.oak, -b.w / 2, -bw / 2, b.y - bh / 2, b.y + bh / 2, z, z + 3);
-    C.box(M.oak, bw / 2, b.w / 2, b.y - bh / 2, b.y + bh / 2, z, z + 3);
-    C.box(M.oak, -b.w / 2 + 4, b.w / 2 - 4, b.y - b.h / 2 - 2.5, b.y - b.h / 2, z, z + 8);
-    const ly = b.y - b.h / 2;
-    for (const [cx, rot] of [[-62, 0.1], [-50, -0.05], [34, 0.3]]) {
-      const g = new THREE.CylinderGeometry(0.55, 0.55, 8, 10).rotateZ(Math.PI / 2).rotateY(rot);
-      C.put(M.chalk, g.translate(cx, ly + 0.55, z + 5));
+    C.put(M.board, new THREE.PlaneGeometry(bw, bh).translate(0, b.y, z + 1.3));
+    C.box(M.paint, -bw / 2, bw / 2, b.y - bh / 2, b.y + bh / 2, z, z + 1.2);
+    C.box(M.boardFrame, -b.w / 2, b.w / 2, b.y + bh / 2, b.y + b.h / 2, z, z + 2.6);
+    C.box(M.boardFrame, -b.w / 2, b.w / 2, b.y - b.h / 2, b.y - bh / 2, z, z + 2.6);
+    C.box(M.boardFrame, -b.w / 2, -bw / 2, b.y - bh / 2, b.y + bh / 2, z, z + 2.6);
+    C.box(M.boardFrame, bw / 2, b.w / 2, b.y - bh / 2, b.y + bh / 2, z, z + 2.6);
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+      const cx = sx * (b.w / 2 - 3), cy = b.y + sy * (b.h / 2 - 3);
+      C.box(M.felt, cx - 3.6, cx + 3.6, cy - 3.6, cy + 3.6, z, z + 3.2);
     }
-    C.box(M.felt, 72, 86, ly, ly + 2.2, z + 1.5, z + 6.5);
-    C.box(M.oak, 72, 86, ly + 2.2, ly + 4, z + 1.5, z + 6.5);
+    const ly = b.y - b.h / 2, tw = Math.min(110, bw * 0.7);
+    C.box(M.boardFrame, -tw / 2, tw / 2, ly - 2.4, ly - 1.4, z, z + 8);
+    C.box(M.boardFrame, -tw / 2, tw / 2, ly - 2.4, ly + 0.6, z + 7, z + 8);
+    const marker = (x, rot, cap) => {
+      const body = new THREE.CylinderGeometry(0.85, 0.85, 11.5, 14).rotateZ(Math.PI / 2).rotateY(rot);
+      C.put(M.ceramic, body.translate(x, ly - 0.55, z + 4));
+      const c = new THREE.CylinderGeometry(0.95, 0.95, 3.4, 14).rotateZ(Math.PI / 2).translate(-6.6, 0, 0).rotateY(rot).translate(x, ly - 0.5, z + 4);
+      const col = new Float32Array(c.attributes.position.count * 3), cc = new THREE.Color(cap);
+      for (let k = 0; k < col.length; k += 3) col.set([cc.r, cc.g, cc.b], k);
+      c.setAttribute("color", new THREE.BufferAttribute(col, 3));
+      C.put(M.books, c);
+    };
+    marker(-tw / 2 + 12, 0.04, 0x1d1e22); marker(-tw / 2 + 26, -0.06, 0x1f47b5); marker(-tw / 2 + 40, 0.1, 0xc42a2a);
+    C.box(M.felt, tw / 2 - 22, tw / 2 - 8, ly - 1.4, ly + 0.4, z + 1.8, z + 6.4);
+    C.box(M.blackMetal, tw / 2 - 22, tw / 2 - 8, ly + 0.4, ly + 3, z + 1.8, z + 6.4);
 
     // a picture light over the board, and a soft spotlight on it from the ceiling
     C.box(M.blackMetal, -60, 60, b.y + b.h / 2 + 10, b.y + b.h / 2 + 14, z, z + 12);
@@ -567,7 +564,7 @@ export function makeHouse(quality, renderer, ready = () => {}) {
     model("plant.glb", -212, -238, 165, 0.4),       // a potted plant in the corner by the board
     model("chair.glb", -150, -190, 100, 0.55),       // a velvet armchair, turned to the room
   ]);
-  Promise.all([surfaces, sky, models]).then(([surf, skyTex, objs]) => {
+  Promise.all([surfaces, sky, models, board.ready]).then(([surf, skyTex, objs]) => {
     if (worker) worker.terminate();
     const roomEnv = pmrem.fromScene(officeLight(), 0.035, 1, 3000).texture;
     for (const m of M.interior) { m.envMap = roomEnv; m.envMapIntensity = 1; m.needsUpdate = true; }
@@ -592,7 +589,7 @@ export function makeHouse(quality, renderer, ready = () => {}) {
     ready();
   });
 
-  return { group };
+  return { group, board: { reveal: board.reveal } };
 }
 
 // a model of the office as its own walls see it: daylight through the door and windows, the sunny patch on the
