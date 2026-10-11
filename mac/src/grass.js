@@ -54,7 +54,7 @@ function groundTexture(rand, size) {
 }
 
 function ground(rand, quality) {
-  const SIZE = 1600, SEG = 160, TILE = 48;   // wide enough to fill the view from high above
+  const SIZE = 5200, SEG = 220, TILE = 48;   // wide enough to fill the view from high above, and round the house
   const geo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
   geo.rotateX(-Math.PI / 2);
   // large, slow variation in colour across the lawn, so the repeating tile doesn't show
@@ -100,6 +100,7 @@ function bladeGeometry() {
   return g;
 }
 
+const smoothstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 // is a point under the laptop (with a margin)?
 const under = (x, z, w, d, m) => Math.abs(x) < w / 2 + m && Math.abs(z) < d / 2 + m;
 
@@ -127,11 +128,14 @@ function blades(rand, count, foot) {
   const c = new THREE.Color();
   let n = 0;
   while (n < count) {
-    // most of the blades go where the camera looks: in front of and around the laptop
-    const x = (rand() * 2 - 1) * 90, z = -70 + rand() * 150;
+    // most of the blades go where the camera looks: in front of and around the laptop, thinning out and getting
+    // shorter towards the edge of the patch, so it melts into the painted lawn when seen from further off
+    const x = (rand() * 2 - 1) * 125, z = -105 + rand() * 225;
+    const edge = Math.hypot(x / 125, (z - 7.5) / 112.5);
+    if (edge > 1 || rand() > 1 - smoothstep(0.62, 1, edge)) continue;
     if (under(x, z, foot.w, foot.d, 0.2)) continue;
     const near = under(x, z, foot.w, foot.d, 2.2);            // pressed down at the laptop's edges
-    const h = near ? 0.7 + rand() * 0.9 : 1.4 + rand() * 2.0;   // a mown lawn
+    const h = (near ? 0.7 + rand() * 0.9 : 1.4 + rand() * 2.0) * (1 - 0.55 * smoothstep(0.55, 1, edge));   // a mown lawn
     e.set((rand() - 0.5) * 0.5, rand() * Math.PI * 2, (rand() - 0.5) * 0.5);
     q.setFromEuler(e);
     p.set(x, GROUND_Y - 0.1, z);
@@ -208,7 +212,13 @@ export function outdoorEnvironment(sunDir) {
 export function makeLawn(scene, foot, quality) {
   const rand = rng(20261010);
   scene.add(ground(rand, quality));
-  const b = blades(rand, quality === "high" ? 80000 : 40000, foot);
+  // the fields beyond, out to the horizon, where the haze takes them
+  const far = new THREE.Mesh(new THREE.PlaneGeometry(200000, 200000).rotateX(-Math.PI / 2),
+    new THREE.MeshStandardMaterial({ color: 0x3b6322, roughness: 1, metalness: 0, envMapIntensity: 0.18 }));
+  far.position.y = GROUND_Y - 1;
+  far.receiveShadow = true;
+  scene.add(far);
+  const b = blades(rand, quality === "high" ? 96000 : 48000, foot);
   scene.add(b.mesh);
   for (const d of daisies(rand, quality === "high" ? 34 : 22, foot)) scene.add(d);
   return { update: t => { b.uTime.value = t; } };

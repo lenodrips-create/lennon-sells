@@ -1,10 +1,12 @@
 // A real-time 3D MacBook (Air-like proportions, in centimetres) for the laptop page.
-// Its display shows the project gallery strip; going on to the services, the camera flies in to face the display
-// until it fills the screen. The page drives it with Mac.update(rise, zoom, now, dt): rise is how far the camera
-// has come down from the sky (0..1), zoom how far it has flown into the display.
+// Its display shows the project gallery strip. Next door stands a modern house (house.js); scrolling on, the camera
+// leaves the laptop, flies across the lawn to the house, over the balcony and in through the open door to the office,
+// and stops square on to the chalkboard on its back wall. The page drives it with Mac.update(rise, go, now, dt):
+// rise is how far the camera has come down from the sky (0..1), go how far it has gone towards the chalkboard.
 // Build: cd mac && npm install && npm run build  (bundles three.js into mac/mac.min.js)
 import * as THREE from "three";
 import { makeLawn, outdoorEnvironment } from "./grass.js";
+import { makeHouse, OFFICE } from "./house.js";
 
 const canvas = document.getElementById("mac");
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -340,9 +342,64 @@ softShadow(W + 6, D + 6, 1.2, 0.55, 0);
 mac.traverse(o => { if (o.isMesh && !o.material.transparent && !o.material.polygonOffset) { o.castShadow = true; o.receiveShadow = true; } });
 const lawn = makeLawn(scene, { w: W, d: D }, quality);
 
+/* ---------- the house next door, the sky over it and the haze on the far fields ---------- */
+// the laptop lies on the line through the office door and the chalkboard, 10 m out in front of the house, which is
+// turned a little towards the sun so its front is lit
+const HOUSE_DIST = 1000, HOUSE_ROT = -Math.PI / 6;
+const house = makeHouse(quality);
+house.group.rotation.y = HOUSE_ROT;
+house.group.position.set(-Math.sin(HOUSE_ROT) * HOUSE_DIST, 0, -Math.cos(HOUSE_ROT) * HOUSE_DIST);
+scene.add(house.group);
+house.group.updateMatrixWorld(true);
+const toWorld = (x, y, z) => house.group.localToWorld(new THREE.Vector3(x, y, z));
+
+const HORIZON = new THREE.Color("#d9eaf8");
+scene.fog = new THREE.Fog(HORIZON, 3000, 16000);
+// the sky: drawn behind everything, centred on the camera; blue overhead to pale at the horizon, with soft clouds
+const sky = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 16), new THREE.ShaderMaterial({
+  uniforms: { top: { value: new THREE.Color("#2c78d0") }, mid: { value: new THREE.Color("#69aee9") }, hor: { value: HORIZON } },
+  vertexShader: `varying vec3 vDir;
+    void main() { vDir = position; vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_Position = vec4(p.xy, p.w * 0.99999, p.w); }`,
+  fragmentShader: `uniform vec3 top, mid, hor; varying vec3 vDir;
+    float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float n(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(h(i), h(i + vec2(1.0, 0.0)), f.x), mix(h(i + vec2(0.0, 1.0)), h(i + vec2(1.0, 1.0)), f.x), f.y); }
+    float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * n(p); p *= 2.03; a *= 0.5; } return v; }
+    void main() {
+      vec3 d = normalize(vDir); float y = max(d.y, 0.0);
+      vec3 c = mix(hor, mid, smoothstep(0.0, 0.22, y)); c = mix(c, top, smoothstep(0.22, 0.85, y));
+      float cl = smoothstep(0.52, 0.78, fbm(d.xz / (y + 0.12) * 1.3 + 3.0)) * smoothstep(0.03, 0.2, y);
+      c = mix(c, vec3(1.0), cl * 0.85);
+      gl_FragColor = vec4(c, 1.0);
+      #include <colorspace_fragment>
+    }`,
+  side: THREE.BackSide, depthWrite: false, depthFunc: THREE.LessEqualDepth, fog: false, toneMapped: false,
+}));
+sky.frustumCulled = false;
+sky.renderOrder = -1;
+scene.add(sky);
+
+// the sun's shadow covers just the laptop while the camera is on it (so it's sharp), and widens to the house and
+// its garden as the camera goes over
+const ORIGIN = new THREE.Vector3(), HOUSE_C = toWorld(-170, 300, 0), MID_C = HOUSE_C.clone().multiplyScalar(0.5), sunC = new THREE.Vector3();
+function aimSun(t) {
+  const a = smooth(0, 0.18, t), b = smooth(0.35, 0.65, t), L = THREE.MathUtils.lerp;
+  sunC.lerpVectors(ORIGIN, MID_C, a).lerp(HOUSE_C, b);
+  const ext = L(L(48, 1250, a), 780, b), dist = L(120, 3000, a);
+  sun.position.copy(sunDir).multiplyScalar(dist).add(sunC);
+  sun.target.position.copy(sunC);
+  sun.target.updateMatrixWorld();
+  const c = sun.shadow.camera;
+  c.left = c.bottom = -ext; c.right = c.top = ext;
+  c.near = L(10, 100, a); c.far = dist + L(140, 2600, a);
+  c.updateProjectionMatrix();
+  sun.shadow.normalBias = 0.04 * ext / 48;
+  sun.shadow.bias = -0.1 / (c.far - c.near);
+}
+
 /* ---------- camera ---------- */
 const camera = new THREE.PerspectiveCamera(26, 1, 1, 400);
-let vw = 1, vh = 1, headPx = 0, openFit = null, screenFit = null;
+let vw = 1, vh = 1, headPx = 0, openFit = null, tour = null;
 const box = new THREE.Box3();
 function corners() {
   lid.rotation.x = -OPEN;
@@ -380,14 +437,24 @@ function fitOpen() {
   }
   return { target: T_OPEN.clone(), elev: E_OPEN, az: azOpen(), dist: hi, shift: headPx / 2 };
 }
-function fitScreen() {
-  // square on to the open display, close enough that the picture covers the whole screen. The display tilts back
-  // OPEN - 90 degrees, so that's the elevation that faces it head on.
-  corners();
-  const target = display.getWorldPosition(new THREE.Vector3());
-  const visH = Math.min(SCR_H, SCR_W / (vw / vh)) * 0.97;
-  const dist = visH / 2 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-  return { target, elev: THREE.MathUtils.radToDeg(OPEN) - 90, az: 0, dist, shift: 0 };
+// the flight to the office: from the view of the laptop, back and up to take in the house, across the lawn, over the
+// balcony rail and in through the door, ending square on to the chalkboard. The lens widens on the way, so the house
+// fits in view and the office reads as a room; at the end the board sits in the middle with the room round it.
+const FOV = 26;
+function planTour() {
+  const aspect = vw / vh, portrait = aspect < 1, B = OFFICE.board;
+  place(openFit.target, openFit.elev, openFit.dist, openFit.az);
+  const endZ = portrait ? 95 : 45;
+  // a phone held upright sees a narrow slice, so it stands further back and higher to take the house in
+  const back = portrait ? toWorld(0, 330, 1520) : toWorld(0, 210, 1260);
+  const pos = new THREE.CatmullRomCurve3([camera.position.clone(), back, toWorld(0, 400, 820),
+    toWorld(0, OFFICE.eye, 430), toWorld(0, OFFICE.eye, endZ)], false, "centripetal");
+  const look = new THREE.CatmullRomCurve3([openFit.target.clone(), toWorld(0, 310, 330), toWorld(0, 440, 0),
+    toWorld(0, B.y, B.z), toWorld(0, B.y, B.z - 1)], false, "centripetal");
+  const share = portrait ? 0.86 : aspect < 1.35 ? 0.62 : 0.5;   // how much of the width the board takes at the end
+  const tanH = B.w / share / 2 / (endZ - B.z);
+  const fovEnd = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(tanH / aspect)), 32, 80);
+  return { pos, look, fovMid: portrait ? 64 : 44, fovEnd };
 }
 
 function resize() {
@@ -396,27 +463,28 @@ function resize() {
   renderer.setPixelRatio(dpr);
   renderer.setSize(vw, vh, false);
   camera.aspect = vw / vh;
+  camera.fov = FOV;
   camera.clearViewOffset();
   camera.updateProjectionMatrix();   // the fits below project through it
   const title = document.querySelector(".work-title");
   // layout positions, not the on-screen ones: the page moves both elements with transforms while they rise
   headPx = title ? title.offsetTop + title.offsetHeight - canvas.offsetTop + 12 : 0;
   openFit = fitOpen();
-  screenFit = fitScreen();
+  tour = planTour();
   dirty = true;
 }
 
 /* ---------- per-frame update ---------- */
-let dirty = true, last = { rise: -1, zoom: -1 };
-const tgt = new THREE.Vector3(), descT = new THREE.Vector3(), SKY_T = new THREE.Vector3(0, 0, 0);
-function update(rise, zoom, now, dt) {
+let dirty = true, last = { rise: -1, go: -1 };
+const descT = new THREE.Vector3(), look = new THREE.Vector3(), SKY_T = new THREE.Vector3(0, 0, 0);
+function update(rise, go, now, dt) {
   if (!openFit) resize();
-  // the gallery flows until the camera is right in front of it (then it holds still behind the services)
-  const stripOn = rise > 0 && zoom < 1;
+  // the gallery flows while the laptop's in view
+  const stripOn = rise > 0 && go < 0.35;
   if (stripOn && !reduce) offset = (offset + dt * 38) % TOTAL;
-  if (!stripOn && !dirty && rise === last.rise && zoom === last.zoom) return;
+  if (!stripOn && !dirty && rise === last.rise && go === last.go) return;
   const redraw = stripOn || dirty;   // the display's picture needs drawing again
-  last.rise = rise; last.zoom = zoom; dirty = false;
+  last.rise = rise; last.go = go; dirty = false;
 
   lid.rotation.x = -OPEN;
   // coming down from the sky: from high above the lawn, turning as it drops, to the view of the open laptop
@@ -424,18 +492,26 @@ function update(rise, zoom, now, dt) {
   const skyDist = vw < 700 ? 1500 : 1100;
   descT.lerpVectors(SKY_T, openFit.target, k);
   const dE = L(90, openFit.elev, k), dA = L(34, openFit.az, k), dD = Math.exp(L(Math.log(skyDist), Math.log(openFit.dist), k));
-  // then it flies in to face the display, and stops when the picture fills the screen
-  const m = easeInOut(clamp01(zoom));
-  tgt.lerpVectors(descT, screenFit.target, m);
-  const elev = L(dE, screenFit.elev, m);
-  const dist = Math.exp(L(Math.log(dD), Math.log(screenFit.dist), m));
-  place(tgt, elev, dist, L(dA, screenFit.az, m));
+  place(descT, dE, dD, dA);
   // near and far planes follow the height, so the whole lawn shows from up high and the laptop stays crisp close up
-  camera.near = Math.max(0.5, dist * 0.04);
-  camera.far = dist * 3 + 400;
-  const shift = openFit.shift * k * (1 - m);
+  let near = Math.max(0.5, dD * 0.04), far = dD * 3 + 400, fov = FOV, shift = openFit.shift * k;
+  // then over to the house and into the office
+  const g = clamp01(go), t = g * g * (3 - 2 * g);
+  if (t > 0) {
+    tour.pos.getPoint(t, camera.position);
+    tour.look.getPoint(t, look);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(look);
+    const s = smooth(0, 0.2, t);
+    near = L(near, 4, s); far = L(far, 30000, s);
+    fov = t < 0.5 ? L(FOV, tour.fovMid, smooth(0, 0.2, t)) : L(tour.fovMid, tour.fovEnd, smooth(0.55, 1, t));
+    shift *= 1 - smooth(0, 0.12, t);
+  }
+  camera.fov = fov; camera.near = near; camera.far = far;
   camera.setViewOffset(vw, vh, 0, -shift, vw, vh);
   camera.updateProjectionMatrix();
+  aimSun(t);
+  sky.position.copy(camera.position);
 
   if (redraw) {
     layoutStrip(now / 1000);

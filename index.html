@@ -7,7 +7,7 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA: project gallery and services.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="mac/mac.min.js?v=7">
+<link rel="modulepreload" href="mac/mac.min.js?v=8">
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
@@ -17,7 +17,8 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 
 /* The page opens in the sky: LENNON HELMAN over clouds. Scrolling flies the camera through the O, through the
    clouds and down onto the laptop lying on a lawn (the 3D MacBook, pinned to the screen). There, scrolling on
-   flies the camera into its screen and the services pop up there, all following the scroll. */
+   flies the camera across the lawn to the house next door and in through its balcony door to the office, where it
+   stops square on to a chalkboard; all of that follows the scroll. */
 
 /* ---------- the sky at the top: layers over the 3D lawn, moved and faded by the scroll ---------- */
 #intro{position:fixed;inset:0;z-index:3;overflow:hidden;pointer-events:none;contain:strict}
@@ -28,8 +29,8 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 .fog{background:radial-gradient(120% 120% at 50% 50%,#fff 30%,#eef5fc 70%,#dbe9f7);opacity:0}
 /* the fly-through: this much scrolling takes the camera from the sky down to the laptop */
 .fly{height:260vh}
-/* and this much from the laptop towards its screen before the services start up (they overlap the end of the zoom) */
-.zoom{height:60vh}
+/* and this much from the laptop to the chalkboard in the office */
+.zoom{height:240vh}
 
 /* the page: the MacBook on the lawn, then the services on its screen */
 #work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#3d6a22}   /* grass green until the 3D lawn draws */
@@ -39,8 +40,6 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 @media (max-width:700px){.work-title{top:clamp(76px,10vh,104px);font-size:15vw;padding:0 4vw}}
 /* the MacBook is a real-time 3D model (mac/src/mac.js) */
 #mac{position:absolute;inset:0;width:100%;height:100%;display:block}
-/* a dark, blurred shade over the screen once the camera is up close, so the services read clearly on it */
-.screen-shade{position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 0%,rgba(8,8,10,.5),rgba(8,8,10,.78));-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:0;pointer-events:none;z-index:1}
 body.no-mac .mac-hint{display:none}
 .mac-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));margin:0;text-align:center;font:600 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5);opacity:0;transition:opacity .4s;z-index:2}
 
@@ -56,7 +55,6 @@ body.no-mac .mac-hint{display:none}
 @media (max-width:380px){.topnav{padding:5px 6px}.topnav a{padding:8px 7px;font-size:12.5px}}
 
 </style>
-<link rel="stylesheet" href="info/info.css?v=4">
 </head>
 <body>
 <h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA.</h1>
@@ -73,47 +71,17 @@ body.no-mac .mac-hint{display:none}
   <div class="stage">
     <h2 class="work-title">Project Gallery</h2>
     <canvas id="mac" aria-hidden="true"></canvas>
-    <div class="screen-shade"></div>
-    <p class="mac-hint" aria-hidden="true">Scroll for services</p>
+    <p class="mac-hint" aria-hidden="true">Keep scrolling</p>
   </div>
   <div class="fly" aria-hidden="true"></div>
   <div class="zoom" aria-hidden="true"></div>
-  <div id="info" class="ff">
-    <section class="ff-sec ff-only" id="ff-services">
-      <div class="ff-head rv"><h3>Services we offer</h3><span>03 services</span></div>
-      <div class="ff-services">
-        <article class="ff-svc rv">
-          <span class="ff-svc-num">01</span>
-          <h4>Custom websites</h4>
-          <p>Hand-built sites made to fit what you do: the design, the animation and fast, clean code. This site is one of them.</p>
-          <div class="ff-tags"><span>Design</span><span>Animation</span><span>Hosting</span></div>
-          <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Custom%20website">Ask about a website ↗</a>
-        </article>
-        <article class="ff-svc rv" style="--i:1">
-          <span class="ff-svc-num">02</span>
-          <h4>Bug fixes</h4>
-          <p>Something broken, slow or acting strange? I track down the cause and fix it, from layout glitches to crashes.</p>
-          <div class="ff-tags"><span>Debugging</span><span>Performance</span><span>Cleanup</span></div>
-          <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Bug%20fix">Report a bug ↗</a>
-        </article>
-        <article class="ff-svc rv" style="--i:2">
-          <span class="ff-svc-num">03</span>
-          <h4>Electronic projects</h4>
-          <p>Hardware and the code that runs it: circuits, microcontrollers, sensors and lights, planned and built with you.</p>
-          <div class="ff-tags"><span>Microcontrollers</span><span>Sensors</span><span>Prototypes</span></div>
-          <a class="ff-ghost" href="mailto:lenodrips@gmail.com?subject=Electronics%20project">Plan a build ↗</a>
-        </article>
-      </div>
-      <div class="ff-links rv"><a class="ff-pill" href="mailto:lenodrips@gmail.com?subject=New%20project">Start a project ↗</a></div>
-    </section>
-  </div>
 </section>
 
 <nav class="topnav" aria-label="Site">
   <a href="#gallery" data-go="gallery">project gallery</a>
   <a href="#services" data-go="services">services</a>
 </nav>
-<script type="module" src="mac/mac.min.js?v=7"></script>
+<script type="module" src="mac/mac.min.js?v=8"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -129,22 +97,19 @@ body.no-mac .mac-hint{display:none}
 
   /* ---------- scroll positions ---------- */
   // the stage is pinned from the top; the fly-through from the sky takes the first stretch of scrolling and ends
-  // on the laptop (closeAt); scrolling on flies into its screen (done at zoomEnd), and the services start up at
-  // zoomAt, while it's still flying in, reaching the top at infoAt
+  // on the laptop (closeAt); scrolling on from there to the end of the page (officeAt) takes the camera to the
+  // chalkboard in the office next door
   const work = document.getElementById("work");
-  const info = document.getElementById("info");
   const stage = work.querySelector(".stage");
   const zoomEl = work.querySelector(".zoom");
-  let closeAt = 1, zoomAt = 1, zoomEnd = 1, infoAt = 1;
+  let closeAt = 1, officeAt = 2;
   function measure() {
-    infoAt = work.offsetTop + info.offsetTop;
-    zoomAt = infoAt - stage.offsetHeight;
-    closeAt = Math.max(1, zoomAt - zoomEl.offsetHeight);
-    zoomEnd = zoomAt + (infoAt - zoomAt) * 0.35;   // the camera is still flying in as the services start up
+    closeAt = Math.max(1, work.offsetTop + zoomEl.offsetTop - stage.offsetHeight);
+    officeAt = Math.max(closeAt + 1, Math.min(closeAt + zoomEl.offsetHeight, maxScroll()));
   }
+  const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
   measure();
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";   // always start in the sky
-  const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
   const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   // scroll the page to a position over a set time, eased; `at` = [fraction, fn] runs fn once partway
   function scrollAnim(to, dur, at) {
@@ -228,7 +193,7 @@ body.no-mac .mac-hint{display:none}
   });
   // go there, flying into or out of the screen on the way
   function goTo(where) {
-    run(() => scrollAnim(where === "services" ? infoAt : closeAt, reduce ? 0 : 1.8));
+    run(() => scrollAnim(where === "services" ? officeAt : closeAt, reduce ? 0 : 1.8));
   }
   let current = "";
   function markCurrent(where) {
@@ -367,10 +332,7 @@ body.no-mac .mac-hint{display:none}
 
   /* ---------- the MacBook page ---------- */
   const title = work.querySelector(".work-title");
-  const shade = work.querySelector(".screen-shade");
   const macHint = work.querySelector(".mac-hint");
-  const cards = [...info.querySelectorAll(".rv")];
-  let cardsIn = false;
 
   /* ---------- one animation loop: it runs while something moves or the gallery plays, and sleeps otherwise ---------- */
   let running = false, last = 0;
@@ -384,28 +346,20 @@ body.no-mac .mac-hint{display:none}
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     const y = window.scrollY;
-    const c = clamp01((y - closeAt) / (zoomEnd - closeAt));      // 0 on the laptop, 1 with its screen filling the view
-    const q = clamp01((y - zoomAt) / (infoAt - zoomAt));          // the services coming up: 0 below the screen, 1 in place
+    const c = clamp01((y - closeAt) / (officeAt - closeAt));     // 0 on the laptop, 1 at the chalkboard
     const p = clamp01(y / closeAt);                 // 0 in the sky, 1 on the laptop
     flyIntro(p, now);
-    // the headline lifts away as the camera starts in; a shade settles over the screen; the services pop up on it
-    set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
-    set(title, "opacity", (smooth(0.86, 1, p) * (1 - smooth(0, 0.3, c))).toFixed(3));
-    set(shade, "opacity", smooth(0.5, 0.9, c).toFixed(3));
-    // they grow from small and faint to full size as they rise, so they pop up out of the screen
-    const e = 1 - Math.pow(1 - smooth(0.05, 0.85, q), 3);
-    set(info, "opacity", e.toFixed(3));
-    set(info, "transform", e === 1 ? "none" : `scale(${(0.82 + 0.18 * e).toFixed(4)})`);
-    const show = q > 0.3;
-    if (show !== cardsIn) { cardsIn = show; cards.forEach(el => el.classList.toggle("in", show)); }   // and the cards rise in
+    // the headline lifts away as the camera sets off
+    set(title, "transform", `translate3d(0, ${(-smooth(0, 0.15, c) * 40).toFixed(2)}px, 0)`);
+    set(title, "opacity", (smooth(0.86, 1, p) * (1 - smooth(0, 0.12, c))).toFixed(3));
     set(macHint, "opacity", p === 1 && c === 0 && !auto ? "1" : "0");
-    // the 3D camera: from high above the lawn, once the clouds open (0.42), down to the laptop
+    // the 3D camera: from high above the lawn, once the clouds open (0.42), down to the laptop, then on to the office
     const down = clamp01((p - 0.4) / 0.6);
     if (window.Mac && p > 0.38) Mac.update(down, c, now, dt);
 
-    markCurrent(q >= 0.5 ? "services" : p >= 1 ? "gallery" : "");
+    markCurrent(c >= 0.5 ? "services" : p >= 1 ? "gallery" : "");
 
-    // keep going while something moves, or the gallery plays on the open laptop's screen
+    // keep going while something moves: the grass and the gallery on the laptop's screen, or the sky
     const playing = (window.Mac && p > 0.38 && c < 1 && !reduce) || (p < 0.34 && !reduce);   // the gallery, or the sky
     if (playing) requestAnimationFrame(loop);
     else running = false;
