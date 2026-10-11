@@ -35,6 +35,24 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 
 /* 2. the white card, in the page's flow: it scrolls up over the fixed reel */
 #work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#f5f9fc;border-radius:56px 56px 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.45)}
+/* the projects, at the top of the card, above the project gallery */
+.pj{padding:clamp(110px,16vh,150px) clamp(20px,5vw,72px) clamp(40px,8vh,90px);color:#0a0a0a;font:clamp(15px,1.1vw,17px)/1.55 system-ui,-apple-system,"Segoe UI",Inter,sans-serif}
+.pj-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:clamp(20px,3vw,40px);padding-bottom:clamp(12px,1.6vw,20px);border-bottom:1px solid rgba(0,0,0,.1)}
+.pj-head h2{margin:0;font-family:"League Spartan",sans-serif;font-weight:900;font-size:clamp(52px,9vw,150px);line-height:.84;letter-spacing:-.04em;text-transform:uppercase}
+.pj-head span{color:#6b6b70;font-size:.9em}
+.pj-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(14px,2vw,28px)}
+.pj-card{display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(0,0,0,.1);border-radius:24px;background:#fff}
+.pj-card img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:top;border-bottom:1px solid rgba(0,0,0,.08);background:#e9edf1}
+.pj-body{display:flex;flex-direction:column;gap:10px;flex:1;padding:clamp(18px,2vw,28px)}
+.pj-meta{display:flex;gap:10px;color:#6b6b70;font-size:.88em}
+.pj-meta span{color:#0a0a0a;font-weight:600}
+.pj-card h3{margin:0;font-family:"League Spartan",sans-serif;font-weight:900;font-size:clamp(28px,2.8vw,44px);line-height:.95;letter-spacing:-.025em}
+.pj-card p{margin:0;color:#2a2a2d;flex:1}
+.pj-tags{display:flex;flex-wrap:wrap;gap:6px}
+.pj-tags span{padding:4px 10px;border:1px solid rgba(0,0,0,.1);border-radius:999px;font-size:.8em}
+.pj-card a{align-self:flex-start;margin-top:4px;padding:9px 15px;border-radius:999px;background:#0a0a0a;color:#fff;text-decoration:none;font-size:.92em;transition:background .2s}
+.pj-card a:hover,.pj-card a:focus-visible{background:#2a2a2d}
+@media (max-width:760px){.pj-grid{grid-template-columns:1fr}.pj-head{flex-direction:column;gap:6px}}
 /* the stage holds the headline and the MacBook, and stays pinned to the screen from the moment it reaches the top */
 .stage{position:sticky;top:0;height:100vh;z-index:1}
 .work-title{position:absolute;left:0;right:0;top:calc(var(--tb) * .2 + 70px);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#0a0a0a;z-index:2;will-change:transform,opacity}
@@ -56,6 +74,7 @@ body.no-mac .mac-hint{display:none}
 .topnav a:hover,.topnav a:focus-visible,.topnav a[aria-current="true"]{color:#fff}
 .topnav a:focus-visible{outline:1px solid rgba(255,255,255,.5);outline-offset:-1px}
 @media (max-width:560px){.topnav{top:max(16px,env(safe-area-inset-top));gap:0;padding:6px 8px}.topnav a{padding:8px 10px;font-size:13px}.topnav .long{display:none}}
+@media (max-width:560px){.topnav a[href^="mailto"]{display:none}}   /* phones: contact is on the about card */
 @media (max-width:380px){.topnav{padding:5px 6px}.topnav a{padding:8px 7px;font-size:12.5px}}
 
 /* ---------- the LH logo, top left: black and white, with a code symbol ---------- */
@@ -86,7 +105,52 @@ body.no-mac .mac-hint{display:none}
 
 <div class="intro" aria-hidden="true"></div>
 
-<section id="work" aria-label="Project gallery">
+<section id="work" aria-label="Projects and project gallery">
+  <div class="pj" id="projects">
+    <div class="pj-head rv"><h2>Projects</h2><span>04 projects</span></div>
+    <div class="pj-grid">
+      <article class="pj-card rv">
+        <img src="img/work/01.jpg" alt="Kepler, a desktop web browser, with its AI side panel open" loading="lazy" width="900" height="506">
+        <div class="pj-body">
+          <div class="pj-meta"><span>01</span>Desktop browser</div>
+          <h3>Kepler</h3>
+          <p>A web browser from another orbit, written in C++ on Qt 6 and Chromium: a built-in tracker blocker, private Orbit windows, session restore and an animated new-tab page.</p>
+          <div class="pj-tags"><span>C++17</span><span>Qt 6</span><span>Qt WebEngine</span><span>CMake</span></div>
+          <a href="https://keplerbrowser.org" target="_blank" rel="noopener">keplerbrowser.org ↗</a>
+        </div>
+      </article>
+      <article class="pj-card rv" style="--i:1">
+        <img src="img/work/04.jpg" alt="The keplerbrowser.org home page: Browse dark. Ship clean." loading="lazy" width="900" height="600">
+        <div class="pj-body">
+          <div class="pj-meta"><span>02</span>Website + Rust server</div>
+          <h3>keplerbrowser.org</h3>
+          <p>The download and docs site for Kepler, served by a zero-dependency Rust release server with a JSON releases API.</p>
+          <div class="pj-tags"><span>Rust</span><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+          <a href="https://keplerbrowser.org" target="_blank" rel="noopener">Visit the site ↗</a>
+        </div>
+      </article>
+      <article class="pj-card rv" style="--i:2">
+        <img src="img/work/11.jpg" alt="CTerm Studio: an editor, live preview, file explorer and shells in one page" loading="lazy" width="900" height="600">
+        <div class="pj-body">
+          <div class="pj-meta"><span>03</span>Browser code studio</div>
+          <h3>CTerm Studio</h3>
+          <p>An editor, live preview, file explorer and two shells in one page, all running on a C core compiled to WebAssembly.</p>
+          <div class="pj-tags"><span>C</span><span>WebAssembly</span><span>React 19</span><span>Vite</span></div>
+          <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </article>
+      <article class="pj-card rv" style="--i:3">
+        <img src="img/work/14.jpg" alt="The FORGIVN clothing storefront home page" loading="lazy" width="900" height="600">
+        <div class="pj-body">
+          <div class="pj-meta"><span>04</span>Storefront</div>
+          <h3>FORGIVN</h3>
+          <p>A clothing storefront in one dependency-free file: a dove intro, filterable products, a saved cart, a contact form and scroll animations.</p>
+          <div class="pj-tags"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+          <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </article>
+    </div>
+  </div>
   <div class="stage">
     <h2 class="work-title">Project Gallery</h2>
     <canvas id="mac" aria-hidden="true"></canvas>
@@ -130,17 +194,20 @@ body.no-mac .mac-hint{display:none}
       <div class="ab-head rv"><h2>About me</h2><span>@lenodrips</span></div>
       <div class="ab-grid">
         <div class="ab-main">
-          <p class="ab-lead rv">I'm Lennon. I build what I imagine.</p>
-          <p class="rv" style="--i:1">I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it.</p>
-          <p class="rv" style="--i:2">Most of my work starts as a question. Could I make my own web browser? That became Kepler, written in C++ on Qt and Chromium. Could a full code studio run inside a browser tab? That became CTerm Studio, with a C core compiled to WebAssembly.</p>
-          <p class="rv" style="--i:3">I care about how software feels as much as what it does: fast, private, and a little bit cinematic.</p>
+          <p class="ab-lead rv">I'm Lennon. I build what I imagine, from Greencastle, Pennsylvania.</p>
+          <p class="rv" style="--i:1">Greencastle is a small town in Franklin County, in the Cumberland Valley of south-central Pennsylvania, a few miles above the Maryland line. It has a town square with a fountain at its centre, brick storefronts on every side, farmland out past the edge of town and Interstate 81 running along it. It's a quiet, friendly place where people know each other, and that's where all of this gets made.</p>
+          <p class="rv" style="--i:2">A small town is a good place to build things. There's room to think, no hype to chase and nobody telling you a project is too big. If I want something that doesn't exist yet, I sit down and make it. That's how I ended up writing my own web browser instead of just using one.</p>
+          <p class="rv" style="--i:3">I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it. Most of my work starts as a question. Could I make my own web browser? That became Kepler, written in C++ on Qt and Chromium. Could a full code studio run inside a browser tab? That became CTerm Studio, with a C core compiled to WebAssembly.</p>
+          <p class="rv" style="--i:4">I care about how software feels as much as what it does: fast, private, and a little bit cinematic. Everything I build here in Greencastle goes out to anyone, anywhere, so I want it to be as good as anything made in a big city.</p>
         </div>
         <div class="ab-side">
           <ul class="ab-facts rv" style="--i:2">
             <li><span>Handle</span>@lenodrips</li>
             <li><span>Focus</span>Browsers, dev tools, the web</li>
             <li><span>Based in</span>Greencastle, PA</li>
-            <li><span>Public projects</span>5</li>
+            <li><span>County</span>Franklin County</li>
+            <li><span>Region</span>Cumberland Valley</li>
+            <li><span>Public projects</span>4</li>
           </ul>
           <div class="ab-chips rv" style="--i:3"><span>C++</span><span>Qt 6</span><span>Rust</span><span>C</span><span>WebAssembly</span><span>JavaScript</span><span>React</span><span>Vite</span><span>CMake</span><span>HyperFrames</span></div>
           <div class="ab-links rv" style="--i:4">
@@ -158,6 +225,7 @@ body.no-mac .mac-hint{display:none}
 
 <nav class="topnav" aria-label="Site">
   <a href="#top" data-go="home">home</a>
+  <a href="#projects" data-go="projects">projects</a>
   <a href="#gallery" data-go="gallery"><span class="long">project </span>gallery</a>
   <a href="#services" data-go="services">services</a>
   <a href="#about" data-go="about">about</a>
@@ -208,10 +276,13 @@ body.no-mac .mac-hint{display:none}
   // start at infoAt, a screen further on, over the closed lid
   const work = document.getElementById("work");
   const info = document.getElementById("info");
-  let riseLen = 1, closeAt = 1, infoAt = 1;
+  const stage = work.querySelector(".stage");
+  let riseLen = 1, closeAt = 1, infoAt = 1, stageH = 1;
   function measure() {
-    riseLen = closeAt = Math.max(1, work.offsetTop);
+    riseLen = Math.max(1, work.offsetTop);                   // the card covers the reel; the projects come first
+    closeAt = work.offsetTop + stage.offsetTop;              // then the stage pins: the laptop
     infoAt = work.offsetTop + info.offsetTop;
+    stageH = stage.offsetHeight;
   }
   measure();
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";   // always start on the reel
@@ -345,7 +416,7 @@ body.no-mac .mac-hint{display:none}
 
   /* ---------- services: they rise in as they scroll into view ---------- */
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 });
-  info.querySelectorAll(".rv").forEach(el => io.observe(el));
+  document.querySelectorAll("#info .rv, #projects .rv").forEach(el => io.observe(el));
 
   /* ---------- navigation ---------- */
   const nav = document.querySelector(".topnav");
@@ -371,7 +442,7 @@ body.no-mac .mac-hint{display:none}
         if (lid.v < 1) await toServices(); else await scrollAnim(infoAt);
       } else {
         if (lid.v > 0) await toLaptop();
-        await scrollAnim(where === "home" ? 0 : closeAt);
+        await scrollAnim(where === "home" ? 0 : where === "projects" ? riseLen : closeAt);
       }
     });
   }
@@ -417,6 +488,7 @@ body.no-mac .mac-hint{display:none}
     }
     const c = lid.v;
     const w = clamp01(y / riseLen);                   // the card covering the reel
+    const r = clamp01((y - (closeAt - stageH)) / stageH);   // the laptop's stage coming up after the projects
 
     // reel: hidden and paused once the card covers it
     set(reelBox, "visibility", w >= 1 ? "hidden" : "visible");
@@ -429,8 +501,8 @@ body.no-mac .mac-hint{display:none}
     set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
     set(title, "opacity", (1 - smooth(0, 0.3, c)).toFixed(3));
     set(shade, "opacity", smooth(0.8, 1, c).toFixed(3));
-    set(macHint, "opacity", w > 0.98 && c === 0 && lid.to === 0 && !auto ? "1" : "0");
-    if (window.Mac && w > 0) Mac.update(w, c, now, dt);
+    set(macHint, "opacity", r > 0.98 && c === 0 && lid.to === 0 && !auto ? "1" : "0");
+    if (window.Mac && r > 0) Mac.update(r, c, now, dt);
 
     // the white card pops up from the bottom; the about me on it rises in as it arrives, and resets once it's gone
     set(whiteCard, "visibility", white.v > 0 ? "visible" : "hidden");
@@ -444,10 +516,10 @@ body.no-mac .mac-hint{display:none}
       if (!show) whiteScroll.scrollTop = 0;
     }
 
-    markCurrent(white.v > 0.5 ? "about" : c >= 0.5 ? "services" : w >= 0.5 ? "gallery" : "home");
+    markCurrent(white.v > 0.5 ? "about" : c >= 0.5 ? "services" : r >= 0.5 ? "gallery" : w >= 0.5 ? "projects" : "home");
 
     // keep going while something moves, or the gallery plays on the open laptop's screen
-    const playing = window.Mac && w > 0 && c < 0.75 && !reduce;
+    const playing = window.Mac && r > 0 && c < 0.75 && !reduce;
     if (playing || lid.moving() || white.moving()) requestAnimationFrame(loop);
     else running = false;
   }
