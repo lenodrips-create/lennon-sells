@@ -346,7 +346,31 @@ const lawn = makeLawn(scene, { w: W, d: D }, quality);
 // the laptop lies on the line through the office door and the chalkboard, 10 m out in front of the house, which is
 // turned a little towards the sun so its front is lit
 const HOUSE_DIST = 1000, HOUSE_ROT = -Math.PI / 6;
-const house = makeHouse(quality, renderer, () => { dirty = true; window.dispatchEvent(new Event("mac-ready")); });   // redraw as its parts arrive
+// once its textures, sky and furniture are on, compile its shaders in the background, and draw it twice, out of
+// sight, with the sun's shadow round it, so its shadow shaders are made and everything is on the GPU; then redraw.
+// Nothing has to be compiled or uploaded when the house first comes into view, which is what makes a flight stutter.
+const house = makeHouse(quality, renderer, () => renderer.compileAsync(scene, camera).catch(() => {}).then(() => {
+  // two draws from along the flight into one pixel of the canvas (the same shaders as a real frame; a render target
+  // would get different ones), so the house's shaders are linked and its geometry and textures are on the GPU
+  // before it's seen. The next frame draws over that pixel.
+  if (!openFit) resize();
+  const warm = camera.clone();
+  warm.clearViewOffset();
+  aimSun(1);
+  renderer.autoClear = false;
+  renderer.setViewport(0, 0, 1, 1);
+  for (const t of [0.5, 0.97]) {
+    tour.pos.getPoint(t, warm.position); tour.look.getPoint(t, look);
+    warm.up.set(0, 1, 0); warm.lookAt(look);
+    warm.near = 4; warm.far = 30000; warm.fov = 60; warm.updateProjectionMatrix();
+    renderer.render(scene, warm);
+  }
+  renderer.setViewport(0, 0, vw, vh);
+  renderer.autoClear = true;
+  aimSun(sunT);
+  dirty = true;
+  window.dispatchEvent(new Event("mac-ready"));
+}));
 house.group.rotation.y = HOUSE_ROT;
 house.group.position.set(-Math.sin(HOUSE_ROT) * HOUSE_DIST, 0, -Math.cos(HOUSE_ROT) * HOUSE_DIST);
 scene.add(house.group);
@@ -364,7 +388,7 @@ const sky = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 16), new THREE.Shader
     float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
     float n(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
       return mix(mix(h(i), h(i + vec2(1.0, 0.0)), f.x), mix(h(i + vec2(0.0, 1.0)), h(i + vec2(1.0, 1.0)), f.x), f.y); }
-    float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * n(p); p *= 2.03; a *= 0.5; } return v; }
+    float fbm(vec2 p) { float v = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { v += a * n(p); p *= 2.03; a *= 0.5; } return v; }
     void main() {
       vec3 d = normalize(vDir); float y = max(d.y, 0.0);
       vec3 c = mix(hor, mid, smoothstep(0.0, 0.22, y)); c = mix(c, top, smoothstep(0.22, 0.85, y));
@@ -381,6 +405,7 @@ scene.add(sky);
 
 // the sun's shadow covers just the laptop while the camera is on it (so it's sharp), and widens to the house and
 // its garden as the camera goes over
+let sunT = 0;
 const ORIGIN = new THREE.Vector3(), HOUSE_C = toWorld(-170, 300, 0), MID_C = HOUSE_C.clone().multiplyScalar(0.5), sunC = new THREE.Vector3();
 function aimSun(t) {
   const a = smooth(0, 0.18, t), b = smooth(0.35, 0.65, t), L = THREE.MathUtils.lerp;
@@ -457,11 +482,24 @@ function planTour() {
   return { pos, look, fovMid: portrait ? 64 : 44, fovEnd };
 }
 
+// Resolution: sharp but within a pixel budget, and lowered on the fly (then raised again) if frames run slow, so
+// the motion stays smooth on any machine
+let baseDpr = 1, dprScale = 1;
+const applyDpr = () => { renderer.setPixelRatio(baseDpr * dprScale); renderer.setSize(vw, vh, false); };
+let frameAvg = 1000 / 60, lastFrame = 0, settle = 30;
+function govern(now) {
+  const ft = now - lastFrame;
+  lastFrame = now;
+  if (ft <= 0 || ft > 120) return;            // a pause between moves, not a slow frame
+  frameAvg += (ft - frameAvg) * 0.1;
+  if (--settle > 0) return;
+  if (frameAvg > 23 && dprScale > 0.5) { dprScale = Math.max(0.5, dprScale * 0.82); applyDpr(); settle = 40; }
+  else if (frameAvg < 15.5 && dprScale < 1) { dprScale = Math.min(1, dprScale * 1.12); applyDpr(); settle = 150; }
+}
 function resize() {
   vw = Math.max(1, canvas.clientWidth); vh = Math.max(1, canvas.clientHeight);
-  const dpr = Math.min(2, devicePixelRatio || 1, Math.sqrt(4.2e6 / (vw * vh)));
-  renderer.setPixelRatio(dpr);
-  renderer.setSize(vw, vh, false);
+  baseDpr = Math.max(Math.min(1, devicePixelRatio || 1), Math.min(2, devicePixelRatio || 1, Math.sqrt(2.6e6 / (vw * vh))));
+  applyDpr();
   camera.aspect = vw / vh;
   camera.fov = FOV;
   camera.clearViewOffset();
@@ -510,7 +548,7 @@ function update(rise, go, now, dt) {
   camera.fov = fov; camera.near = near; camera.far = far;
   camera.setViewOffset(vw, vh, 0, -shift, vw, vh);
   camera.updateProjectionMatrix();
-  aimSun(t);
+  aimSun(sunT = t);
   sky.position.copy(camera.position);
 
   if (redraw) {
@@ -519,8 +557,10 @@ function update(rise, go, now, dt) {
     renderer.render(screenScene, screenCam);
     renderer.setRenderTarget(null);
   }
+  lawn.near(t < 0.33);   // by then the laptop and its patch of blades are out of sight
   lawn.update(reduce ? 0 : now / 1000);   // the grass sways while the laptop is open
   renderer.render(scene, camera);
+  govern(now);
 }
 
 addEventListener("resize", () => { resize(); });

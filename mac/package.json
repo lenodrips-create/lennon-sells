@@ -3,7 +3,7 @@
   "private": true,
   "description": "The 3D MacBook on lennonh.com, bundled with three.js into mac.min.js",
   "scripts": {
-    "build": "esbuild src/mac.js --bundle --minify --format=esm --outfile=mac.min.js"
+    "build": "esbuild src/paint.js --bundle --minify --format=iife --outfile=src/paint.worker.txt && esbuild src/mac.js --bundle --minify --format=esm --loader:.txt=text --outfile=mac.min.js"
   },
   "devDependencies": {
     "esbuild": "0.25.10",
