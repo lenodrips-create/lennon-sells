@@ -28,8 +28,8 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 .fog{background:radial-gradient(120% 120% at 50% 50%,#fff 30%,#eef5fc 70%,#dbe9f7);opacity:0}
 /* the fly-through: this much scrolling takes the camera from the sky down to the laptop */
 .fly{height:260vh}
-/* and this much from the laptop into its screen, before the services pop up on it */
-.zoom{height:110vh}
+/* and this much from the laptop towards its screen before the services start up (they overlap the end of the zoom) */
+.zoom{height:60vh}
 
 /* the page: the MacBook on the lawn, then the services on its screen */
 #work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#3d6a22}   /* grass green until the 3D lawn draws */
@@ -129,17 +129,18 @@ body.no-mac .mac-hint{display:none}
 
   /* ---------- scroll positions ---------- */
   // the stage is pinned from the top; the fly-through from the sky takes the first stretch of scrolling and ends
-  // on the laptop (closeAt); scrolling on to zoomAt flies into its screen, and the services come up after that,
-  // reaching the top at infoAt
+  // on the laptop (closeAt); scrolling on flies into its screen (done at zoomEnd), and the services start up at
+  // zoomAt, while it's still flying in, reaching the top at infoAt
   const work = document.getElementById("work");
   const info = document.getElementById("info");
   const stage = work.querySelector(".stage");
   const zoomEl = work.querySelector(".zoom");
-  let closeAt = 1, zoomAt = 1, infoAt = 1;
+  let closeAt = 1, zoomAt = 1, zoomEnd = 1, infoAt = 1;
   function measure() {
     infoAt = work.offsetTop + info.offsetTop;
     zoomAt = infoAt - stage.offsetHeight;
     closeAt = Math.max(1, zoomAt - zoomEl.offsetHeight);
+    zoomEnd = zoomAt + (infoAt - zoomAt) * 0.35;   // the camera is still flying in as the services start up
   }
   measure();
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";   // always start in the sky
@@ -383,14 +384,14 @@ body.no-mac .mac-hint{display:none}
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     const y = window.scrollY;
-    const c = clamp01((y - closeAt) / (zoomAt - closeAt));       // 0 on the laptop, 1 with its screen filling the view
+    const c = clamp01((y - closeAt) / (zoomEnd - closeAt));      // 0 on the laptop, 1 with its screen filling the view
     const q = clamp01((y - zoomAt) / (infoAt - zoomAt));          // the services coming up: 0 below the screen, 1 in place
     const p = clamp01(y / closeAt);                 // 0 in the sky, 1 on the laptop
     flyIntro(p, now);
     // the headline lifts away as the camera starts in; a shade settles over the screen; the services pop up on it
     set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
     set(title, "opacity", (smooth(0.86, 1, p) * (1 - smooth(0, 0.3, c))).toFixed(3));
-    set(shade, "opacity", smooth(0.75, 1, c).toFixed(3));
+    set(shade, "opacity", smooth(0.5, 0.9, c).toFixed(3));
     // they grow from small and faint to full size as they rise, so they pop up out of the screen
     const e = 1 - Math.pow(1 - smooth(0.05, 0.85, q), 3);
     set(info, "opacity", e.toFixed(3));
