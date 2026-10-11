@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0a0a0a">
 <title>Lennon Helman</title>
-<meta name="description" content="Lennon Helman, software developer in Greencastle, PA. Dev reel 2026.">
+<meta name="description" content="Lennon Helman, software developer in Greencastle, PA: project gallery and services.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="mac/mac.min.js?v=4">
 <style>
@@ -15,46 +15,11 @@ html{--gap:clamp(10px,2.6vw,40px);background:#0a0a0a;overscroll-behavior-y:none}
 body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 .sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* The page scrolls normally: the white card scrolls up over the reel and the MacBook pins to the screen. There,
-   one scroll down closes the lid by itself and carries on up to the services over the closed lid; one scroll up
-   from the top of the services goes straight back to the open laptop. */
+/* Two stops: the project gallery (a 3D MacBook, pinned to the screen) and the services. One scroll at the laptop
+   closes its lid and brings the services up over it; one scroll up from the services opens it again. */
 
-/* 1. the showreel: the HyperFrames compositions in reel/ (16:9) and reel-portrait/ (9:16) rendered to video,
-   so the device's video hardware plays it; the page picks the one that matches the screen's shape.
-   It sits in a rounded frame a little inside the screen edges. */
-#reel{position:fixed;top:var(--gap);left:var(--gap);right:var(--gap);bottom:var(--gap);overflow:hidden;border-radius:clamp(16px,2.2vw,32px);background:#fff}
-#reel video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
-/* a scroll button at the bottom middle of the video, in the navigation's style; the card scrolls up over it */
-#hint{position:fixed;left:50%;bottom:calc(var(--gap) + clamp(16px,3vh,28px));transform:translateX(-50%);z-index:0;display:flex;align-items:center;gap:10px;padding:12px 18px 12px 22px;border:0;border-radius:999px;cursor:pointer;
-  background:rgba(23,23,23,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#d4d4d4;font:400 14px/1.25 "Readex Pro",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;transition:color .15s}
-#hint:hover,#hint:focus-visible{color:#fff}
-#hint:focus-visible{outline:1px solid rgba(255,255,255,.5);outline-offset:2px}
-#hint svg{width:14px;height:14px;animation:hint 1.6s ease-in-out infinite}
-@keyframes hint{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
-.intro{height:100vh}
-
-/* 2. the white card, in the page's flow: it scrolls up over the fixed reel */
-#work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#f5f9fc;border-radius:56px 56px 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.45)}
-/* the projects, at the top of the card, above the project gallery */
-.pj{padding:clamp(110px,16vh,150px) clamp(20px,5vw,72px) clamp(40px,8vh,90px);color:#0a0a0a;font:clamp(15px,1.1vw,17px)/1.55 system-ui,-apple-system,"Segoe UI",Inter,sans-serif}
-.pj-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:clamp(20px,3vw,40px);padding-bottom:clamp(12px,1.6vw,20px);border-bottom:1px solid rgba(0,0,0,.1)}
-.pj-head h2{margin:0;font-family:"League Spartan",sans-serif;font-weight:900;font-size:clamp(52px,9vw,150px);line-height:.84;letter-spacing:-.04em;text-transform:uppercase}
-.pj-head span{color:#6b6b70;font-size:.9em}
-.pj-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(14px,2vw,28px)}
-.pj-card{display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(0,0,0,.1);border-radius:24px;background:#fff}
-.pj-card img{display:block;width:100%;aspect-ratio:21/9;object-fit:cover;object-position:top;border-bottom:1px solid rgba(0,0,0,.08);background:#e9edf1}
-.pj-body{display:flex;flex-direction:column;gap:10px;flex:1;padding:clamp(18px,2vw,28px)}
-.pj-meta{display:flex;gap:10px;color:#6b6b70;font-size:.88em}
-.pj-meta span{color:#0a0a0a;font-weight:600}
-.pj-card h3{margin:0;font-family:"League Spartan",sans-serif;font-weight:900;font-size:clamp(28px,2.8vw,44px);line-height:.95;letter-spacing:-.025em}
-.pj-card p{margin:0;color:#2a2a2d;flex:1}
-.pj-tags{display:flex;flex-wrap:wrap;gap:6px}
-.pj-tags span{padding:4px 10px;border:1px solid rgba(0,0,0,.1);border-radius:999px;font-size:.8em}
-.pj-card a{align-self:flex-start;margin-top:4px;padding:9px 15px;border-radius:999px;background:#0a0a0a;color:#fff;text-decoration:none;font-size:.92em;transition:background .2s}
-.pj-card a:hover,.pj-card a:focus-visible{background:#2a2a2d}
-@media (min-width:1100px){.pj-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.pj-card img{aspect-ratio:16/10}}   /* wide screens: four across, so the pictures are small */
-@media (max-width:760px){.pj-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pj-head{flex-direction:column;gap:6px}}
-@media (max-width:520px){.pj-grid{grid-template-columns:1fr}.pj-card img{aspect-ratio:3/1}}
+/* the page: the white MacBook page, then the services over its closed lid */
+#work{--tb:clamp(84px,14vh,160px);position:relative;z-index:1;background:#f5f9fc}
 /* the stage holds the headline and the MacBook, and stays pinned to the screen from the moment it reaches the top */
 .stage{position:sticky;top:0;height:100vh;z-index:1}
 .work-title{position:absolute;left:0;right:0;top:calc(var(--tb) * .2 + 70px);margin:0;text-align:center;font-family:"League Spartan",system-ui,sans-serif;font-weight:900;font-size:min(8vw,calc(var(--tb) * .72));line-height:.84;letter-spacing:-.04em;text-transform:uppercase;color:#0a0a0a;z-index:2;will-change:transform,opacity}
@@ -66,7 +31,6 @@ body{margin:0;background:#0a0a0a;font-family:system-ui,-apple-system,"Segoe UI",
 body.no-mac .mac-hint{display:none}
 .mac-hint{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom));margin:0;text-align:center;font:600 12px/1 system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6c7076;opacity:0;transition:opacity .4s;z-index:2}
 
-@media (prefers-reduced-motion: reduce){#hint svg{animation:none}}
 
 /* ---------- navigation: a pill of buttons in the top middle ---------- */
 @font-face{font-family:"Readex Pro";font-style:normal;font-weight:400;font-display:swap;src:url("fonts/readex-pro-latin-400-normal.woff2") format("woff2")}
@@ -76,83 +40,15 @@ body.no-mac .mac-hint{display:none}
 .topnav a:hover,.topnav a:focus-visible,.topnav a[aria-current="true"]{color:#fff}
 .topnav a:focus-visible{outline:1px solid rgba(255,255,255,.5);outline-offset:-1px}
 @media (max-width:560px){.topnav{top:max(16px,env(safe-area-inset-top));gap:0;padding:6px 8px}.topnav a{padding:8px 10px;font-size:13px}.topnav .long{display:none}}
-@media (max-width:560px){.topnav a[href^="mailto"]{display:none}}   /* phones: contact is on the about card */
 @media (max-width:380px){.topnav{padding:5px 6px}.topnav a{padding:8px 7px;font-size:12.5px}}
-
-/* ---------- the LH logo, top left: black and white, with a code symbol ---------- */
-.logo{position:fixed;top:max(24px,env(safe-area-inset-top));left:max(24px,env(safe-area-inset-left));z-index:50;display:flex;align-items:center;gap:10px;height:42px;padding:0 16px;border-radius:999px;
-  background:#0a0a0a;color:#fff;text-decoration:none;box-shadow:0 0 0 1px rgba(255,255,255,.14)}
-.logo b{font:900 20px/1 "League Spartan",system-ui,sans-serif;letter-spacing:-.02em;padding-top:3px}
-.logo span{font:400 14px/1 "Readex Pro",system-ui,sans-serif;color:#fff;opacity:.85}
-@media (max-width:760px){.logo{display:none}}   /* phones: the nav pill takes the whole top */
-
-/* ---------- after the services: a white card with the about me ---------- */
-/* one more scroll at the end of the services pops it up from the bottom, like the first card; scrolling up takes
-   it back down. It's taller than the screen by its corner radius, so its rounded top ends just above the screen.
-   Its content scrolls inside it when it's taller than the screen (styles in info/info.css). */
-#white{position:fixed;left:0;right:0;bottom:0;top:-56px;z-index:20;background:#fff;border-radius:56px 56px 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.45);
-  transform:translate3d(0,100%,0);visibility:hidden;will-change:transform;overflow:hidden}
-.white-scroll{position:absolute;inset:56px 0 0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 
 </style>
 <link rel="stylesheet" href="info/info.css?v=3">
 </head>
 <body>
-<h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA. Dev reel 2026.</h1>
+<h1 class="sr-only">Lennon Helman, software developer, Greencastle, PA.</h1>
 
-<div id="reel" aria-hidden="true">
-  <video id="reel-video" muted playsinline loop preload="auto" poster="media/reel-poster.jpg?v=3"></video>
-</div>
-<button id="hint" type="button" aria-label="Scroll to the project gallery">scroll<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.5v11M3.5 9 8 13.5 12.5 9"/></svg></button>
-
-<div class="intro" aria-hidden="true"></div>
-
-<section id="work" aria-label="Projects and project gallery">
-  <div class="pj" id="projects">
-    <div class="pj-head rv"><h2>Projects</h2><span>04 projects</span></div>
-    <div class="pj-grid">
-      <article class="pj-card rv">
-        <img src="img/projects/01.jpg" alt="Kepler, a desktop web browser, with its AI side panel open" loading="lazy" width="1600" height="900">
-        <div class="pj-body">
-          <div class="pj-meta"><span>01</span>Desktop browser</div>
-          <h3>Kepler</h3>
-          <p>A web browser from another orbit, written in C++ on Qt 6 and Chromium: a built-in tracker blocker, private Orbit windows, session restore and an animated new-tab page.</p>
-          <div class="pj-tags"><span>C++17</span><span>Qt 6</span><span>Qt WebEngine</span><span>CMake</span></div>
-          <a href="https://keplerbrowser.org" target="_blank" rel="noopener">keplerbrowser.org ↗</a>
-        </div>
-      </article>
-      <article class="pj-card rv" style="--i:1">
-        <img src="img/projects/04.jpg" alt="The keplerbrowser.org home page: Browse dark. Ship clean." loading="lazy" width="1500" height="1000">
-        <div class="pj-body">
-          <div class="pj-meta"><span>02</span>Website + Rust server</div>
-          <h3>keplerbrowser.org</h3>
-          <p>The download and docs site for Kepler, served by a zero-dependency Rust release server with a JSON releases API.</p>
-          <div class="pj-tags"><span>Rust</span><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
-          <a href="https://keplerbrowser.org" target="_blank" rel="noopener">Visit the site ↗</a>
-        </div>
-      </article>
-      <article class="pj-card rv" style="--i:2">
-        <img src="img/projects/11.jpg" alt="CTerm Studio: an editor, live preview, file explorer and shells in one page" loading="lazy" width="1500" height="1000">
-        <div class="pj-body">
-          <div class="pj-meta"><span>03</span>Browser code studio</div>
-          <h3>CTerm Studio</h3>
-          <p>An editor, live preview, file explorer and two shells in one page, all running on a C core compiled to WebAssembly.</p>
-          <div class="pj-tags"><span>C</span><span>WebAssembly</span><span>React 19</span><span>Vite</span></div>
-          <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a>
-        </div>
-      </article>
-      <article class="pj-card rv" style="--i:3">
-        <img src="img/projects/14.jpg" alt="The FORGIVN clothing storefront home page" loading="lazy" width="1500" height="1000">
-        <div class="pj-body">
-          <div class="pj-meta"><span>04</span>Storefront</div>
-          <h3>FORGIVN</h3>
-          <p>A clothing storefront in one dependency-free file: a dove intro, filterable products, a saved cart, a contact form and scroll animations.</p>
-          <div class="pj-tags"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
-          <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a>
-        </div>
-      </article>
-    </div>
-  </div>
+<section id="work" aria-label="Project gallery">
   <div class="stage">
     <h2 class="work-title">Project Gallery</h2>
     <canvas id="mac" aria-hidden="true"></canvas>
@@ -190,48 +86,9 @@ body.no-mac .mac-hint{display:none}
   </div>
 </section>
 
-<div id="white" aria-hidden="true" inert>
-  <div class="white-scroll">
-    <section class="ab" aria-label="About me">
-      <div class="ab-head rv"><h2>About me</h2><span>@lenodrips</span></div>
-      <div class="ab-grid">
-        <div class="ab-main">
-          <p class="ab-lead rv">I'm Lennon. I build what I imagine, from Greencastle, Pennsylvania.</p>
-          <p class="rv" style="--i:1">Greencastle is a small town in Franklin County, in the Cumberland Valley of south-central Pennsylvania, a few miles above the Maryland line. It has a town square with a fountain at its centre, brick storefronts on every side, farmland out past the edge of town and Interstate 81 running along it. It's a quiet, friendly place where people know each other, and that's where all of this gets made.</p>
-          <p class="rv" style="--i:2">A small town is a good place to build things. There's room to think, no hype to chase and nobody telling you a project is too big. If I want something that doesn't exist yet, I sit down and make it. That's how I ended up writing my own web browser instead of just using one.</p>
-          <p class="rv" style="--i:3">I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it. Most of my work starts as a question. Could I make my own web browser? That became Kepler, written in C++ on Qt and Chromium. Could a full code studio run inside a browser tab? That became CTerm Studio, with a C core compiled to WebAssembly.</p>
-          <p class="rv" style="--i:4">I care about how software feels as much as what it does: fast, private, and a little bit cinematic. Everything I build here in Greencastle goes out to anyone, anywhere, so I want it to be as good as anything made in a big city.</p>
-        </div>
-        <div class="ab-side">
-          <ul class="ab-facts rv" style="--i:2">
-            <li><span>Handle</span>@lenodrips</li>
-            <li><span>Focus</span>Browsers, dev tools, the web</li>
-            <li><span>Based in</span>Greencastle, PA</li>
-            <li><span>County</span>Franklin County</li>
-            <li><span>Region</span>Cumberland Valley</li>
-            <li><span>Public projects</span>4</li>
-          </ul>
-          <div class="ab-chips rv" style="--i:3"><span>C++</span><span>Qt 6</span><span>Rust</span><span>C</span><span>WebAssembly</span><span>JavaScript</span><span>React</span><span>Vite</span><span>CMake</span><span>HyperFrames</span></div>
-          <div class="ab-links rv" style="--i:4">
-            <a href="mailto:lenodrips@gmail.com">lenodrips@gmail.com ↗</a>
-            <a href="https://github.com/lenodrips-create" target="_blank" rel="noopener">GitHub ↗</a>
-            <a href="https://keplerbrowser.org" target="_blank" rel="noopener">keplerbrowser.org ↗</a>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-</div>
-
-<a class="logo" href="#top" data-go="home" aria-label="Lennon Helman, back to the start"><b>LH</b><span aria-hidden="true">&lt;/&gt;</span></a>
-
 <nav class="topnav" aria-label="Site">
-  <a href="#top" data-go="home">home</a>
-  <a href="#projects" data-go="projects">projects</a>
-  <a href="#gallery" data-go="gallery"><span class="long">project </span>gallery</a>
+  <a href="#gallery" data-go="gallery">project gallery</a>
   <a href="#services" data-go="services">services</a>
-  <a href="#about" data-go="about">about</a>
-  <a href="mailto:lenodrips@gmail.com">contact</a>
 </nav>
 <script type="module" src="mac/mac.min.js?v=4"></script>
 
@@ -247,47 +104,19 @@ body.no-mac .mac-hint{display:none}
     if (m[prop] !== value) { m[prop] = value; el.style[prop] = value; }
   }
 
-  /* ---------- showreel: a rendered video, which the device's video hardware plays ---------- */
-  const reelBox = document.getElementById("reel");
-  const video = document.getElementById("reel-video");
-  const portraitMq = matchMedia("(orientation: portrait)");
-  const ext = video.canPlayType('video/webm; codecs="vp9"') ? "webm" : "mp4";   // VP9 where supported, H.264 elsewhere
-  const V = "?v=3";                                   // bump when the reel is re-rendered, so caches fetch the new one
-  function pickVideo() {
-    const tall = portraitMq.matches;
-    if (reduce) {                                      // reduced motion: the end card, still
-      video.preload = "none";
-      video.poster = (tall ? "media/reel-portrait-end.jpg" : "media/reel-end.jpg") + V;
-      return;
-    }
-    // upright phones get the vertical cut so it fills the screen; small landscape screens get 720p
-    const px = Math.max(window.screen.width, window.screen.height) * (devicePixelRatio || 1);
-    const src = (tall ? `media/reel-portrait.${ext}` : `media/reel${px <= 1500 ? "-720" : ""}.${ext}`) + V;
-    if (video.getAttribute("src") === src) return;
-    const t = video.currentTime || 0;
-    video.poster = (tall ? "media/reel-portrait-poster.jpg" : "media/reel-poster.jpg") + V;
-    video.src = src;
-    video.addEventListener("loadedmetadata", () => { video.currentTime = t % (video.duration || 1); }, { once: true });
-    if (reelBox.style.visibility !== "hidden") video.play().catch(() => {});   // not while a card covers it
-  }
-  pickVideo();
-  portraitMq.addEventListener("change", pickVideo);
-
   /* ---------- scroll positions ---------- */
-  // the card rises over the reel's screen of scrolling; at closeAt the stage pins (the laptop), and the services
-  // start at infoAt, a screen further on, over the closed lid
+  // the page opens on the laptop (closeAt, where the stage is pinned); the services start at infoAt, a screen
+  // further on, over the closed lid
   const work = document.getElementById("work");
   const info = document.getElementById("info");
   const stage = work.querySelector(".stage");
-  let riseLen = 1, closeAt = 1, infoAt = 1, stageH = 1;
+  let closeAt = 0, infoAt = 1;
   function measure() {
-    riseLen = Math.max(1, work.offsetTop);                   // the card covers the reel; the projects come first
-    closeAt = work.offsetTop + stage.offsetTop;              // then the stage pins: the laptop
+    closeAt = work.offsetTop + stage.offsetTop;
     infoAt = work.offsetTop + info.offsetTop;
-    stageH = stage.offsetHeight;
   }
   measure();
-  if ("scrollRestoration" in history) history.scrollRestoration = "manual";   // always start on the reel
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";   // always start on the laptop
   const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
   const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   // scroll the page to a position over a set time, eased; `at` = [fraction, fn] runs fn once partway
@@ -329,9 +158,6 @@ body.no-mac .mac-hint{display:none}
     return tw;
   }
   const lid = tween(reduce ? 0 : 1.7);       // the lid closes in its own time rather than following the scroll
-  const white = tween(reduce ? 0 : 0.8);     // the white card after the services, with the about me
-  const whiteCard = document.getElementById("white"), whiteScroll = whiteCard.querySelector(".white-scroll");
-  const canScroll = (el, dir) => (dir > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0);
 
   /* ---------- the moves between stops ---------- */
   // While one runs, the page ignores scrolling. A new one doesn't start until it's done.
@@ -357,21 +183,14 @@ body.no-mac .mac-hint{display:none}
 
   /* ---------- scroll gestures ---------- */
   // At the laptop, one scroll down goes to the services; at the top of the services, one scroll up goes back to
-  // the laptop; at the end of the services, one scroll down pops up the white card, and one scroll up from its top
-  // takes it away (until then the about me on it scrolls). Only a scroll that starts there does it: one that
-  // arrives from elsewhere stops there first.
-  let gStartY = 0, gStartInner = 0;
+  // the laptop. Only a scroll that starts there does it: one that arrives from elsewhere stops there first.
+  let gStartY = 0;
   const startedAt = y => Math.abs(gStartY - y) <= 1;
   function decide(dir) {
     if (auto) return { run: null };                 // something's moving: hold still
-    const y = window.scrollY, end = maxScroll();
-    if (white.v > 0 || white.to > 0) {
-      if (white.v === 1 && white.to === 1 && canScroll(whiteScroll, dir)) return null;   // the about me scrolls itself
-      return { run: dir < 0 && (white.v < 1 || gStartInner <= 0) ? () => white.go(0) : null };
-    }
+    const y = window.scrollY;
     if (dir > 0 && lid.v === 0 && y >= closeAt - 1) return { run: startedAt(closeAt) ? () => run(toServices) : null };
     if (dir < 0 && lid.v === 1 && y <= infoAt + 1) return { run: startedAt(infoAt) ? () => run(toLaptop) : null };
-    if (dir > 0 && lid.v === 1 && y >= end - 1) return { run: startedAt(end) ? () => white.go(1) : null };
     return null;
   }
   // a wheel or trackpad gesture is a run of events without a pause; a sudden jump in strength starts a new one,
@@ -379,7 +198,7 @@ body.no-mac .mac-hint{display:none}
   let lastWheel = -1e9, lastMag = 0;
   addEventListener("wheel", e => {
     const ts = e.timeStamp || performance.now(), mag = Math.abs(e.deltaY);
-    if (ts - lastWheel > 200 || (mag > lastMag * 1.8 && mag > 15)) { gStartY = window.scrollY; gStartInner = whiteScroll.scrollTop; }
+    if (ts - lastWheel > 200 || (mag > lastMag * 1.8 && mag > 15)) gStartY = window.scrollY;
     lastWheel = ts; lastMag = mag;
     const d = e.deltaY ? decide(Math.sign(e.deltaY)) : null;
     if (!d) return;
@@ -387,7 +206,7 @@ body.no-mac .mac-hint{display:none}
     if (d.run) d.run();
   }, { passive: false });
   let touchY = null;
-  addEventListener("touchstart", e => { touchY = e.touches[0].clientY; gStartY = window.scrollY; gStartInner = whiteScroll.scrollTop; }, { passive: true });
+  addEventListener("touchstart", e => { touchY = e.touches[0].clientY; gStartY = window.scrollY; }, { passive: true });
   addEventListener("touchmove", e => {
     if (touchY === null) return;
     const dy = touchY - e.touches[0].clientY;            // positive: finger moving up, page scrolling down
@@ -403,14 +222,8 @@ body.no-mac .mac-hint{display:none}
     const down = ["ArrowDown", "PageDown", "End"].includes(e.key) || (e.key === " " && !e.shiftKey && !(a && a.closest && a.closest("button, a")));
     const up = ["ArrowUp", "PageUp", "Home"].includes(e.key) || (e.key === " " && e.shiftKey);
     if (!down && !up) return;
-    gStartY = window.scrollY; gStartInner = whiteScroll.scrollTop;
+    gStartY = window.scrollY;
     const d = decide(down ? 1 : -1);
-    if (d === null && white.v === 1) {                  // keys scroll the about me (focus isn't inside it)
-      e.preventDefault();
-      const page = !["ArrowDown", "ArrowUp"].includes(e.key);
-      whiteScroll.scrollBy({ top: (down ? 1 : -1) * (page ? whiteScroll.clientHeight * 0.85 : 90), behavior: reduce ? "auto" : "smooth" });
-      return;
-    }
     if (!d) return;
     e.preventDefault();
     if (d.run) d.run();
@@ -418,33 +231,25 @@ body.no-mac .mac-hint{display:none}
 
   /* ---------- services: they rise in as they scroll into view ---------- */
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 });
-  document.querySelectorAll("#info .rv, #projects .rv").forEach(el => io.observe(el));
+  info.querySelectorAll(".rv").forEach(el => io.observe(el));
 
   /* ---------- navigation ---------- */
   const nav = document.querySelector(".topnav");
   const navLinks = [...nav.querySelectorAll("a[data-go]")];
-  document.querySelector(".logo").addEventListener("click", e => { e.preventDefault(); goTo("home"); });
   nav.addEventListener("click", e => {
     const a = e.target.closest("a[data-go]");
     if (!a) return;
     e.preventDefault();
     goTo(a.dataset.go);
   });
-  // go there through what's in the way: the white card comes down, the lid opens or closes at the laptop
+  // go there, closing or opening the lid on the way
   function goTo(where) {
     run(async () => {
-      if (where === "about") {
-        if (lid.v < 1) await toServices();
-        await scrollAnim(maxScroll());
-        await white.go(1);
-        return;
-      }
-      if (white.v > 0 || white.to > 0) await white.go(0);
       if (where === "services") {
         if (lid.v < 1) await toServices(); else await scrollAnim(infoAt);
       } else {
         if (lid.v > 0) await toLaptop();
-        await scrollAnim(where === "home" ? 0 : where === "projects" ? riseLen : closeAt);
+        await scrollAnim(closeAt);
       }
     });
   }
@@ -459,11 +264,6 @@ body.no-mac .mac-hint{display:none}
   const title = work.querySelector(".work-title");
   const shade = work.querySelector(".lid-shade");
   const macHint = work.querySelector(".mac-hint");
-  const hint = document.getElementById("hint");
-  const hintArrow = hint.querySelector("svg");
-  hint.addEventListener("click", () => goTo("gallery"));
-  const reveals = whiteCard.querySelectorAll(".rv");
-  let whiteUp = false, aboutIn = false;
 
   /* ---------- one animation loop: it runs while something moves or the gallery plays, and sleeps otherwise ---------- */
   let running = false, last = 0;
@@ -477,52 +277,29 @@ body.no-mac .mac-hint{display:none}
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     lid.step(now);
-    white.step(now);
     let y = window.scrollY;
     // between the laptop and the services the page only moves on its own: anything else that scrolls in there (a
-    // flick's momentum, the scrollbar) is held at the stop it came from. Under the white card it stays at the end.
+    // flick's momentum, the scrollbar) is held at the stop it came from
     if (!auto) {
-      const hold = white.v > 0 ? maxScroll() : lid.v === 0 && y > closeAt + 1 ? closeAt : lid.v === 1 && y < infoAt - 1 ? infoAt : null;
+      const hold = lid.v === 0 && y > closeAt + 1 ? closeAt : lid.v === 1 && y < infoAt - 1 ? infoAt : null;
       if (hold !== null && Math.abs(y - hold) > 1) {
         window.scrollTo(0, hold);
         y = window.scrollY;
       }
     }
     const c = lid.v;
-    const w = clamp01(y / riseLen);                   // the card covering the reel
-    const r = clamp01((y - (closeAt - stageH)) / stageH);   // the laptop's stage coming up after the projects
-
-    // reel: hidden and paused once the card covers it
-    set(reelBox, "visibility", w >= 1 ? "hidden" : "visible");
-    set(hint, "opacity", String(Math.max(0, 1 - w * 5)));
-    set(hint, "visibility", w > 0.2 ? "hidden" : "visible");          // and not clickable once the card is coming up
-    set(hintArrow, "animationPlayState", w > 0.2 ? "paused" : "running");  // a hidden looping animation still costs frames
-    if (!reduce) w >= 1 ? !video.paused && video.pause() : video.paused && video.play().catch(() => {});
-
     // the headline lifts away as the lid starts to close; a shade settles over the closed lid
     set(title, "transform", `translate3d(0, ${(-smooth(0, 0.35, c) * 40).toFixed(2)}px, 0)`);
     set(title, "opacity", (1 - smooth(0, 0.3, c)).toFixed(3));
     set(shade, "opacity", smooth(0.8, 1, c).toFixed(3));
-    set(macHint, "opacity", r > 0.98 && c === 0 && lid.to === 0 && !auto ? "1" : "0");
-    if (window.Mac && r > 0) Mac.update(r, c, now, dt);
+    set(macHint, "opacity", c === 0 && lid.to === 0 && !auto ? "1" : "0");
+    if (window.Mac) Mac.update(1, c, now, dt);
 
-    // the white card pops up from the bottom; the about me on it rises in as it arrives, and resets once it's gone
-    set(whiteCard, "visibility", white.v > 0 ? "visible" : "hidden");
-    set(whiteCard, "transform", `translate3d(0, ${((1 - easeInOut(white.v)) * 100).toFixed(3)}%, 0)`);
-    const up = white.v === 1;
-    if (up !== whiteUp) { whiteUp = up; whiteCard.inert = !up; whiteCard.setAttribute("aria-hidden", !up); }
-    const show = white.v > 0.55 && white.to === 1;
-    if (show !== aboutIn && (show || white.v === 0)) {
-      aboutIn = show;
-      reveals.forEach(el => el.classList.toggle("in", show));
-      if (!show) whiteScroll.scrollTop = 0;
-    }
-
-    markCurrent(white.v > 0.5 ? "about" : c >= 0.5 ? "services" : r >= 0.5 ? "gallery" : w >= 0.5 ? "projects" : "home");
+    markCurrent(c >= 0.5 ? "services" : "gallery");
 
     // keep going while something moves, or the gallery plays on the open laptop's screen
-    const playing = window.Mac && r > 0 && c < 0.75 && !reduce;
-    if (playing || lid.moving() || white.moving()) requestAnimationFrame(loop);
+    const playing = window.Mac && c < 0.75 && !reduce;
+    if (playing || lid.moving()) requestAnimationFrame(loop);
     else running = false;
   }
 
