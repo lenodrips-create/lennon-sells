@@ -14,12 +14,15 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import painterSrc from "./paint.worker.txt";   // paint.js, built as text (see package.json)
-import { makeBoard, boardSize } from "./board.js";
+import { makeBoard, boardSize, MENU_SIZE } from "./board.js";
 
 const T = 15;                         // wall thickness
 const FLOOR = 335.5;                  // the office floor, on top of the ground floor's roof
 const EYE = FLOOR + 150;              // standing eye height in the office
 const ROOM = { x0: -290, x1: 290 - T, z0: -330 + T, z1: 120 - T, y0: FLOOR, y1: 628 };
+// the kitchen: upstairs on the left, through a doorway in the office's left wall
+const KIT = { x0: -630 + T, x1: -290 - T, z0: -330 + T, z1: 330 - T, y0: FLOOR, y1: 605 };
+const KDOOR = { z0: -7.5, z1: 87.5, h: 215 };   // the doorway between them, centred on the menu board
 export const OFFICE = {
   eye: EYE,
   door: 120,                          // the office's front wall (outer face), where the balcony door is
@@ -61,10 +64,15 @@ function contactTex() {
 // overhangs; direct sunlight and its shadows are left to the shadow map.
 const AO_LIB = `
   float aoPlane(float d, float r, float k) { return 1.0 - k * exp(-max(d, 0.0) / r) * smoothstep(0.4, 2.5, d); }
+  float aoBox(vec3 p, float x0, float x1, float z0, float z1, float y0, float y1) {
+    return aoPlane(p.x - x0, 42.0, 0.34) * aoPlane(x1 - p.x, 42.0, 0.34) * aoPlane(p.z - z0, 42.0, 0.34)
+         * aoPlane(z1 - p.z, 42.0, 0.34) * aoPlane(p.y - y0, 36.0, 0.32) * aoPlane(y1 - p.y, 48.0, 0.3);
+  }
+  // the office, or (left of the wall between them) the kitchen
   float aoRoom(vec3 p) {
-    return aoPlane(p.x - (${ROOM.x0.toFixed(1)}), 42.0, 0.34) * aoPlane(${ROOM.x1.toFixed(1)} - p.x, 42.0, 0.34)
-         * aoPlane(p.z - (${ROOM.z0.toFixed(1)}), 42.0, 0.34) * aoPlane(${ROOM.z1.toFixed(1)} - p.z, 42.0, 0.34)
-         * aoPlane(p.y - ${ROOM.y0.toFixed(1)}, 36.0, 0.32) * aoPlane(${ROOM.y1.toFixed(1)} - p.y, 48.0, 0.3);
+    return p.x > -297.5
+      ? aoBox(p, ${[ROOM.x0, ROOM.x1, ROOM.z0, ROOM.z1, ROOM.y0, ROOM.y1].map(v => v.toFixed(1)).join(", ")})
+      : aoBox(p, ${[KIT.x0, KIT.x1, KIT.z0, KIT.z1, KIT.y0, KIT.y1].map(v => v.toFixed(1)).join(", ")});
   }`;
 function shaded(mat, key, code) {
   const top = code.includes("vTop");
@@ -102,6 +110,7 @@ function mats(q) {
     // glass: what's behind it shows through, a little darkened, with the sky reflected on top (Fresnel-weighted)
     glass: std({ color: 0x000000, roughness: 0.02, metalness: 0, transparent: true, opacity: 0.16, depthWrite: false,
                  blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor, side: THREE.DoubleSide }),
+    glassClear: std({ color: 0xdfe8ea, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.25, depthWrite: false }),
     frosted: std({ color: 0xa9afb3, roughness: 0.55, metalness: 0, transparent: true, opacity: 0.9, depthWrite: false }),
     glow: std({ color: 0xfff3dd, emissive: 0xffe2b0, emissiveIntensity: 1.8, roughness: 1 }),
     plants: std({ vertexColors: true, roughness: 0.85, envMapIntensity: 0.45 }),
@@ -117,15 +126,37 @@ function mats(q) {
     oak: shaded(std({ roughness: 1 }), "oak", "aoRoom(p)"),
     boardFrame: std({ color: 0xc5c8cc, roughness: 0.32, metalness: 0.85 }),   // brushed aluminium
     felt: std({ color: 0x3a3d42, roughness: 1 }),
-    ceramic: std({ color: 0xf2f0ec, roughness: 0.3 }),
+    ceramic: std({ color: 0xf2f0ec, roughness: 0.3, side: THREE.DoubleSide }),   // double-sided: bowls are open
     blackMetal: std({ color: 0x141416, roughness: 0.4, metalness: 0.7 }),
     books: std({ vertexColors: true, roughness: 0.8 }),
     contact: new THREE.MeshBasicMaterial({ color: 0x000000, map: contactTex(), transparent: true, opacity: 0.5, depthWrite: false }),
   };
+  // the kitchen's own: lit by its own daylight (see kitchenLight); the shaded keys match the office's, so they share
+  // its shaders
+  Object.assign(M, {
+    kPaint: shaded(std({ color: 0xf1ede6, roughness: 0.9 }), "paint", "aoRoom(p)"),
+    kCeiling: shaded(std({ color: 0xf6f4ef, roughness: 0.95 }), "ceiling", "aoRoom(p)"),
+    kSkirting: shaded(std({ color: 0xf4f2ee, roughness: 0.5 }), "skirting", "aoRoom(p)"),
+    tile: shaded(std({ roughness: 1 }), "tile", "aoRoom(p)"),
+    subway: shaded(std({ roughness: 1 }), "subway", "aoRoom(p)"),
+    marble: shaded(std({ roughness: 1 }), "marble", "aoRoom(p)"),
+    cab: shaded(std({ color: 0x4b6553, roughness: 0.55 }), "cab", "aoRoom(p)"),          // sage green, satin
+    plinth: std({ color: 0x1e2421, roughness: 0.8 }),
+    appliance: std({ color: 0xd0d2d4, roughness: 0.26, metalness: 0.92 }),               // brushed stainless
+    basin: std({ color: 0x9a9da0, roughness: 0.35, metalness: 0.9 }),
+    blackGlass: std({ color: 0x0b0b0d, roughness: 0.06, metalness: 0.2 }),
+    brass: std({ color: 0xb8955c, roughness: 0.3, metalness: 1 }),
+    fruit: std({ vertexColors: true, roughness: 0.45 }),
+    terracotta: std({ color: 0xb0623f, roughness: 0.85 }),
+    herb: std({ color: 0x4d7a35, roughness: 0.7 }),
+  });
+  M.kitchen = [M.kPaint, M.kCeiling, M.kSkirting, M.tile, M.subway, M.marble, M.cab, M.plinth, M.appliance, M.basin, M.blackGlass, M.brass,
+               M.fruit, M.terracotta, M.herb];
   M.exterior = [M.siding, M.corner, M.found, M.alu, M.fascia, M.soffit, M.deck, M.cedar, M.concrete, M.cable, M.steel, M.glass, M.frosted];
   M.interior = [M.paint, M.ceiling, M.skirting, M.floor, M.rug, M.oak, M.boardFrame, M.felt, M.ceramic, M.blackMetal, M.books];
   // the painted surfaces, and what paint.js calls them
-  M.surfaces = [[M.siding, "siding"], [M.floor, "floor"], [M.deck, "deck"], [M.cedar, "cedar"], [M.oak, "oak"], [M.concrete, "concrete"], [M.rug, "rug"]];
+  M.surfaces = [[M.siding, "siding"], [M.floor, "floor"], [M.deck, "deck"], [M.cedar, "cedar"], [M.oak, "oak"], [M.concrete, "concrete"], [M.rug, "rug"],
+                [M.tile, "tile"], [M.subway, "subway"], [M.marble, "marble"]];
   return M;
 }
 
@@ -166,7 +197,16 @@ function collector() {
       group.add(mesh);
     }
   };
-  return { put, box, boxGeo, flatXZ, build };
+  // an upright surface facing +x (at x = c, from z a0 to a1) or +z (at z = c, from x a0 to a1), texture in centimetres
+  const wallQuad = (mat, face, a0, a1, y0, y1, c) => {
+    const g = new THREE.PlaneGeometry(a1 - a0, y1 - y0);
+    if (face === "x") g.rotateY(Math.PI / 2).translate(c, (y0 + y1) / 2, (a0 + a1) / 2);
+    else g.translate((a0 + a1) / 2, (y0 + y1) / 2, c);
+    const p = g.attributes.position, uv = g.attributes.uv;
+    for (let i = 0; i < p.count; i++) uv.setXY(i, face === "x" ? -p.getZ(i) : p.getX(i), p.getY(i));
+    put(mat, g);
+  };
+  return { put, box, boxGeo, flatXZ, wallQuad, build };
 }
 const std0 = o => new THREE.MeshStandardMaterial(o);
 const mat4 = (x, y, z, ry = 0) => new THREE.Matrix4().makeRotationY(ry).setPosition(x, y, z);
@@ -216,19 +256,21 @@ const vcol = (g, top, bottom) => {
 
 /* ---------- the house ---------- */
 export function makeHouse(quality, renderer, ready = () => {}, portrait = false) {
-  const q = quality === "high", M = mats(q), C = collector(), group = new THREE.Group();
+  const q = quality === "high", M = mats(q), C = collector(), group = new THREE.Group(), wallQuad = C.wallQuad;
   // the whiteboard: upright on a phone held upright, wide otherwise; its frame is 6 cm all round
-  const board = makeBoard(portrait), bs = boardSize(portrait);
+  const board = makeBoard("services", portrait), bs = boardSize(portrait), menuBoard = makeBoard("menu", portrait);
   OFFICE.board.w = bs.w + 12; OFFICE.board.h = bs.h + 12;
   M.board = board.writeOn(shaded(std0({ map: board.base, roughness: 0.3 }), "board", "aoRoom(p)"));
   M.interior.push(M.board);
+  M.menu = menuBoard.writeOn(shaded(std0({ map: menuBoard.base, roughness: 0.85 }), "menu", "aoRoom(p)"));
+  M.kitchen.push(M.menu);
   const lights = [];
   const r = rng(909);
 
   // a wall: from (x0, z0) along its own x, facing outwards along its own z (ry turns it), its outer face on that
   // line; T thick inwards. `top` is the underside of the overhang above it, for the shading. Windows get frames,
   // sills and glass; `inside` lines it with paint for the office.
-  function wall({ x0, z0, ry, y0, len, h, top, doors = [], windows = [], inside = false }) {
+  function wall({ x0, z0, ry, y0, len, h, top, doors = [], windows = [], inside = false, lining = M.paint }) {
     const m = mat4(x0, y0, z0, ry);
     const g = new THREE.ExtrudeGeometry(wallShape(len, h, doors, windows, false), { depth: T, bevelEnabled: false });
     g.translate(0, 0, -T);
@@ -236,9 +278,9 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     if (inside) {
       const l = new THREE.ShapeGeometry(wallShape(len, h, doors, windows, true));
       l.rotateY(Math.PI); l.translate(len, 0, -T - 0.3);
-      C.put(M.paint, l, m);
+      C.put(lining, l, m);
     }
-    for (const [x, y, w, wh, kind = "room", bars = []] of windows) windowUnit(m, x, y, w, wh, kind, bars, inside);
+    for (const [x, y, w, wh, kind = "room", bars = []] of windows) windowUnit(m, x, y, w, wh, kind, bars, inside, lining === M.kPaint ? M.kSkirting : M.skirting);
     for (const [x, w, dh] of doors) {   // the door's black frame
       C.box(M.alu, x - 5, x, 0, dh + 5, -T - 1, 2, m); C.box(M.alu, x + w, x + w + 5, 0, dh + 5, -T - 1, 2, m);
       C.box(M.alu, x - 5, x + w + 5, dh, dh + 5, -T - 1, 2, m);
@@ -247,7 +289,7 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
   }
   // a window: a black aluminium frame through the wall's depth, a sash set back in it, the glass, a sill, and
   // (on the ground floor and the closed upstairs room) a curtained room behind
-  function windowUnit(m, x, y, w, wh, kind, bars, inside) {
+  function windowUnit(m, x, y, w, wh, kind, bars, inside, trim = M.skirting) {
     const F = 6, S = 3.5, gz = -T / 2 - 1;
     C.box(M.alu, x, x + w, y, y + F, -T - 1, 1.5, m); C.box(M.alu, x, x + w, y + wh - F, y + wh, -T - 1, 1.5, m);
     C.box(M.alu, x, x + F, y, y + wh, -T - 1, 1.5, m); C.box(M.alu, x + w - F, x + w, y, y + wh, -T - 1, 1.5, m);
@@ -272,9 +314,9 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     }
     if (kind === "office" && inside) {   // a painted casing and a sill on the inside
       const zc = -T - 0.3;
-      C.box(M.skirting, x - 7, x + w + 7, y + wh, y + wh + 7, zc - 2, zc, m);
-      C.box(M.skirting, x - 7, x, y - 3, y + wh, zc - 2, zc, m); C.box(M.skirting, x + w, x + w + 7, y - 3, y + wh, zc - 2, zc, m);
-      C.box(M.skirting, x - 9, x + w + 9, y - 3, y, zc - 4, zc + T - 3, m);
+      C.box(trim, x - 7, x + w + 7, y + wh, y + wh + 7, zc - 2, zc, m);
+      C.box(trim, x - 7, x, y - 3, y + wh, zc - 2, zc, m); C.box(trim, x + w, x + w + 7, y - 3, y + wh, zc - 2, zc, m);
+      C.box(trim, x - 9, x + w + 9, y - 3, y, zc - 4, zc + T - 3, m);
     }
   }
   // a white corner board at an outside corner (cx, cz), whose faces look along sx and sz
@@ -345,12 +387,16 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     C.box(M.found, x0, x0 + 96, -5, 1.15, 386 + i * 66, 386 + i * 66 + 52);
   }
 
-  /* upstairs, left: a closed volume flush with the front, with one window */
-  wall({ x0: -630, z0: 330, ry: 0, y0: 335, len: 340, h: 275, top: 610, windows: [[105, 85, 85, 130, "room"]] });
-  wall({ x0: -630, z0: -315, ry: -Math.PI / 2, y0: 335, len: 630, h: 275, top: 610 });
-  wall({ x0: -290, z0: -330, ry: Math.PI, y0: 335, len: 340, h: 275, top: 610 });
-  // its right-hand wall runs the full depth: on the balcony outside, and the office's left wall inside
-  wall({ x0: -290, z0: 330 - T, ry: Math.PI / 2, y0: 335, len: 660 - 2 * T, h: 295, top: 630 });
+  /* upstairs, left: the kitchen, flush with the front; a window at the front, and a wide one over the sink on the
+     sunny side */
+  const K = { inside: true, lining: M.kPaint };
+  wall({ x0: -630, z0: 330, ry: 0, y0: 335, len: 340, h: 275, top: 610, windows: [[105, 85, 85, 130, "office"]], ...K });
+  wall({ x0: -630, z0: -315, ry: -Math.PI / 2, y0: 335, len: 630, h: 275, top: 610, windows: [[70, 110, 150, 110, "office", [75]]], ...K });
+  wall({ x0: -290, z0: -330, ry: Math.PI, y0: 335, len: 340, h: 275, top: 610, ...K });
+  // its right-hand wall runs the full depth: on the balcony outside, the office's left wall inside, with the doorway
+  // through to the kitchen
+  wall({ x0: -290, z0: 330 - T, ry: Math.PI / 2, y0: 335, len: 660 - 2 * T, h: 295, top: 630,
+         doors: [[315 - KDOOR.z1, KDOOR.z1 - KDOOR.z0, KDOOR.h]], ...K });
   for (const [cx, cz, sx, sz] of [[-630, 330, -1, 1], [-630, -330, -1, -1], [-290, 330, 1, 1]]) corner(cx, cz, sx, sz, 335, 610, 610);
   C.box(M.fascia, -665, -275, 610, 645, -365, 365);
   C.flatXZ(M.soffit, -665, -275, -365, 365, 609.9, true);
@@ -389,10 +435,12 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     const { x0: xl, x1: xr, z0: zb, z1: zf, y1: ceil } = ROOM;
     C.flatXZ(M.floor, xl, xr, zb, zf, FLOOR);
     C.flatXZ(M.ceiling, xl, xr, zb, zf, ceil, true);
-    C.put(M.paint, new THREE.PlaneGeometry(zf - zb, ceil - FLOOR).rotateY(Math.PI / 2).translate(xl + 0.3, (FLOOR + ceil) / 2, (zb + zf) / 2));
+    // the left wall, round the doorway through to the kitchen
+    const leftWall = (z0, z1, y0, y1) => C.put(M.paint, new THREE.PlaneGeometry(z1 - z0, y1 - y0).rotateY(Math.PI / 2).translate(xl + 0.3, (y0 + y1) / 2, (z0 + z1) / 2));
+    leftWall(zb, KDOOR.z0, FLOOR, ceil); leftWall(KDOOR.z1, zf, FLOOR, ceil); leftWall(KDOOR.z0, KDOOR.z1, FLOOR + KDOOR.h - 0.5, ceil);
     // skirting boards, and a casing round the door
     C.box(M.skirting, xl, xr, FLOOR, FLOOR + 10, zb, zb + 1.5);
-    C.box(M.skirting, xl, xl + 1.5, FLOOR, FLOOR + 10, zb, zf);
+    C.box(M.skirting, xl, xl + 1.5, FLOOR, FLOOR + 10, zb, KDOOR.z0 - 5); C.box(M.skirting, xl, xl + 1.5, FLOOR, FLOOR + 10, KDOOR.z1 + 5, zf);
     C.box(M.skirting, xr - 1.5, xr, FLOOR, FLOOR + 10, zb, zf);
     C.box(M.skirting, -122, 122, FLOOR + 232, FLOOR + 240, zf - 2, zf);
     C.box(M.skirting, -122, -115, FLOOR, FLOOR + 232, zf - 2, zf); C.box(M.skirting, 115, 122, FLOOR, FLOOR + 232, zf - 2, zf);
@@ -464,13 +512,168 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     }
     // a desk along the left wall
     {
-      const dx = xl + 2, dz0 = -150, dz1 = 10, top = FLOOR + 74;
+      const dx = xl + 2, dz0 = -200, dz1 = -45, top = FLOOR + 74;
       C.box(M.oak, dx, dx + 72, top - 3, top, dz0, dz1);
       for (const lz of [dz0 + 3, dz1 - 6]) { C.box(M.blackMetal, dx + 4, dx + 7, FLOOR, top - 3, lz, lz + 3); C.box(M.blackMetal, dx + 64, dx + 67, FLOOR, top - 3, lz, lz + 3); }
-      C.box(M.blackMetal, dx + 20, dx + 45, top, top + 1.5, -80, -50);   // a closed notebook
+      C.box(M.blackMetal, dx + 20, dx + 45, top, top + 1.5, -135, -105);   // a closed notebook
       contact(dx - 4, dx + 76, dz0 - 4, dz1 + 4, 0.35);
     }
   }
+
+  /* ---------- the kitchen ---------- */
+  // An L of sage-green cabinets with white quartz worktops along the far (sunny) wall and the back wall, a subway-tile
+  // splashback, a range under a steel hood, a fridge, open oak shelves, and an island with a waterfall top, stools and
+  // two glass pendants. The menu board leans on the worktop opposite the doorway.
+  const kitchen = {};
+  {
+    const { x0: kx0, x1: kx1, z0: kz0, z1: kz1, y1: kc } = KIT;
+    const top = FLOOR + 91, carc = top - 3, toe = FLOOR + 10;   // worktop, carcass top, plinth
+    C.flatXZ(M.tile, kx0, kx1, kz0, kz1, FLOOR);
+    C.flatXZ(M.kCeiling, kx0, kx1, kz0, kz1, kc, true);
+    C.flatXZ(M.floor, kx1, ROOM.x0, KDOOR.z0, KDOOR.z1, FLOOR);   // the threshold, in the office's oak
+    // skirting along the walls without cabinets
+    C.box(M.kSkirting, kx1 - 1.5, kx1, FLOOR, FLOOR + 10, kz0 + 62, KDOOR.z0 - 5); C.box(M.kSkirting, kx1 - 1.5, kx1, FLOOR, FLOOR + 10, KDOOR.z1 + 5, kz1);
+    C.box(M.kSkirting, kx0 + 70, kx1, FLOOR, FLOOR + 10, kz1 - 1.5, kz1);
+    C.box(M.kSkirting, kx1 - 7, kx1 - 2, FLOOR, FLOOR + KDOOR.h + 7, KDOOR.z0 - 7, KDOOR.z0);   // casing round the doorway
+    C.box(M.kSkirting, kx1 - 7, kx1 - 2, FLOOR, FLOOR + KDOOR.h + 7, KDOOR.z1, KDOOR.z1 + 7);
+    C.box(M.kSkirting, kx1 - 7, kx1 - 2, FLOOR + KDOOR.h, FLOOR + KDOOR.h + 7, KDOOR.z0, KDOOR.z1);
+
+    // a run of base cabinets facing +x (along the far wall) or +z (along the back wall), split into doors at `cuts`
+    const seam = (a, b, y0, y1, face, at) => face === "x" ? C.box(M.plinth, at, at + 0.15, y0, y1, a - 0.25, b + 0.25) : C.box(M.plinth, a - 0.25, b + 0.25, y0, y1, at, at + 0.15);
+    const handle = (c, y, face, at) => face === "x" ? C.box(M.brass, at, at + 2.2, y - 0.7, y + 0.7, c - 9, c + 9) : C.box(M.brass, c - 9, c + 9, y - 0.7, y + 0.7, at, at + 2.2);
+    function run(face, a0, a1, cuts) {
+      if (face === "x") {
+        C.box(M.cab, kx0, kx0 + 58, toe, carc, a0, a1);
+        C.box(M.plinth, kx0, kx0 + 52, FLOOR, toe, a0, a1);
+        C.box(M.marble, kx0, kx0 + 62, carc, top, a0 - 1, a1 + 1);
+      } else {
+        C.box(M.cab, a0, a1, toe, carc, kz0, kz0 + 58);
+        C.box(M.plinth, a0, a1, FLOOR, toe, kz0, kz0 + 52);
+        C.box(M.marble, a0 - 1, a1 + 1, carc, top, kz0, kz0 + 62);
+      }
+      const at = face === "x" ? kx0 + 58 : kz0 + 58, edges = [a0, ...cuts, a1];
+      for (let i = 0; i < edges.length - 1; i++) {
+        const a = edges[i], b = edges[i + 1];
+        seam(a, a, toe, carc, face, at);
+        seam(a, b, carc - 17, carc - 16.7, face, at);                // a drawer over each door
+        handle((a + b) / 2, carc - 8.5, face, at);
+        handle((a + b) / 2, carc - 26, face, at);
+      }
+    }
+    run("x", kz0, 190, [-255, -195, -125, -65, -5, 55, 115]);
+    run("z", kx0 + 62, -540, []);
+    run("z", -464, -392, []);
+    // the sink under the window: a steel basin set into the worktop, and a black gooseneck tap
+    C.box(M.basin, kx0 + 8, kx0 + 52, top - 0.6, top + 0.05, -198, -142);
+    C.box(M.blackGlass, kx0 + 12, kx0 + 48, top - 0.55, top + 0.07, -194, -146);
+    C.put(M.blackMetal, new THREE.CylinderGeometry(1.4, 1.8, 30, 16).translate(kx0 + 6, top + 15, -170));
+    C.put(M.blackMetal, new THREE.TorusGeometry(9, 1.2, 10, 24, Math.PI).rotateY(Math.PI / 2).translate(kx0 + 6, top + 30, -161 - 0));
+    C.put(M.blackMetal, new THREE.CylinderGeometry(1.1, 1.1, 8, 12).translate(kx0 + 6, top + 26, -152));
+    // the range: steel, a black glass hob and oven door, and a chimney hood over it
+    {
+      const x0 = -540, x1 = -464;
+      C.box(M.appliance, x0, x1, FLOOR, top - 1, kz0, kz0 + 62);
+      C.box(M.blackGlass, x0 + 1, x1 - 1, top - 1, top, kz0 + 2, kz0 + 60);
+      C.box(M.blackGlass, x0 + 6, x1 - 6, FLOOR + 14, FLOOR + 66, kz0 + 62, kz0 + 62.4);
+      C.put(M.appliance, new THREE.CylinderGeometry(1, 1, x1 - x0 - 16, 12).rotateZ(Math.PI / 2).translate((x0 + x1) / 2, FLOOR + 72, kz0 + 66));
+      for (let i = 0; i < 5; i++) C.put(M.blackMetal, new THREE.CylinderGeometry(1.8, 1.8, 2.5, 16).rotateX(Math.PI / 2).translate(x0 + 12 + i * 13, FLOOR + 82, kz0 + 63.5));
+      for (const [hx, hz, hr] of [[x0 + 19, kz0 + 18, 9], [x1 - 19, kz0 + 18, 9], [x0 + 19, kz0 + 44, 7], [x1 - 19, kz0 + 44, 7]])
+        C.put(M.basin, new THREE.RingGeometry(hr - 0.6, hr, 32).rotateX(-Math.PI / 2).translate(hx, top + 0.05, hz));
+      C.box(M.appliance, x0 - 6, x1 + 6, 528, 540, kz0, kz0 + 52);
+      C.box(M.appliance, (x0 + x1) / 2 - 17, (x0 + x1) / 2 + 17, 540, kc, kz0, kz0 + 26);
+    }
+    // the fridge, with a cabinet over it and a tall pantry beside it
+    {
+      const z0 = 195, z1 = 288, f = kx0 + 66;
+      C.box(M.appliance, kx0, f, FLOOR, FLOOR + 186, z0, z1);
+      seam(z0, z1, FLOOR + 70, FLOOR + 70.4, "x", f); seam((z0 + z1) / 2, (z0 + z1) / 2, FLOOR + 70, FLOOR + 186, "x", f);
+      for (const hz of [(z0 + z1) / 2 - 5, (z0 + z1) / 2 + 5]) C.put(M.appliance, new THREE.CylinderGeometry(1, 1, 60, 12).translate(f + 4, FLOOR + 120, hz));
+      C.put(M.appliance, new THREE.CylinderGeometry(1, 1, 50, 12).rotateX(Math.PI / 2).translate(f + 4, FLOOR + 62, (z0 + z1) / 2));
+      C.box(M.cab, kx0, kx0 + 62, FLOOR + 188, kc, z0, z1);
+      C.box(M.cab, kx0, kx0 + 62, FLOOR, kc, z1, kz1);
+      handle((z1 + kz1) / 2, FLOOR + 120, "x", kx0 + 62);
+    }
+    // the splashback: subway tiles, up round the window and behind the hob to the hood
+    const splashX = (z0, z1, y0, y1) => wallQuad(M.subway, "x", z0, z1, y0, y1, kx0 + 0.4);
+    splashX(kz0, -252, top, top + 58); splashX(-88, 195, top, top + 58); splashX(-252, -88, top, 445 - 3);
+    const splashZ = (x0, x1, y0, y1) => wallQuad(M.subway, "z", x0, x1, y0, y1, kz0 + 0.4);
+    splashZ(kx0 + 62, -546, top, top + 58); splashZ(-546, -458, top, 528); splashZ(-458, -392, top, top + 58);
+    // open oak shelves, with plates, bowls and jars
+    const shelf = (z0, z1, y) => {
+      C.box(M.oak, kx0, kx0 + 26, y - 4, y, z0, z1);
+      for (let z = z0 + 10; z < z1 - 10; z += 24) {
+        for (let k = 0; k < 6; k++) C.put(M.ceramic, new THREE.CylinderGeometry(11, 9, 0.9, 28).translate(kx0 + 13, y + 0.45 + k * 1.1, z));
+      }
+    };
+    shelf(-82, -18, 512); shelf(-82, -18, 552); shelf(100, 186, 512); shelf(100, 186, 552);
+    for (const [z, y] of [[-40, 552], [118, 512], [170, 552]]) C.put(M.ceramic, new THREE.SphereGeometry(8, 24, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2.4).translate(kx0 + 13, y + 7.8, z));
+    for (const [z, y, c] of [[150, 512, 0xd9a441], [165, 512, 0x8a9a5b], [-60, 552, 0xc8553d]]) {
+      C.put(M.glassClear, new THREE.CylinderGeometry(4, 4, 14, 20).translate(kx0 + 13, y + 7, z));
+      const g = new THREE.CylinderGeometry(3.6, 3.6, 9, 16).translate(kx0 + 13, y + 4.6, z), col = new Float32Array(g.attributes.position.count * 3), cc = new THREE.Color(c);
+      for (let i = 0; i < col.length; i += 3) col.set([cc.r, cc.g, cc.b], i);
+      g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+      C.put(M.fruit, g);
+    }
+    // the island: green, with a quartz top that runs down both ends
+    {
+      const x0 = -530, x1 = -450, z0 = -50, z1 = 140, xo = -425;
+      C.box(M.cab, x0, x1, toe, carc, z0, z1);
+      C.box(M.plinth, x0 + 5, x1 - 5, FLOOR, toe, z0 + 5, z1 - 5);
+      C.box(M.marble, x0 - 2, xo, carc, top, z0 - 3, z1 + 3);
+      C.box(M.marble, x0 - 2, xo, FLOOR, carc, z0 - 3, z0); C.box(M.marble, x0 - 2, xo, FLOOR, carc, z1, z1 + 3);
+      for (const c of [-2, 45, 92]) { seam(c, c, toe, carc, "x", x0 - 0.2); handle(c + 23.5, carc - 8.5, "x", x0 - 2.2); }
+      // a bowl of fruit
+      C.put(M.ceramic, new THREE.SphereGeometry(16, 32, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2.6).translate(-478, top + 11, 60));
+      const fr = rng(55), fruitParts = [];
+      for (let i = 0; i < 9; i++) {
+        const a = fr() * 6.3, d = fr() * 8, rad = 4 + fr() * 1.5, g = new THREE.SphereGeometry(rad, 18, 12).translate(-478 + Math.cos(a) * d, top + 5 + rad + (i > 5 ? 4 : 0), 60 + Math.sin(a) * d);
+        const cc = new THREE.Color([0xf0a020, 0xf6d23a, 0x8fbf3a][i % 3]).multiplyScalar(0.85 + fr() * 0.2), col = new Float32Array(g.attributes.position.count * 3);
+        for (let k = 0; k < col.length; k += 3) col.set([cc.r, cc.g, cc.b], k);
+        g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+        fruitParts.push(g);
+      }
+      for (const g of fruitParts) C.put(M.fruit, g);
+      // stools on the near side
+      for (const z of [-5, 45, 95]) {
+        C.put(M.oak, new THREE.CylinderGeometry(18, 17, 4, 32).translate(-400, FLOOR + 64, z));
+        for (const a of [0.8, 2.4, 3.9, 5.5]) C.put(M.blackMetal, new THREE.CylinderGeometry(1, 1.2, 64, 8).translate(0, -32, 0).rotateZ(Math.cos(a) * 0.12).rotateX(-Math.sin(a) * 0.12).translate(-400 + Math.cos(a) * 11, FLOOR + 63, z + Math.sin(a) * 11));
+        C.put(M.blackMetal, new THREE.TorusGeometry(14, 0.8, 8, 32).rotateX(Math.PI / 2).translate(-400, FLOOR + 24, z));
+      }
+      contact(x0 - 6, xo + 4, z0 - 8, z1 + 8, 0.4);
+      // two black dome pendants, hung high and out of the way of the board
+      for (const z of [-28, 118]) {
+        C.put(M.blackMetal, new THREE.CylinderGeometry(0.3, 0.3, kc - 582, 6).translate(-479, (kc + 582) / 2, z));
+        C.put(M.blackMetal, new THREE.SphereGeometry(13, 32, 12, 0, Math.PI * 2, 0, Math.PI / 2).translate(-479, 568, z));
+        C.put(M.glow, new THREE.CircleGeometry(12.6, 32).rotateX(Math.PI / 2).translate(-479, 568.2, z));
+      }
+    }
+    // a kettle, a coffee machine, a chopping board, and herbs on the window sill
+    C.put(M.appliance, new THREE.CylinderGeometry(7, 9, 20, 28).translate(kx0 + 22, top + 10, -45));
+    C.put(M.blackMetal, new THREE.TorusGeometry(6, 1, 8, 20, Math.PI).rotateY(Math.PI / 2).translate(kx0 + 15, top + 19, -45));
+    // a crock of wooden spoons
+    C.put(M.ceramic, new THREE.CylinderGeometry(6.5, 6, 17, 28).translate(kx0 + 20, top + 8.5, 140));
+    for (const [a, l] of [[0.15, 30], [-0.2, 27], [0.05, 33], [-0.05, 25]]) C.put(M.oak, new THREE.CylinderGeometry(0.7, 0.7, l, 8).translate(0, l / 2, 0).rotateZ(a).rotateX(a * 0.8).translate(kx0 + 20, top + 6, 140));
+    C.put(M.oak, new THREE.BoxGeometry(2, 42, 30).rotateZ(0.12).translate(kx0 + 6, top + 21, -110));
+    for (const z of [-225, -170, -115]) {
+      C.put(M.terracotta, new THREE.CylinderGeometry(6, 4.6, 11, 20).translate(kx0 + 8, 445 + 5.5, z));
+      for (let k = 0; k < 5; k++) C.put(M.herb, new THREE.SphereGeometry(3.4, 12, 8).scale(1, 1.3, 1).translate(kx0 + 8 + Math.cos(k * 1.3) * 3, 445 + 14 + (k % 2) * 3, z + Math.sin(k * 1.3) * 3));
+    }
+
+    // the menu board: a chalkboard in an oak frame, leaning back a little against the splashback
+    {
+      const mb = MENU_SIZE, fw = mb.w + 12, fh = mb.h + 12, tilt = THREE.MathUtils.degToRad(5);
+      const m = new THREE.Matrix4().makeTranslation(kx0 + 12.5, top, (KDOOR.z0 + KDOOR.z1) / 2)
+        .multiply(new THREE.Matrix4().makeRotationY(Math.PI / 2)).multiply(new THREE.Matrix4().makeRotationX(-tilt));
+      C.put(M.menu, new THREE.PlaneGeometry(mb.w, mb.h).translate(0, fh / 2, 2.2), m);
+      C.box(M.plinth, -fw / 2, fw / 2, 0, fh, 0, 1.8, m);
+      C.box(M.oak, -fw / 2, fw / 2, 0, 6, 0, 2.8, m); C.box(M.oak, -fw / 2, fw / 2, fh - 6, fh, 0, 2.8, m);
+      C.box(M.oak, -fw / 2, -fw / 2 + 6, 6, fh - 6, 0, 2.8, m); C.box(M.oak, fw / 2 - 6, fw / 2, 6, fh - 6, 0, 2.8, m);
+      kitchen.center = new THREE.Vector3(0, fh / 2, 2.2).applyMatrix4(m);
+      kitchen.normal = new THREE.Vector3(Math.cos(tilt), Math.sin(tilt), 0);
+      kitchen.size = { w: fw, h: fh };
+    }
+  }
+
   // a soft shadow on the floor under furniture, where the room's light can't reach
   function contact(x0, x1, z0, z1, k) {
     const g = new THREE.PlaneGeometry(x1 - x0, z1 - z0).rotateX(-Math.PI / 2).translate((x0 + x1) / 2, FLOOR + 0.9, (z0 + z1) / 2);
@@ -564,10 +767,12 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     model("plant.glb", -212, -238, 165, 0.4),       // a potted plant in the corner by the board
     model("chair.glb", -150, -190, 100, 0.55),       // a velvet armchair, turned to the room
   ]);
-  Promise.all([surfaces, sky, models, board.ready]).then(([surf, skyTex, objs]) => {
+  Promise.all([surfaces, sky, models, board.ready, menuBoard.ready]).then(([surf, skyTex, objs]) => {
     if (worker) worker.terminate();
     const roomEnv = pmrem.fromScene(officeLight(), 0.035, 1, 3000).texture;
     for (const m of M.interior) { m.envMap = roomEnv; m.envMapIntensity = 1; m.needsUpdate = true; }
+    const kitchenEnv = pmrem.fromScene(kitchenLight(), 0.035, 1, 3000).texture;
+    for (const m of [...M.kitchen, M.glassClear]) { m.envMap = kitchenEnv; m.envMapIntensity = 1; m.needsUpdate = true; }
     for (const p of surf) if (p) { Object.assign(p[0], p[1], { roughness: 1 }); p[0].needsUpdate = true; }
     if (skyTex) {
       const env = pmrem.fromEquirectangular(skyTex).texture;
@@ -577,6 +782,11 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
         m.envMapIntensity = SKY_K * 0.8 * (m === M.glass ? 1.5 : m === M.deck ? 0.7 : 1);
         m.needsUpdate = true;
       }
+    }
+    if (objs[0]) {   // the plant again, in the kitchen's front corner
+      const o = objs[0].clone();
+      o.position.set(KIT.x1 - 34, FLOOR, KIT.z1 - 40); o.rotation.y = 2.2;
+      objs.push(o);
     }
     for (const o of objs) if (o) {
       o.traverse(n => {
@@ -589,7 +799,30 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     ready();
   });
 
-  return { group, board: { reveal: board.reveal } };
+  return { group, board: { reveal: board.reveal }, menu: { reveal: menuBoard.reveal }, kitchen };
+}
+
+// the kitchen's daylight, the same way: the big window over the sink faces the sun, so it's bright and throws a
+// sunny patch across the floor and the island; the front window and the doorway to the office add a little more
+function kitchenLight() {
+  const s = new THREE.Scene(), { x0, x1, z0, z1, y0, y1 } = KIT;
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, cz = (z0 + z1) / 2, W = x1 - x0, H = y1 - y0, D = z1 - z0;
+  const basic = (r, g, b) => new THREE.MeshBasicMaterial({ color: new THREE.Color(r, g, b), side: THREE.DoubleSide });
+  const quad = (w, h, mat, x, y, z, rx = 0, ry = 0) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    m.rotation.set(rx, ry, 0); m.position.set(x - cx, y - cy, z - cz); s.add(m);
+  };
+  const walls = basic(0.47, 0.455, 0.43), floor = basic(0.52, 0.49, 0.45), ceil = basic(0.44, 0.435, 0.42), cabs = basic(0.12, 0.15, 0.13);
+  quad(W, D, floor, cx, y0, cz, -Math.PI / 2);
+  quad(W, D, ceil, cx, y1, cz, Math.PI / 2);
+  quad(W, H, walls, cx, cy, z0); quad(W, H, walls, cx, cy, z1, 0, Math.PI);
+  quad(D, H, walls, x0, cy, cz, 0, Math.PI / 2); quad(D, H, walls, x1, cy, cz, 0, -Math.PI / 2);
+  quad(D * 0.8, 90, cabs, x0 + 1, y0 + 45, z0 + D * 0.4, 0, Math.PI / 2);
+  quad(150, 110, basic(3.4, 3.4, 3.2), x0 + 1, 500, -170, 0, Math.PI / 2);     // the sunny window
+  quad(85, 130, basic(2.3, 2.6, 3.1), -482, 485, z1 - 1, 0, Math.PI);          // the front window
+  quad(95, KDOOR.h, basic(0.6, 0.58, 0.55), x1 - 1, y0 + KDOOR.h / 2, 40, 0, -Math.PI / 2);   // the office
+  quad(150, 160, basic(1.6, 1.4, 1.1), -520, y0 + 1, -150, -Math.PI / 2);      // sun on the floor
+  return s;
 }
 
 // a model of the office as its own walls see it: daylight through the door and windows, the sunny patch on the

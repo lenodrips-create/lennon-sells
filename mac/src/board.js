@@ -1,5 +1,6 @@
-// The whiteboard in the office: the services, hand-written in marker with a few doodles, and written out line by
-// line, left to right, when the camera arrives in front of it.
+// The boards in the house, written out line by line, left to right, when the camera arrives in front of them: the
+// whiteboard in the office, with the services hand-written in marker and a few doodles, and the chalk menu in the
+// kitchen, with what Lennon does and what it costs.
 //
 // It's three textures over the plain board: the ink (colour and coverage), which line each inked pixel belongs to,
 // and when each line is written and where it starts and ends. The board's shader shows a line's ink up to where the
@@ -7,10 +8,14 @@
 import * as THREE from "three";
 
 const INK = { black: "#121316", blue: "#173ea8", red: "#b81f1f", green: "#16693a" };
+const CHALK = { white: "#f3f2ec", yellow: "#f4d774", pink: "#f3a6b8", blue: "#a9d2f3" };
 const K = 8;                                   // texture pixels per centimetre of board
 const MAX = 64;                                // most lines the board can hold
 const FONTS = [["Permanent Marker", "fonts/permanent-marker-latin-400-normal.woff2", "400"],
-               ["Caveat", "fonts/caveat-latin-700-normal.woff2", "700"]];
+               ["Caveat", "fonts/caveat-latin-700-normal.woff2", "700"],
+               ["League Spartan", "reel/fonts/league-spartan-latin-900-normal.woff2", "900"]];
+const FAMILY = { 400: '"Permanent Marker"', 700: '"Caveat"', 900: '"League Spartan"' };
+const fontOf = (font, px) => `${font} ${px}px ${FAMILY[font]}`;
 export const WRITE_SECONDS = 4.2;              // how long the writing takes
 
 const SERVICES = [
@@ -26,10 +31,14 @@ function rng(seed) {
 // the writing surface's size in centimetres: wide on a landscape screen, upright on a phone held upright so the
 // writing is big enough to read there
 export const boardSize = portrait => (portrait ? { w: 150, h: 196 } : { w: 240, h: 120 });
+// the kitchen's menu board: upright, the same everywhere
+export const MENU_SIZE = { w: 84, h: 118 };
 
-export function makeBoard(portrait) {
-  const { w: W, h: H } = boardSize(portrait), cw = Math.round(W * K), ch = Math.round(H * K);
-  const base = new THREE.CanvasTexture(blankBoard(cw, ch));
+// kind: "services" (the office's whiteboard) or "menu" (the kitchen's chalkboard)
+export function makeBoard(kind, portrait) {
+  const menu = kind === "menu";
+  const { w: W, h: H } = menu ? MENU_SIZE : boardSize(portrait), cw = Math.round(W * K), ch = Math.round(H * K);
+  const base = new THREE.CanvasTexture(menu ? slateBoard(cw, ch) : blankBoard(cw, ch));
   base.colorSpace = THREE.SRGBColorSpace; base.anisotropy = 8;
   const inkCanvas = document.createElement("canvas"); inkCanvas.width = cw; inkCanvas.height = ch;
   const ink = new THREE.CanvasTexture(inkCanvas);
@@ -73,12 +82,12 @@ export function makeBoard(portrait) {
     document.fonts.add(f);
     return f.load();
   })).then(() => {
-    const els = layout(portrait, W, H, inkCanvas.getContext("2d"));
+    const els = (menu ? menuLayout : layout)(portrait, W, H, inkCanvas.getContext("2d"));
     const idxCanvas = document.createElement("canvas"); idxCanvas.width = cw; idxCanvas.height = ch;
-    paint(els, inkCanvas.getContext("2d"), idxCanvas.getContext("2d"));
-    // marker ink isn't perfectly even
+    paint(els, inkCanvas.getContext("2d"), idxCanvas.getContext("2d"), menu);
+    // marker ink isn't perfectly even; chalk is grainy, catching on the board's tooth
     const ix = inkCanvas.getContext("2d"), img = ix.getImageData(0, 0, cw, ch), d = img.data, r = rng(99);
-    for (let i = 3; i < d.length; i += 4) if (d[i]) d[i] = Math.round(d[i] * (0.93 + 0.07 * r()));
+    for (let i = 3; i < d.length; i += 4) if (d[i]) d[i] = Math.round(d[i] * (menu ? 0.5 + 0.5 * Math.pow(r(), 0.6) : 0.93 + 0.07 * r()));
     ix.putImageData(img, 0, 0);
     ink.needsUpdate = true;
     // which line each pixel belongs to, flipped to the texture's bottom-up rows
@@ -131,7 +140,7 @@ function blankBoard(cw, ch) {
 // paths). x0..x1 is its horizontal extent, which the pen crosses as it's written.
 function layout(portrait, W, H, ctx) {
   const els = [], r = rng(portrait ? 7 : 3);
-  const measure = (font, size, text) => { ctx.font = `${font} ${size * K}px ${font === "700" ? '"Caveat"' : '"Permanent Marker"'}`; return ctx.measureText(text).width / K; };
+  const measure = (font, size, text) => { ctx.font = fontOf(font, size * K); return ctx.measureText(text).width / K; };
   const PM = "400", CV = "700";
   const text = (t, x, y, size, color, font = CV, rot = (r() - 0.5) * 0.03, maxW = 1e9) => {
     let w = measure(font, size, t);
@@ -214,8 +223,66 @@ function doodle(kind, x, y, draw) {
   }
 }
 
+// a chalkboard that's been used and wiped: dark green-black, a fine tooth, and faint swirls of old chalk
+function slateBoard(cw, ch) {
+  const c = document.createElement("canvas"); c.width = cw; c.height = ch;
+  const x = c.getContext("2d"), r = rng(4242);
+  x.fillStyle = "#1c2420"; x.fillRect(0, 0, cw, ch);
+  const img = x.getImageData(0, 0, cw, ch), d = img.data;
+  for (let i = 0; i < d.length; i += 4) { const v = (r() - 0.5) * 12; d[i] += v; d[i + 1] += v; d[i + 2] += v; }
+  x.putImageData(img, 0, 0);
+  x.lineCap = "round";
+  for (let i = 0; i < 40; i++) {
+    x.strokeStyle = `rgba(230,236,232,${0.015 + r() * 0.03})`;
+    x.lineWidth = 20 + r() * 50;
+    const cx = r() * cw, cy = r() * ch, rad = 30 + r() * 120, a0 = r() * 6.3;
+    x.beginPath(); x.arc(cx, cy, rad, a0, a0 + 0.8 + r() * 2); x.stroke();
+  }
+  return c;
+}
+
+/* ---------- the kitchen's menu: what Lennon does, and the prices, like a café's specials board ---------- */
+function menuLayout(portrait, W, H, ctx) {
+  const els = [], r = rng(11);
+  const measure = (font, size, text) => { ctx.font = fontOf(font, size * K); return ctx.measureText(text).width / K; };
+  const LS = "900", CV = "700";
+  const put = (t, x, y, size, color, font, rot = (r() - 0.5) * 0.02) => {
+    const w = measure(font, size, t);
+    els.push({ text: t, x, y, size, color, font, rot, x0: x, x1: x + w });
+    return w;
+  };
+  const centre = (t, y, size, color, font) => put(t, (W - measure(font, size, t)) / 2, y, size, color, font);
+  const draw = (x0, x1, color, width, fn) => els.push({ x0, x1, color, width, fn });
+
+  const tw = measure(LS, 9, "DEVELOPER");
+  centre("DEVELOPER", 14, 9, CHALK.white, LS);
+  draw((W - tw) / 2 - 2, (W + tw) / 2 + 2, CHALK.yellow, 0.5, p => wave(p, (W - tw) / 2 - 2, (W + tw) / 2 + 2, 17.6, 0.45, 7));
+  centre("~ what I do ~", 25.5, 6, CHALK.yellow, CV);
+  centre("I design & build websites,", 33, 5.6, CHALK.white, CV);
+  centre("fix bugs, and make", 39.5, 5.6, CHALK.white, CV);
+  centre("electronics that work.", 46, 5.6, CHALK.white, CV);
+  draw(14, W - 14, CHALK.white, 0.35, p => dashes(p, 14, W - 14, 51.5));
+
+  const tiers = [["STARTER", "$200", "a clean one-page site"], ["MAIN COURSE", "$400", "a custom multi-page site"],
+                 ["CHEF'S SPECIAL", "$600", "custom + animation & 3D"]];
+  tiers.forEach(([name, price, what], i) => {
+    const y = 61 + i * 13;
+    const nw = put(name, 7, y, 4.6, CHALK.white, LS, 0);
+    const pw = measure(CV, 7.2, price);
+    draw(7 + nw + 1.5, W - 7 - pw - 1.5, CHALK.white, 0.42, p => dots(p, 7 + nw + 1.5, W - 7 - pw - 1.5, y - 0.4));
+    put(price, W - 7 - pw, y + 0.3, 7.2, CHALK.yellow, CV, -0.03);
+    put(what, 8.5, y + 6, 4.9, CHALK.pink, CV);
+  });
+  draw(14, W - 14, CHALK.white, 0.35, p => dashes(p, 14, W - 14, 99));
+  centre("every project $200 - $600", 106.5, 5.8, CHALK.blue, CV);
+  centre("lenodrips@gmail.com", 113.5, 5.6, CHALK.white, CV);
+  return els;
+}
+function dashes(p, x0, x1, y) { for (let x = x0; x < x1 - 1; x += 3.4) { p.moveTo(x, y + Math.sin(x) * 0.15); p.lineTo(x + 1.9, y + Math.sin(x + 2) * 0.15); } }
+function dots(p, x0, x1, y) { for (let x = x0; x <= x1; x += 1.8) { p.moveTo(x + 0.15, y); p.arc(x, y, 0.15, 0, Math.PI * 2); } }
+
 // draw every element twice: its ink, and (a little thicker, so it covers the ink's soft edges) its number
-function paint(els, ink, ids) {
+function paint(els, ink, ids, chalk) {
   for (const c of [ink, ids]) { c.lineCap = "round"; c.lineJoin = "round"; c.textBaseline = "alphabetic"; }
   els.forEach((e, i) => {
     const idColor = `rgb(${i + 1},0,0)`;
@@ -224,7 +291,8 @@ function paint(els, ink, ids) {
       c.fillStyle = c.strokeStyle = color;
       if (e.text) {
         c.translate(e.x * K, e.y * K); c.rotate(e.rot);
-        c.font = `${e.font} ${e.size * K}px ${e.font === "700" ? '"Caveat"' : '"Permanent Marker"'}`;
+        c.font = fontOf(e.font, e.size * K);
+        if (chalk && !extra) { c.shadowColor = "rgba(240,240,232,0.35)"; c.shadowBlur = 5; }   // chalk dust
         c.fillText(e.text, 0, 0);
         if (extra) { c.lineWidth = extra * K; c.strokeText(e.text, 0, 0); }
       } else {

@@ -105,8 +105,35 @@ const rugSurface = q => surface(q ? 256 : 128, q ? 256 : 128, 40, 40, (x, y, o) 
   o[0] = 0.8 * k; o[1] = 0.76 * k; o[2] = 0.69 * k; o[3] = 0.08 * w; o[4] = 0.95;
 });
 
+// the kitchen's floor: big porcelain tiles, 60 cm square, a warm pale stone with fine grout lines
+const tileSurface = q => surface(q ? 512 : 256, q ? 512 : 256, 120, 120, (x, y, o) => {
+  const tx = x % 60, ty = y % 60, edge = Math.min(tx, 60 - tx, ty, 60 - ty), grout = edge < 0.16;
+  const id = Math.floor(x / 60) + Math.floor(y / 60) * 2, tone = 0.94 + hash(id, 5, 3) * 0.1;
+  const st = fbm(x / 18, y / 18, 81, 7, 7), fleck = hash(Math.floor(x * 4.3), Math.floor(y * 4.3), 83);
+  const k = grout ? 0.66 : tone * (0.93 + 0.12 * st) * (0.985 + 0.03 * fleck);
+  o[0] = 0.8 * k; o[1] = 0.77 * k; o[2] = 0.72 * k;
+  o[3] = grout ? 0 : 0.25 * smoothstep(0.1, 0.5, edge) + 0.01 * st; o[4] = grout ? 0.95 : 0.3 + 0.12 * st;
+});
+// glossy white subway tiles, 15 by 7.5 cm, laid in a running bond with pale grout; each tile's glaze rounds off at
+// its edges
+const subwaySurface = q => surface(q ? 512 : 256, q ? 256 : 128, 60, 30, (x, y, o) => {
+  const row = Math.floor(y / 7.5), xx = (x + (row % 2) * 7.5) % 60, tx = xx % 15, ty = y - row * 7.5;
+  const edge = Math.min(tx, 15 - tx, ty, 7.5 - ty), grout = edge < 0.13, id = Math.floor(xx / 15) + row * 4;
+  const k = grout ? 0.8 : 0.95 * (0.985 + hash(id, 2, 8) * 0.03);
+  o[0] = k; o[1] = k * 0.995; o[2] = k * 0.985;
+  o[3] = grout ? 0 : 0.35 * Math.sqrt(smoothstep(0.05, 0.7, edge)); o[4] = grout ? 0.9 : 0.08;
+});
+// white quartz with soft grey veins, for the worktops and the island
+const marbleSurface = q => surface(q ? 512 : 256, q ? 512 : 256, 120, 120, (x, y, o) => {
+  const f = fbm(x / 30, y / 30, 91, 4, 4), g = fbm(x / 10, y / 10, 93, 12, 12, 3);
+  const a = (x + y) * (Math.PI * 2 / 120) + f * 7, vein = 1 - smoothstep(0, 0.09 + 0.05 * g, Math.abs(Math.sin(a)));
+  const fine = 1 - smoothstep(0, 0.035, Math.abs(Math.sin(a * 2.3 + g * 5)));
+  const k = 0.93 * (1 - 0.22 * vein * (0.5 + f) - 0.08 * fine * g) * (0.99 + 0.02 * hash(Math.floor(x * 4.3), Math.floor(y * 4.3), 95));
+  o[0] = k; o[1] = k * 0.993; o[2] = k * 0.98; o[3] = 0; o[4] = 0.16 + 0.06 * g;
+});
+
 const SURFACES = { siding: sidingSurface, floor: oakFloorSurface, deck: deckSurface, cedar: cedarSurface, oak: oakSurface,
-                   concrete: concreteSurface, rug: rugSurface };
+                   concrete: concreteSurface, rug: rugSurface, tile: tileSurface, subway: subwaySurface, marble: marbleSurface };
 
 /* ---------- the HDRI: Radiance RGBE, run-length encoded, to RGBA half floats ---------- */
 const f32 = new Float32Array(1), u32 = new Uint32Array(f32.buffer);
