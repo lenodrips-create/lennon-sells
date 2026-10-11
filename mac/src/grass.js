@@ -54,7 +54,7 @@ function groundTexture(rand, size) {
 }
 
 function ground(rand, quality) {
-  const SIZE = 420, SEG = 96, TILE = 48;
+  const SIZE = 1600, SEG = 160, TILE = 48;   // wide enough to fill the view from high above
   const geo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
   geo.rotateX(-Math.PI / 2);
   // large, slow variation in colour across the lawn, so the repeating tile doesn't show

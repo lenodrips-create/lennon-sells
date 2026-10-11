@@ -406,7 +406,7 @@ function resize() {
 
 /* ---------- per-frame update ---------- */
 let dirty = true, last = { rise: -1, close: -1 };
-const tgt = new THREE.Vector3();
+const tgt = new THREE.Vector3(), descT = new THREE.Vector3(), SKY_T = new THREE.Vector3(0, 0, 0);
 function update(rise, close, now, dt) {
   if (!openFit) resize();
   const stripOn = rise > 0 && close < 0.75;
@@ -414,20 +414,24 @@ function update(rise, close, now, dt) {
   if (!stripOn && !dirty && rise === last.rise && close === last.close) return;
   last.rise = rise; last.close = close; dirty = false;
 
-  // as the card arrives the laptop lifts into place with a slight turn, and settles as the card finishes
-  const lift = reduce ? 0 : 1 - easeInOut(smooth(0.3, 1, rise));
-  mac.position.y = -5 * lift;
-  mac.rotation.y = 0.22 * lift;
   // the lid closes over the first 60% of the move, with a soft landing
   const lc = easeInOut(clamp01(close / 0.6));
   lid.rotation.x = -OPEN * (1 - lc);
-  // the camera cranes up and over the lid, then settles straight above it
+  // coming down from the sky: from high above the lawn, turning as it drops, to the view of the open laptop
+  const k = 1 - Math.pow(1 - clamp01(rise), 2.4), L = THREE.MathUtils.lerp;   // quick to leave the heights, slow to land
+  const skyDist = vw < 700 ? 1500 : 1100;
+  descT.lerpVectors(SKY_T, openFit.target, k);
+  const dE = L(90, openFit.elev, k), dA = L(34, openFit.az, k), dD = Math.exp(L(Math.log(skyDist), Math.log(openFit.dist), k));
+  // then the camera cranes up and over the lid, and settles straight above it
   const m = easeInOut(clamp01((close - 0.08) / 0.92));
-  tgt.lerpVectors(openFit.target, closedFit.target, m);
-  const elev = THREE.MathUtils.lerp(openFit.elev, closedFit.elev, m);
-  const dist = Math.exp(THREE.MathUtils.lerp(Math.log(openFit.dist), Math.log(closedFit.dist), m));
-  place(tgt, elev, dist, THREE.MathUtils.lerp(openFit.az, closedFit.az, m));
-  const shift = openFit.shift * (1 - m);
+  tgt.lerpVectors(descT, closedFit.target, m);
+  const elev = L(dE, closedFit.elev, m);
+  const dist = Math.exp(L(Math.log(dD), Math.log(closedFit.dist), m));
+  place(tgt, elev, dist, L(dA, closedFit.az, m));
+  // near and far planes follow the height, so the whole lawn shows from up high and the laptop stays crisp close up
+  camera.near = Math.max(0.5, dist * 0.04);
+  camera.far = dist * 3 + 400;
+  const shift = openFit.shift * k * (1 - m);
   camera.setViewOffset(vw, vh, 0, -shift, vw, vh);
   camera.updateProjectionMatrix();
 
