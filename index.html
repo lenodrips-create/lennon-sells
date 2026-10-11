@@ -7,7 +7,7 @@
 <title>Lennon Helman</title>
 <meta name="description" content="Lennon Helman, software developer in Greencastle, PA: project gallery and services.">
 <link rel="preload" href="reel/fonts/league-spartan-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="mac/mac.min.js?v=8">
+<link rel="modulepreload" href="mac/mac.min.js?v=9">
 <style>
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:700;font-display:swap;src:url("reel/fonts/league-spartan-latin-700-normal.woff2") format("woff2")}
 @font-face{font-family:"League Spartan";font-style:normal;font-weight:900;font-display:swap;src:url("reel/fonts/league-spartan-latin-900-normal.woff2") format("woff2")}
@@ -81,7 +81,7 @@ body.no-mac .mac-hint{display:none}
   <a href="#gallery" data-go="gallery">project gallery</a>
   <a href="#services" data-go="services">services</a>
 </nav>
-<script type="module" src="mac/mac.min.js?v=8"></script>
+<script type="module" src="mac/mac.min.js?v=9"></script>
 
 <script>
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -135,8 +135,9 @@ body.no-mac .mac-hint{display:none}
   }
   /* ---------- scroll gestures ---------- */
   // In the sky, one scroll flies all the way down to the laptop (and one scroll up at the laptop flies back up).
-  // Past the laptop the page scrolls freely, and the camera and the services follow it. Scrolling back up stops at
-  // the laptop; a scroll up that starts there flies back to the sky.
+  // At the laptop, one scroll down flies on to the chalkboard in the house next door, and one scroll up from the
+  // board flies back to the laptop. Only a scroll that starts at a stop does it: one that arrives from elsewhere (the
+  // tail of the last flight) stops there first.
   let gStartY = 0;
   const startedAt = y => Math.abs(gStartY - y) <= 1;
   function decide(dir) {
@@ -144,6 +145,8 @@ body.no-mac .mac-hint{display:none}
     const y = window.scrollY;
     if (dir > 0 && y < closeAt - 1) return { run: () => run(() => scrollAnim(closeAt, reduce ? 0 : 3.2)) };
     if (dir < 0 && y > 1 && y <= closeAt + 1) return { run: startedAt(closeAt) || y < closeAt - 1 ? () => run(() => scrollAnim(0, reduce ? 0 : 2.4)) : null };
+    if (dir > 0 && y < officeAt - 1) return { run: startedAt(closeAt) || y > closeAt + 1 ? () => run(() => scrollAnim(officeAt, reduce ? 0 : 4.2)) : null };
+    if (dir < 0 && y <= officeAt + 1) return { run: startedAt(officeAt) || y < officeAt - 1 ? () => run(() => scrollAnim(closeAt, reduce ? 0 : 3.6)) : null };
     return null;
   }
   // a wheel or trackpad gesture is a run of events without a pause; a sudden jump in strength starts a new one,
@@ -193,7 +196,7 @@ body.no-mac .mac-hint{display:none}
   });
   // go there, flying into or out of the screen on the way
   function goTo(where) {
-    run(() => scrollAnim(where === "services" ? officeAt : closeAt, reduce ? 0 : 1.8));
+    run(() => scrollAnim(where === "services" ? officeAt : closeAt, reduce ? 0 : where === "services" ? 4.2 : window.scrollY > closeAt ? 3.6 : 1.8));
   }
   let current = "";
   function markCurrent(where) {
