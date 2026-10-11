@@ -208,7 +208,7 @@ export function outdoorEnvironment(sunDir) {
 export function makeLawn(scene, foot, quality) {
   const rand = rng(20261010);
   scene.add(ground(rand, quality));
-  const b = blades(rand, quality === "high" ? 110000 : 40000, foot);
+  const b = blades(rand, quality === "high" ? 80000 : 40000, foot);
   scene.add(b.mesh);
   for (const d of daisies(rand, quality === "high" ? 34 : 22, foot)) scene.add(d);
   return { update: t => { b.uTime.value = t; } };
