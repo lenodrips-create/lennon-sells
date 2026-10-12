@@ -1,6 +1,6 @@
 // The boards in the house, written out line by line, left to right, when the camera arrives in front of them: the
-// whiteboard in the office, with the services hand-written in marker and a few doodles, and the chalk menu in the
-// kitchen, with what Lennon does and what it costs.
+// whiteboard in the office, with the services hand-written in marker and a few doodles; the monitor on the office
+// desk, which types out an about page; and the chalk menu in the kitchen, with what Lennon does and what it costs.
 //
 // It's three textures over the plain board: the ink (colour and coverage), which line each inked pixel belongs to,
 // and when each line is written and where it starts and ends. The board's shader shows a line's ink up to where the
@@ -9,13 +9,17 @@ import * as THREE from "three";
 
 const INK = { black: "#121316", blue: "#173ea8", red: "#b81f1f", green: "#16693a" };
 const CHALK = { white: "#f3f2ec", yellow: "#f4d774", pink: "#f3a6b8", blue: "#a9d2f3" };
-const K = 8;                                   // texture pixels per centimetre of board
+// texture pixels per centimetre of board: 8, or 12 for the monitor's small type. (Set by makeBoard at the start of
+// each piece of drawing it does, which all runs straight through, so boards being made side by side don't clash.)
+let K = 8;
 const MAX = 64;                                // most lines the board can hold
 const FONTS = [["Permanent Marker", "fonts/permanent-marker-latin-400-normal.woff2", "400"],
                ["Caveat", "fonts/caveat-latin-700-normal.woff2", "700"],
-               ["League Spartan", "reel/fonts/league-spartan-latin-900-normal.woff2", "900"]];
-const FAMILY = { 400: '"Permanent Marker"', 700: '"Caveat"', 900: '"League Spartan"' };
-const fontOf = (font, px) => `${font} ${px}px ${FAMILY[font]}`;
+               ["League Spartan", "reel/fonts/league-spartan-latin-900-normal.woff2", "900"],
+               ["Readex Pro", "fonts/readex-pro-latin-400-normal.woff2", "400"]];
+const FAMILY = { 400: ["400", '"Permanent Marker"'], 700: ["700", '"Caveat"'], 900: ["900", '"League Spartan"'],
+                 rx: ["400", '"Readex Pro"'], mono: ["600", 'ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace'] };
+const fontOf = (font, px) => `${FAMILY[font][0]} ${px}px ${FAMILY[font][1]}`;
 export const WRITE_SECONDS = 4.2;              // how long the writing takes
 
 const SERVICES = [
@@ -33,12 +37,15 @@ function rng(seed) {
 export const boardSize = portrait => (portrait ? { w: 150, h: 196 } : { w: 240, h: 120 });
 // the kitchen's menu board: upright, the same everywhere
 export const MENU_SIZE = { w: 84, h: 118 };
+// the office monitor's picture: wide, or turned upright on a phone held upright (as coders often have them)
+export const screenSize = portrait => (portrait ? { w: 40, h: 71 } : { w: 71, h: 40 });
 
-// kind: "services" (the office's whiteboard) or "menu" (the kitchen's chalkboard)
+// kind: "services" (the office's whiteboard), "about" (the office monitor) or "menu" (the kitchen's chalkboard)
 export function makeBoard(kind, portrait) {
-  const menu = kind === "menu";
-  const { w: W, h: H } = menu ? MENU_SIZE : boardSize(portrait), cw = Math.round(W * K), ch = Math.round(H * K);
-  const base = new THREE.CanvasTexture(menu ? slateBoard(cw, ch) : blankBoard(cw, ch));
+  const menu = kind === "menu", about = kind === "about", k = about ? 12 : 8;
+  K = k;
+  const { w: W, h: H } = menu ? MENU_SIZE : about ? screenSize(portrait) : boardSize(portrait), cw = Math.round(W * K), ch = Math.round(H * K);
+  const base = new THREE.CanvasTexture(menu ? slateBoard(cw, ch) : about ? editorScreen(cw, ch) : blankBoard(cw, ch));
   base.colorSpace = THREE.SRGBColorSpace; base.anisotropy = 8;
   const inkCanvas = document.createElement("canvas"); inkCanvas.width = cw; inkCanvas.height = ch;
   const ink = new THREE.CanvasTexture(inkCanvas);
@@ -82,12 +89,13 @@ export function makeBoard(kind, portrait) {
     document.fonts.add(f);
     return f.load();
   })).then(() => {
-    const els = (menu ? menuLayout : layout)(portrait, W, H, inkCanvas.getContext("2d"));
+    K = k;
+    const els = (menu ? menuLayout : about ? aboutLayout : layout)(portrait, W, H, inkCanvas.getContext("2d"));
     const idxCanvas = document.createElement("canvas"); idxCanvas.width = cw; idxCanvas.height = ch;
     paint(els, inkCanvas.getContext("2d"), idxCanvas.getContext("2d"), menu);
     // marker ink isn't perfectly even; chalk is grainy, catching on the board's tooth
     const ix = inkCanvas.getContext("2d"), img = ix.getImageData(0, 0, cw, ch), d = img.data, r = rng(99);
-    for (let i = 3; i < d.length; i += 4) if (d[i]) d[i] = Math.round(d[i] * (menu ? 0.5 + 0.5 * Math.pow(r(), 0.6) : 0.93 + 0.07 * r()));
+    if (!about) for (let i = 3; i < d.length; i += 4) if (d[i]) d[i] = Math.round(d[i] * (menu ? 0.5 + 0.5 * Math.pow(r(), 0.6) : 0.93 + 0.07 * r()));
     ix.putImageData(img, 0, 0);
     ink.needsUpdate = true;
     // which line each pixel belongs to, flipped to the texture's bottom-up rows
@@ -98,7 +106,7 @@ export function makeBoard(kind, portrait) {
     }
     idx.needsUpdate = true;
     // timing: each line takes time in proportion to its length, with a short pause between
-    const cost = els.map(e => (e.text ? 0.12 + e.text.length * 0.05 : 0.35) + 0.08), total = cost.reduce((a, b) => a + b, 0);
+    const cost = els.map(e => (e.text ? 0.12 + e.text.length * (about ? 0.022 : 0.05) : 0.35) + 0.08), total = cost.reduce((a, b) => a + b, 0);
     let t = 0;
     els.forEach((e, i) => {
       const t0 = t / total, t1 = (t + cost[i] - 0.08) / total;
@@ -281,12 +289,61 @@ function menuLayout(portrait, W, H, ctx) {
 function dashes(p, x0, x1, y) { for (let x = x0; x < x1 - 1; x += 3.4) { p.moveTo(x, y + Math.sin(x) * 0.15); p.lineTo(x + 1.9, y + Math.sin(x + 2) * 0.15); } }
 function dots(p, x0, x1, y) { for (let x = x0; x <= x1; x += 1.8) { p.moveTo(x + 0.15, y); p.arc(x, y, 0.15, 0, Math.PI * 2); } }
 
+// the monitor: a dark code editor, with its title bar, a tab for about.md, and line numbers down the side
+function editorScreen(cw, ch) {
+  const c = document.createElement("canvas"); c.width = cw; c.height = ch;
+  const x = c.getContext("2d"), bar = 2.6 * K;
+  x.fillStyle = "#14161b"; x.fillRect(0, 0, cw, ch);
+  x.fillStyle = "#1d2027"; x.fillRect(0, 0, cw, bar);
+  for (const [i, col] of ["#ff5f57", "#febc2e", "#28c840"].entries()) { x.fillStyle = col; x.beginPath(); x.arc((1.4 + i * 1.2) * K, bar / 2, 0.38 * K, 0, Math.PI * 2); x.fill(); }
+  x.fillStyle = "#14161b"; x.fillRect(5 * K, 0.5 * K, 9 * K, bar - 0.5 * K);
+  x.fillStyle = "#c9ced6"; x.font = `500 ${1.05 * K}px ui-monospace, "SF Mono", Menlo, Consolas, monospace`; x.textBaseline = "middle";
+  x.fillText("about.md", 6.2 * K, bar / 2 + 0.2 * K);
+  x.fillStyle = "#4b5160"; x.textAlign = "right"; x.font = `500 ${0.95 * K}px ui-monospace, "SF Mono", Menlo, Consolas, monospace`;
+  for (let i = 0, y = bar + 2.4 * K; y < ch - 0.8 * K; i++, y += 2.05 * K) x.fillText(String(i + 1), 2.6 * K, y);
+  x.fillStyle = "#1a1d23"; x.fillRect(3.3 * K, bar, 0.08 * K, ch - bar);
+  return c;
+}
+
+/* ---------- the monitor's about page: Lennon, in his own words from the site's earlier about section ---------- */
+function aboutLayout(portrait, W, H, ctx) {
+  const els = [], s = portrait ? 1.12 : 1, col = { head: "#7dd3fc", sub: "#c4b5fd", text: "#e6e8eb", soft: "#aeb4bd", code: "#fdba74", link: "#86efac" };
+  const measure = (font, size, text) => { ctx.font = fontOf(font, size * K); return ctx.measureText(text).width / K; };
+  // wrapped lines, typed left to right one after another; returns where the next block starts
+  const block = (text, x, y, maxW, font, size, color, lead = 1.38) => {
+    let line = "";
+    const out = [];
+    for (const word of text.split(" ")) {
+      const t = line ? line + " " + word : word;
+      if (measure(font, size, t) > maxW && line) { out.push(line); line = word; } else line = t;
+    }
+    out.push(line);
+    out.forEach((t, i) => { const yy = y + size + i * size * lead; els.push({ text: t, x, y: yy, size, color, font, rot: 0, x0: x, x1: x + measure(font, size, t) }); });
+    return y + size + (out.length - 1) * size * lead + size * 0.75;
+  };
+  const left = 5, colW = portrait ? W - left - 2.5 : (W - left - 4) / 2, right = portrait ? left : left + colW + 3;
+  let y = 3.6;
+  y = block("# About me", left, y, colW, "mono", 2.4 * s, col.head) + 0.4;
+  y = block("I'm Lennon. I build what I imagine, from Greencastle, Pennsylvania.", left, y, colW, "rx", 1.62 * s, col.text) + 0.5;
+  y = block("I'm a developer who likes building the whole thing: the engine, the interface and the page that tells people about it. Most of my work starts as a question.", left, y, colW, "rx", 1.36 * s, col.soft) + 0.5;
+  y = block("Greencastle is a small town in Franklin County, in the Cumberland Valley: quiet and friendly, and where all of this gets made.", left, y, colW, "rx", 1.36 * s, col.soft) + 0.9;
+  if (!portrait) y = 3.6;
+  y = block("## Projects", right, y, colW, "mono", 1.75 * s, col.sub) + 0.2;
+  y = block("- Kepler: my own web browser, in C++ on Qt and Chromium", right, y, colW, "rx", 1.36 * s, col.text) + 0.3;
+  y = block("- CTerm Studio: a code studio in a browser tab, with a C core compiled to WebAssembly", right, y, colW, "rx", 1.36 * s, col.text) + 0.9;
+  y = block("## Stack", right, y, colW, "mono", 1.75 * s, col.sub) + 0.2;
+  y = block("C++  Qt 6  Rust  C  WebAssembly  JavaScript  React  Vite", right, y, colW, "mono", 1.25 * s, col.code, 1.5) + 0.9;
+  y = block("## Find me", right, y, colW, "mono", 1.75 * s, col.sub) + 0.2;
+  y = block("@lenodrips  github.com/lenodrips-create  lenodrips@gmail.com", right, y, colW, "rx", 1.32 * s, col.link, 1.5);
+  return els;
+}
+
 // draw every element twice: its ink, and (a little thicker, so it covers the ink's soft edges) its number
 function paint(els, ink, ids, chalk) {
   for (const c of [ink, ids]) { c.lineCap = "round"; c.lineJoin = "round"; c.textBaseline = "alphabetic"; }
   els.forEach((e, i) => {
     const idColor = `rgb(${i + 1},0,0)`;
-    for (const [c, color, extra] of [[ink, e.color, 0], [ids, idColor, 0.5]]) {
+    for (const [c, color, extra] of [[ink, e.color, 0], [ids, idColor, 4 / K]]) {
       c.save();
       c.fillStyle = c.strokeStyle = color;
       if (e.text) {
