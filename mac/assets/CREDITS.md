@@ -6,6 +6,9 @@
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), from the Khronos glTF Sample Assets; based on an
   original asset by Rico Cilliers (CC0). Changed: the fireflies and lights removed, the soil mesh simplified and
   the textures resized and recompressed to WebP.
+- **sofa.glb**: "Glam Velvet Sofa", © 2023 Wayfair, LLC, by Eric Chadwick, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/),
+  from the Khronos glTF Sample Assets. Changed: its light removed, simplified, and the textures resized and
+  recompressed to WebP.
 - **chair.glb**: "Sheen Chair", © 2020 Wayfair, LLC, by Eric Chadwick, CC0, from the Khronos glTF Sample Assets.
   Changed: simplified and the textures resized and recompressed to WebP.
 

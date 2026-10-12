@@ -15,6 +15,7 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import painterSrc from "./paint.worker.txt";   // paint.js, built as text (see package.json)
 import { makeBoard, boardSize, MENU_SIZE } from "./board.js";
+import { makePrints, printSize } from "./reviews.js";
 
 const T = 15;                         // wall thickness
 const FLOOR = 335.5;                  // the office floor, on top of the ground floor's roof
@@ -23,6 +24,9 @@ const ROOM = { x0: -290, x1: 290 - T, z0: -330 + T, z1: 120 - T, y0: FLOOR, y1: 
 // the kitchen: upstairs on the left, through a doorway in the office's left wall
 const KIT = { x0: -630 + T, x1: -290 - T, z0: -330 + T, z1: 330 - T, y0: FLOOR, y1: 605 };
 const KDOOR = { z0: -7.5, z1: 87.5, h: 215 };   // the doorway between them, centred on the menu board
+// the living room: downstairs, in through the front door, beside the garage
+const LIV = { x0: -630 + T, x1: -39, z0: -330 + T, z1: 330 - T, y0: 14, y1: 290 };
+const LX = -382;                                  // the front door's middle, and the line the sofa and the reviews sit on
 export const OFFICE = {
   eye: EYE,
   door: 120,                          // the office's front wall (outer face), where the balcony door is
@@ -50,12 +54,23 @@ const surfaceMaps = s => {
   return { map: dataTex(s.col, s.w, s.h, true, rep), normalMap: dataTex(s.nrm, s.w, s.h, false, rep), roughnessMap: dataTex(s.rgh, s.w, s.h, false, rep) };
 };
 
-// a soft contact shadow, for under furniture: a blurred dark square (drawn as the shadow of one off the canvas)
-function contactTex() {
+// soft shadow shapes: a blurred square or disc (drawn as the shadow of one off the canvas), or a fade from top to bottom
+function blurTex(kind) {
   const c = document.createElement("canvas"); c.width = c.height = 128;
   const x = c.getContext("2d");
-  x.shadowColor = "#000"; x.shadowBlur = 16; x.shadowOffsetX = 256;
-  x.fillRect(26 - 256, 26, 76, 76);
+  if (kind === "fade") {   // dark at the top, fading down, and soft at both ends
+    const g = x.createLinearGradient(0, 0, 0, 128);
+    g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(0.3, "rgba(0,0,0,0.4)"); g.addColorStop(1, "rgba(0,0,0,0)");
+    x.fillStyle = g; x.fillRect(0, 0, 128, 128);
+    const h = x.createLinearGradient(0, 0, 128, 0);
+    h.addColorStop(0, "rgba(0,0,0,0)"); h.addColorStop(0.12, "rgba(0,0,0,1)"); h.addColorStop(0.88, "rgba(0,0,0,1)"); h.addColorStop(1, "rgba(0,0,0,0)");
+    x.globalCompositeOperation = "destination-in"; x.fillStyle = h; x.fillRect(0, 0, 128, 128);
+  } else {
+    x.shadowColor = "#000"; x.shadowBlur = 16; x.shadowOffsetX = 256;
+    x.beginPath();
+    if (kind === "round") x.arc(64 - 256, 64, 40, 0, Math.PI * 2); else x.rect(26 - 256, 26, 76, 76);
+    x.fill();
+  }
   return new THREE.CanvasTexture(c);
 }
 
@@ -68,8 +83,9 @@ const AO_LIB = `
     return aoPlane(p.x - x0, 42.0, 0.34) * aoPlane(x1 - p.x, 42.0, 0.34) * aoPlane(p.z - z0, 42.0, 0.34)
          * aoPlane(z1 - p.z, 42.0, 0.34) * aoPlane(p.y - y0, 36.0, 0.32) * aoPlane(y1 - p.y, 48.0, 0.3);
   }
-  // the office, or (left of the wall between them) the kitchen
+  // downstairs the living room; upstairs the office, or (left of the wall between them) the kitchen
   float aoRoom(vec3 p) {
+    if (p.y < 310.0) return aoBox(p, ${[LIV.x0, LIV.x1, LIV.z0, LIV.z1, LIV.y0, LIV.y1].map(v => v.toFixed(1)).join(", ")});
     return p.x > -297.5
       ? aoBox(p, ${[ROOM.x0, ROOM.x1, ROOM.z0, ROOM.z1, ROOM.y0, ROOM.y1].map(v => v.toFixed(1)).join(", ")})
       : aoBox(p, ${[KIT.x0, KIT.x1, KIT.z0, KIT.z1, KIT.y0, KIT.y1].map(v => v.toFixed(1)).join(", ")});
@@ -129,7 +145,6 @@ function mats(q) {
     ceramic: std({ color: 0xf2f0ec, roughness: 0.3, side: THREE.DoubleSide }),   // double-sided: bowls are open
     blackMetal: std({ color: 0x141416, roughness: 0.4, metalness: 0.7 }),
     books: std({ vertexColors: true, roughness: 0.8 }),
-    contact: new THREE.MeshBasicMaterial({ color: 0x000000, map: contactTex(), transparent: true, opacity: 0.5, depthWrite: false }),
   };
   // the kitchen's own: lit by its own daylight (see kitchenLight); the shaded keys match the office's, so they share
   // its shaders
@@ -150,6 +165,23 @@ function mats(q) {
     terracotta: std({ color: 0xb0623f, roughness: 0.85 }),
     herb: std({ color: 0x4d7a35, roughness: 0.7 }),
   });
+  // the living room's own, lit by its own daylight
+  Object.assign(M, {
+    lPaint: shaded(std({ color: 0xefeae2, roughness: 0.9 }), "paint", "aoRoom(p)"),
+    lCeiling: shaded(std({ color: 0xf6f4ef, roughness: 0.95 }), "ceiling", "aoRoom(p)"),
+    lSkirting: shaded(std({ color: 0xf4f2ee, roughness: 0.5 }), "skirting", "aoRoom(p)"),
+    lFloor: shaded(std({ roughness: 1 }), "floor", "aoRoom(p)"),
+    lRug: shaded(std({ roughness: 1 }), "rug", "aoRoom(p)"),
+    lOak: shaded(std({ roughness: 1 }), "oak", "aoRoom(p)"),
+    lMetal: std({ color: 0x141416, roughness: 0.4, metalness: 0.7 }),
+    lCeramic: std({ color: 0xece6dc, roughness: 0.35 }),
+    frame: std({ color: 0x18181a, roughness: 0.45, metalness: 0.2 }),
+  });
+  M.living = [M.lPaint, M.lCeiling, M.lSkirting, M.lFloor, M.lRug, M.lOak, M.lMetal, M.lCeramic, M.frame];
+  // soft shadows that sit on a surface: square (under things with corners), round, and fading down a wall (under a
+  // shelf); their strength rides in each one's vertex colour, so they all merge into three draw calls
+  const decal = map => new THREE.MeshBasicMaterial({ map, vertexColors: true, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  Object.assign(M, { shadeSq: decal(blurTex("square")), shadeRound: decal(blurTex("round")), shadeFade: decal(blurTex("fade")) });
   M.kitchen = [M.kPaint, M.kCeiling, M.kSkirting, M.tile, M.subway, M.marble, M.cab, M.plinth, M.appliance, M.basin, M.blackGlass, M.brass,
                M.fruit, M.terracotta, M.herb];
   M.exterior = [M.siding, M.corner, M.found, M.alu, M.fascia, M.soffit, M.deck, M.cedar, M.concrete, M.cable, M.steel, M.glass, M.frosted];
@@ -193,7 +225,7 @@ function collector() {
       const mesh = new THREE.Mesh(mergeGeometries(geos), mat);
       mesh.castShadow = !mat.transparent && mat.isMeshStandardMaterial;
       mesh.receiveShadow = !mat.transparent && !mat.isMeshBasicMaterial;
-      if (mat.transparent) mesh.renderOrder = 1;
+      if (mat.transparent) mesh.renderOrder = mat.vertexColors && mat.isMeshBasicMaterial ? 2 : 1;
       group.add(mesh);
     }
   };
@@ -257,6 +289,11 @@ const vcol = (g, top, bottom) => {
 /* ---------- the house ---------- */
 export function makeHouse(quality, renderer, ready = () => {}, portrait = false) {
   const q = quality === "high", M = mats(q), C = collector(), group = new THREE.Group(), wallQuad = C.wallQuad;
+  // shadows: lying on a level surface at height y, or on a wall facing +x (at x) or +z (at z), strength k
+  const tint = (g, k) => g.setAttribute("color", new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count * 4).map((_, i) => (i % 4 === 3 ? k : 0)), 4));
+  const shadeH = (mat, x0, x1, z0, z1, y, k) => C.put(mat, tint(new THREE.PlaneGeometry(x1 - x0, z1 - z0).rotateX(-Math.PI / 2).translate((x0 + x1) / 2, y, (z0 + z1) / 2), k));
+  const shadeX = (mat, x, z0, z1, y0, y1, k) => C.put(mat, tint(new THREE.PlaneGeometry(z1 - z0, y1 - y0).rotateY(Math.PI / 2).translate(x, (y0 + y1) / 2, (z0 + z1) / 2), k));
+  const shadeZ = (mat, z, x0, x1, y0, y1, k) => C.put(mat, tint(new THREE.PlaneGeometry(x1 - x0, y1 - y0).translate((x0 + x1) / 2, (y0 + y1) / 2, z), k));
   // the whiteboard: upright on a phone held upright, wide otherwise; its frame is 6 cm all round
   const board = makeBoard("services", portrait), bs = boardSize(portrait), menuBoard = makeBoard("menu", portrait);
   OFFICE.board.w = bs.w + 12; OFFICE.board.h = bs.h + 12;
@@ -280,7 +317,7 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
       l.rotateY(Math.PI); l.translate(len, 0, -T - 0.3);
       C.put(lining, l, m);
     }
-    for (const [x, y, w, wh, kind = "room", bars = []] of windows) windowUnit(m, x, y, w, wh, kind, bars, inside, lining === M.kPaint ? M.kSkirting : M.skirting);
+    for (const [x, y, w, wh, kind = "room", bars = []] of windows) windowUnit(m, x, y, w, wh, kind, bars, inside, lining === M.kPaint ? M.kSkirting : lining === M.lPaint ? M.lSkirting : M.skirting);
     for (const [x, w, dh] of doors) {   // the door's black frame
       C.box(M.alu, x - 5, x, 0, dh + 5, -T - 1, 2, m); C.box(M.alu, x + w, x + w + 5, 0, dh + 5, -T - 1, 2, m);
       C.box(M.alu, x - 5, x + w + 5, dh, dh + 5, -T - 1, 2, m);
@@ -335,10 +372,11 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
 
   /* ground floor: x -630..290, z -330..330, siding from a concrete foundation at 14 cm up to 300 */
   const G0 = 14;
-  wall({ x0: -630, z0: 330, ry: 0, y0: G0, len: 920, h: 300 - G0, top: 300, doors: [[200, 96, 215 - G0], [606, 292, 235 - G0]] });
-  wall({ x0: -630, z0: -315, ry: -Math.PI / 2, y0: G0, len: 630, h: 300 - G0, top: 300, windows: [[250, 120 - G0, 110, 126, "room", [55]]] });
+  const L = { inside: true, lining: M.lPaint };
+  wall({ x0: -630, z0: 330, ry: 0, y0: G0, len: 920, h: 300 - G0, top: 300, doors: [[200, 96, 215 - G0], [606, 292, 235 - G0]], ...L });
+  wall({ x0: -630, z0: -315, ry: -Math.PI / 2, y0: G0, len: 630, h: 300 - G0, top: 300, windows: [[250, 120 - G0, 110, 126, "office", [55]]], ...L });
   wall({ x0: 290, z0: 315, ry: Math.PI / 2, y0: G0, len: 630, h: 300 - G0, top: 300, windows: [[200, 136 - G0, 150, 110, "room"]] });
-  wall({ x0: 290, z0: -330, ry: Math.PI, y0: G0, len: 920, h: 300 - G0, top: 300 });
+  wall({ x0: 290, z0: -330, ry: Math.PI, y0: G0, len: 920, h: 300 - G0, top: 300, ...L });
   // the foundation, a little proud of the siding, with a concrete step at the front door
   C.box(M.found, -631, 291, -6, G0, -331, 316);
   for (const [a, b] of [[-631, -430], [-334, -24], [268, 291]]) C.box(M.found, a, b, -6, G0, 316, 331);
@@ -346,15 +384,19 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
   for (const [cx, cz, sx, sz] of [[-630, 330, -1, 1], [290, 330, 1, 1], [-630, -330, -1, -1], [290, -330, 1, -1]]) corner(cx, cz, sx, sz, G0, 300, 300);
 
   // the front door: black aluminium with a full-height frosted glass light and a long steel pull
+  // (a leaf of its own, hinged on the left, so it can swing open into the living room as the camera comes in)
+  const door = new THREE.Group();
   {
-    const x0 = -430, x1 = -334, z = 330 - T + 4;
-    C.box(M.alu, x0, x0 + 9, G0, 215, z, z + 4); C.box(M.alu, x1 - 9, x1, G0, 215, z, z + 4);
-    C.box(M.alu, x0, x1, 215 - 9, 215, z, z + 4); C.box(M.alu, x0, x1, G0, G0 + 12, z, z + 4);
-    C.put(M.roomBack, vcol(new THREE.PlaneGeometry(110, 220), [0.17, 0.16, 0.15], [0.09, 0.085, 0.08]).translate((x0 + x1) / 2, 110, 290));
-    C.put(M.frosted, new THREE.PlaneGeometry(x1 - x0 - 18, 215 - G0 - 21).translate((x0 + x1) / 2, (G0 + 12 + 206) / 2, z + 2));
-    C.put(M.glass, new THREE.PlaneGeometry(x1 - x0 - 18, 215 - G0 - 21).translate((x0 + x1) / 2, (G0 + 12 + 206) / 2, z + 2.3));
-    C.put(M.steel, new THREE.CylinderGeometry(1.3, 1.3, 90, 12).translate(x1 - 16, 120, z + 9));
-    for (const yy of [80, 160]) C.put(M.steel, new THREE.CylinderGeometry(0.9, 0.9, 5, 10).rotateX(Math.PI / 2).translate(x1 - 16, yy, z + 6));
+    const w = 96, z0 = 330 - T + 4, part = (geo, mat) => { const m = new THREE.Mesh(geo, mat); m.castShadow = !mat.transparent; m.receiveShadow = !mat.transparent; door.add(m); };
+    const bx = (x0, x1, y0, y1, z0b, z1b, mat = M.alu) => part(C.boxGeo(x1 - x0, y1 - y0, z1b - z0b).translate((x0 + x1) / 2, (y0 + y1) / 2, (z0b + z1b) / 2), mat);
+    bx(0, 9, G0, 215, 0, 4); bx(w - 9, w, G0, 215, 0, 4); bx(0, w, 215 - 9, 215, 0, 4); bx(0, w, G0, G0 + 12, 0, 4);
+    part(new THREE.PlaneGeometry(w - 18, 215 - G0 - 21).translate(w / 2, (G0 + 12 + 206) / 2, 2), M.frosted);
+    part(new THREE.PlaneGeometry(w - 18, 215 - G0 - 21).translate(w / 2, (G0 + 12 + 206) / 2, 2.3), M.glass);
+    part(new THREE.CylinderGeometry(1.3, 1.3, 90, 12).translate(w - 16, 120, 9), M.steel);
+    for (const yy of [80, 160]) part(new THREE.CylinderGeometry(0.9, 0.9, 5, 10).rotateX(Math.PI / 2).translate(w - 16, yy, 6), M.steel);
+    part(new THREE.CylinderGeometry(1.3, 1.3, 30, 12).translate(w - 16, 120, -5), M.steel);   // and a pull on the inside
+    door.position.set(-430, 0, z0);
+    group.add(door);
   }
   sconce(-458, 175, 330); sconce(281, 175, 330);
   // the garage door: an aluminium grid of frosted glass, 4 by 4
@@ -653,11 +695,26 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     // a crock of wooden spoons
     C.put(M.ceramic, new THREE.CylinderGeometry(6.5, 6, 17, 28).translate(kx0 + 20, top + 8.5, 140));
     for (const [a, l] of [[0.15, 30], [-0.2, 27], [0.05, 33], [-0.05, 25]]) C.put(M.oak, new THREE.CylinderGeometry(0.7, 0.7, l, 8).translate(0, l / 2, 0).rotateZ(a).rotateX(a * 0.8).translate(kx0 + 20, top + 6, 140));
-    C.put(M.oak, new THREE.BoxGeometry(2, 42, 30).rotateZ(0.12).translate(kx0 + 6, top + 21, -110));
-    for (const z of [-225, -170, -115]) {
-      C.put(M.terracotta, new THREE.CylinderGeometry(6, 4.6, 11, 20).translate(kx0 + 8, 445 + 5.5, z));
-      for (let k = 0; k < 5; k++) C.put(M.herb, new THREE.SphereGeometry(3.4, 12, 8).scale(1, 1.3, 1).translate(kx0 + 8 + Math.cos(k * 1.3) * 3, 445 + 14 + (k % 2) * 3, z + Math.sin(k * 1.3) * 3));
+    C.put(M.oak, new THREE.BoxGeometry(2, 42, 30).rotateZ(0.12).translate(kx0 + 6, top + 21, -78));
+    for (const z of [-240, -226, -128]) {
+      C.put(M.terracotta, new THREE.CylinderGeometry(6, 4.6, 11, 20).translate(kx0 + 12, top + 5.5, z));
+      for (let k = 0; k < 5; k++) C.put(M.herb, new THREE.SphereGeometry(3.4, 12, 8).scale(1, 1.3, 1).translate(kx0 + 12 + Math.cos(k * 1.3) * 3, top + 14 + (k % 2) * 3, z + Math.sin(k * 1.3) * 3));
+      shadeH(M.shadeRound, kx0 + 3, kx0 + 21, z - 9, z + 9, top + 0.12, 0.45);
     }
+    // soft shadows: along the foot of the cabinets, under the stools, round everything on the worktops, under the
+    // shelves, and behind the menu board
+    shadeH(M.shadeSq, kx0 + 44, kx0 + 76, kz0 + 56, 192, FLOOR + 0.3, 0.42);
+    shadeH(M.shadeSq, kx0 + 62, -390, kz0 + 44, kz0 + 76, FLOOR + 0.3, 0.42);
+    shadeH(M.shadeSq, kx0 + 56, kx0 + 84, 192, kz1, FLOOR + 0.3, 0.32);
+    for (const z of [-5, 45, 95]) shadeH(M.shadeRound, -428, -372, z - 28, z + 28, FLOOR + 0.3, 0.38);
+    shadeH(M.shadeRound, kx0 + 6, kx0 + 38, -61, -29, top + 0.12, 0.5);
+    shadeH(M.shadeRound, kx0 + 6, kx0 + 34, 126, 154, top + 0.12, 0.45);
+    shadeH(M.shadeSq, kx0 + 0, kx0 + 16, -98, -58, top + 0.12, 0.4);
+    shadeH(M.shadeSq, kx0 + 2, kx0 + 24, KDOOR.z0 - 14, KDOOR.z1 + 14, top + 0.12, 0.5);
+    shadeH(M.shadeRound, -506, -450, 32, 88, top + 0.12, 0.45);
+    for (const [z0, z1, y] of [[-82, -18, 512], [-82, -18, 552], [100, 186, 512], [100, 186, 552]]) shadeX(M.shadeFade, kx0 + 0.55, z0 - 3, z1 + 3, y - 15, y - 4, 0.26);
+    shadeX(M.shadeSq, kx0 + 0.55, KDOOR.z0 - 18, KDOOR.z1 + 18, top - 4, top + MENU_SIZE.h + 22, 0.55);
+    shadeZ(M.shadeFade, kz0 + 0.55, -548, -456, 500, 528, 0.4);
 
     // the menu board: a chalkboard in an oak frame, leaning back a little against the splashback
     {
@@ -674,14 +731,67 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     }
   }
 
-  // a soft shadow on the floor under furniture, where the room's light can't reach
-  function contact(x0, x1, z0, z1, k) {
-    const g = new THREE.PlaneGeometry(x1 - x0, z1 - z0).rotateX(-Math.PI / 2).translate((x0 + x1) / 2, FLOOR + 0.9, (z0 + z1) / 2);
-    const mesh = new THREE.Mesh(g, M.contact.clone());
-    mesh.material.opacity = k;
-    mesh.renderOrder = 2;
-    group.add(mesh);
+  /* ---------- the living room ---------- */
+  // In through the front door: an oak floor, a velvet sofa against the back wall with three framed reviews over it, a
+  // coffee table on a rug, side tables with a lamp, a plant, and the sun coming in at the side window.
+  const prints = makePrints(portrait), ps = printSize(portrait), living = {};
+  {
+    const { x0, x1, z0, z1, y0, y1 } = LIV, F = y0 + 0.2;
+    C.flatXZ(M.lFloor, x0, x1, z0, z1, F);
+    C.flatXZ(M.lCeiling, x0, x1, z0, z1, y1, true);
+    C.box(M.lPaint, x1, -24, G0, 300, -315, 315);                          // the wall to the garage
+    C.box(M.lSkirting, x0, x1, F, F + 10, z0, z0 + 1.5);
+    C.box(M.lSkirting, x0, x0 + 1.5, F, F + 10, z0, z1);
+    C.box(M.lSkirting, x1 - 1.5, x1, F, F + 10, z0, z1);
+    C.box(M.lSkirting, x0, -437, F, F + 10, z1 - 1.5, z1); C.box(M.lSkirting, -327, x1, F, F + 10, z1 - 1.5, z1);
+    C.box(M.lSkirting, -437, -430, F, 222, z1 - 2, z1); C.box(M.lSkirting, -334, -327, F, 222, z1 - 2, z1);   // the door's casing
+    C.box(M.lSkirting, -437, -327, 215, 222, z1 - 2, z1);
+    for (const [x, z] of [[-480, -150], [-280, -150], [-480, 120], [-280, 120], [-140, -100], [-140, 160]]) {
+      C.put(M.glow, new THREE.CircleGeometry(5, 20).rotateX(Math.PI / 2).translate(x, y1 - 0.2, z));
+      C.put(M.lMetal, new THREE.RingGeometry(5, 6.2, 24).rotateX(Math.PI / 2).translate(x, y1 - 0.15, z));
+    }
+    // the rug and the coffee table
+    C.flatXZ(M.lRug, LX - 160, LX + 160, -238, -18, F + 0.6);
+    C.box(M.lRug, LX - 160, LX + 160, F, F + 0.6, -238, -18);
+    C.box(M.lOak, LX - 62, LX + 62, F + 37, F + 41, -168, -104);
+    C.box(M.lOak, LX - 58, LX + 58, F + 12, F + 14, -164, -108);
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) C.box(M.lMetal, LX + sx * 56 - 1.5, LX + sx * 56 + 1.5, F + 0.6, F + 37, -136 + sz * 26 - 1.5, -136 + sz * 26 + 1.5);
+    C.put(M.lCeramic, new THREE.CylinderGeometry(9, 7, 12, 28).translate(LX + 30, F + 47, -140));       // a vase
+    C.box(M.lMetal, LX - 40, LX - 12, F + 41, F + 44, -150, -128);                                     // a book
+    shadeH(M.shadeSq, LX - 70, LX + 70, -176, -96, F + 0.9, 0.42);
+    // side tables either end of the sofa, a lamp on one
+    for (const sx of [-1, 1]) {
+      const x = LX + sx * 145, z = -280;
+      C.put(M.lOak, new THREE.CylinderGeometry(24, 24, 3, 40).translate(x, F + 55, z));
+      C.put(M.lMetal, new THREE.CylinderGeometry(1.6, 1.6, 52, 12).translate(x, F + 27, z));
+      C.put(M.lMetal, new THREE.CylinderGeometry(14, 15, 1.5, 32).translate(x, F + 0.8, z));
+      shadeH(M.shadeRound, x - 30, x + 30, z - 30, z + 30, F + 0.3, 0.4);
+    }
+    C.put(M.lCeramic, new THREE.CylinderGeometry(6, 8, 30, 24).translate(LX - 145, F + 71.5, -280));
+    C.put(M.glow, new THREE.CylinderGeometry(15, 19, 24, 32, 1, true).translate(LX - 145, F + 96, -280));
+    shadeH(M.shadeRound, LX - 160, LX - 130, -295, -265, F + 56.6, 0.4);
+    shadeH(M.shadeSq, LX - 120, LX + 120, -318, -190, F + 0.3, 0.5);   // under the sofa, which loads below
+    // the reviews: three framed prints on the wall over the sofa, side by side, or stacked on a phone held upright
+    const fw = ps.w + 4, fh = ps.h + 4, zf = z0 + 0.3, cy = portrait ? 188 : 180;
+    prints.textures.forEach((tex, i) => {
+      const cx = portrait ? LX : LX + (i - 1) * (fw + 12), y = portrait ? cy + (1 - i) * (fh + 8) : cy;
+      const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.65 });
+      M.living.push(mat);
+      C.put(mat, new THREE.PlaneGeometry(ps.w, ps.h).translate(cx, y, zf + 1.6));
+      C.box(M.frame, cx - fw / 2, cx + fw / 2, y + ps.h / 2, y + fh / 2, zf, zf + 3);
+      C.box(M.frame, cx - fw / 2, cx + fw / 2, y - fh / 2, y - ps.h / 2, zf, zf + 3);
+      C.box(M.frame, cx - fw / 2, cx - ps.w / 2, y - ps.h / 2, y + ps.h / 2, zf, zf + 3);
+      C.box(M.frame, cx + ps.w / 2, cx + fw / 2, y - ps.h / 2, y + ps.h / 2, zf, zf + 3);
+      C.box(M.lPaint, cx - ps.w / 2, cx + ps.w / 2, y - ps.h / 2, y + ps.h / 2, zf, zf + 1.4);
+      shadeZ(M.shadeFade, zf + 0.25, cx - fw / 2, cx + fw / 2, y - fh / 2 - 4, y - fh / 2 + 0.5, 0.2);
+    });
+    const span = portrait ? { w: fw, h: 3 * fh + 16 } : { w: 3 * fw + 24, h: fh };
+    living.center = new THREE.Vector3(LX, cy, zf + 1.6);
+    living.size = span;
   }
+
+  // a soft shadow on the floor under furniture, where the room's light can't reach
+  function contact(x0, x1, z0, z1, k, y = FLOOR) { shadeH(M.shadeSq, x0, x1, z0, z1, y + 0.3, k); }
 
   /* ---------- planting: shrubs and ornamental grasses along the front, and trees round the house ---------- */
   {
@@ -726,11 +836,11 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     group.add(m);
   }
 
+  contact(-205, -95, -240, -145, 0.42);   // under the armchair and the plant, which load below
+  contact(-262, -170, -290, -195, 0.4);
   C.build(group);
   for (const l of lights) group.add(l);
 
-  contact(-205, -95, -240, -145, 0.42);   // under the armchair and the plant, which load below
-  contact(-262, -170, -290, -195, 0.4);
 
   /* ---------- getting it ready, off the page's thread where it can be ---------- */
   // The surfaces are painted and the sky decoded in a worker, and the furniture loads, while the visitor is still up
@@ -766,14 +876,20 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
   const models = Promise.all([
     model("plant.glb", -212, -238, 165, 0.4),       // a potted plant in the corner by the board
     model("chair.glb", -150, -190, 100, 0.55),       // a velvet armchair, turned to the room
+    model("sofa.glb", LX, -249, 100, 0).then(o => { if (o) o.position.y = LIV.y0 + 0.2; return o; }),   // the living room's sofa
   ]);
-  Promise.all([surfaces, sky, models, board.ready, menuBoard.ready]).then(([surf, skyTex, objs]) => {
+  Promise.all([surfaces, sky, models, board.ready, menuBoard.ready, prints.ready]).then(([surf, skyTex, objs]) => {
     if (worker) worker.terminate();
     const roomEnv = pmrem.fromScene(officeLight(), 0.035, 1, 3000).texture;
     for (const m of M.interior) { m.envMap = roomEnv; m.envMapIntensity = 1; m.needsUpdate = true; }
     const kitchenEnv = pmrem.fromScene(kitchenLight(), 0.035, 1, 3000).texture;
     for (const m of [...M.kitchen, M.glassClear]) { m.envMap = kitchenEnv; m.envMapIntensity = 1; m.needsUpdate = true; }
     for (const p of surf) if (p) { Object.assign(p[0], p[1], { roughness: 1 }); p[0].needsUpdate = true; }
+    // the living room shares the office's oak and wool
+    for (const [to, from] of [[M.lFloor, M.floor], [M.lRug, M.rug], [M.lOak, M.oak]])
+      if (from.map) { Object.assign(to, { map: from.map, normalMap: from.normalMap, roughnessMap: from.roughnessMap }); to.needsUpdate = true; }
+    const livingEnv = pmrem.fromScene(livingLight(), 0.035, 1, 3000).texture;
+    for (const m of M.living) { m.envMap = livingEnv; m.envMapIntensity = 1; m.needsUpdate = true; }
     if (skyTex) {
       const env = pmrem.fromEquirectangular(skyTex).texture;
       skyTex.dispose();
@@ -783,23 +899,48 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
         m.needsUpdate = true;
       }
     }
-    if (objs[0]) {   // the plant again, in the kitchen's front corner
+    if (objs[0]) {   // the plant again, in the kitchen's front corner, and in the living room by the sofa
       const o = objs[0].clone();
       o.position.set(KIT.x1 - 34, FLOOR, KIT.z1 - 40); o.rotation.y = 2.2;
       objs.push(o);
+      const l = objs[0].clone();
+      l.position.set(LX + 215, LIV.y0 + 0.2, -262); l.rotation.y = 1.1;
+      objs.push(l);
     }
     for (const o of objs) if (o) {
+      const env = o === objs[2] ? livingEnv : roomEnv;   // the sofa; the plants all share the office plant's materials
       o.traverse(n => {
         if (!n.isMesh) return;
         n.castShadow = n.receiveShadow = true;
-        for (const m of [].concat(n.material)) { m.envMap = roomEnv; m.envMapIntensity = 1; }
+        for (const m of [].concat(n.material)) { m.envMap = env; m.envMapIntensity = 1; }
       });
       group.add(o);
     }
     ready();
   });
 
-  return { group, board: { reveal: board.reveal }, menu: { reveal: menuBoard.reveal }, kitchen };
+  return { group, board: { reveal: board.reveal }, menu: { reveal: menuBoard.reveal }, kitchen, living,
+           door: { open: a => { door.rotation.y = a; } } };
+}
+
+// the living room's daylight: the side window faces the sun, the open front door lets in the garden
+function livingLight() {
+  const s = new THREE.Scene(), { x0, x1, z0, z1, y0, y1 } = LIV;
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, cz = (z0 + z1) / 2, W = x1 - x0, H = y1 - y0, D = z1 - z0;
+  const basic = (r, g, b) => new THREE.MeshBasicMaterial({ color: new THREE.Color(r, g, b), side: THREE.DoubleSide });
+  const quad = (w, h, mat, x, y, z, rx = 0, ry = 0) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    m.rotation.set(rx, ry, 0); m.position.set(x - cx, y - cy, z - cz); s.add(m);
+  };
+  const walls = basic(0.56, 0.545, 0.52), floor = basic(0.5, 0.43, 0.34), ceil = basic(0.5, 0.495, 0.48);
+  quad(W, D, floor, cx, y0, cz, -Math.PI / 2);
+  quad(W, D, ceil, cx, y1, cz, Math.PI / 2);
+  quad(W, H, walls, cx, cy, z0); quad(W, H, walls, cx, cy, z1, 0, Math.PI);
+  quad(D, H, walls, x0, cy, cz, 0, Math.PI / 2); quad(D, H, walls, x1, cy, cz, 0, -Math.PI / 2);
+  quad(110, 126, basic(4.0, 4.0, 3.8), x0 + 1, 183, -10, 0, Math.PI / 2);     // the sunny window
+  quad(96, 200, basic(2.4, 2.6, 2.9), LX, 114, z1 - 1, 0, Math.PI);           // the open front door
+  quad(170, 110, basic(1.5, 1.3, 1.0), -540, y0 + 1, -20, -Math.PI / 2);       // sun on the floor
+  return s;
 }
 
 // the kitchen's daylight, the same way: the big window over the sink faces the sun, so it's bright and throws a
