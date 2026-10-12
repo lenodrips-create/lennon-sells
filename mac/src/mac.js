@@ -1,5 +1,5 @@
 // A real-time 3D MacBook (Air-like proportions, in centimetres) for the laptop page.
-// Its display shows the project gallery strip. Next door stands a modern house (house.js); scrolling on, the camera
+// Its display shows the project gallery, one picture at a time. Next door stands a modern house (house.js); scrolling on, the camera
 // leaves the laptop, flies across the lawn to the house, over the balcony and in through the open door to the office,
 // and stops square on to the chalkboard on its back wall. The page drives it with Mac.update(rise, go, now, dt):
 // rise is how far the camera has come down from the sky (0..1), go how far it has gone towards the chalkboard.
@@ -222,18 +222,17 @@ lid.add(bezel);
 const SCR_W = 28.8, SCR_H = SCR_W / 1.538, SCR_TOP_BEZEL = 0.62;
 const SCR_ZC = D - LID_H / 2 - SCR_TOP_BEZEL - SCR_H / 2;   // centre along the lid, measured from the hinge
 
-/* ---------- the display: the gallery strip, rendered into a texture ---------- */
+/* ---------- the display: the project gallery, one picture at a time, rendered into a texture ---------- */
 const TW = 1280, TH = Math.round(TW / 1.538);
 const rt = new THREE.WebGLRenderTarget(TW, TH, { samples: 4 });
 const screenScene = new THREE.Scene();
 const screenCam = new THREE.OrthographicCamera(-TW / 2, TW / 2, TH / 2, -TH / 2, -10, 10);
 const loader = new THREE.TextureLoader();
-const SHOTS = [["01", 1.78], ["02", 1.02], ["03", 1.84], ["04", 1.5], ["05", 1.5], ["06", 1.5], ["11", 1.5],
-               ["12", 1.5], ["13", 1.5], ["14", 1.5], ["16", 1.5], ["20", 0.8], ["21", 1.78]].map(([n, a]) => [n, Math.round(118 * a)]);
-const COPIES = 2, CGAP = 6, TOTAL = SHOTS.reduce((a, [, w]) => a + w + CGAP, 0), SEG = 12;
-const k = TW / 934, baseH = TH * 0.36;
+const SHOTS = ["01", "02", "03", "04", "05", "06", "11", "12", "13", "14", "16", "20", "21"];
+const SLIDE = 3.6, FADE = 0.8;                 // seconds each picture shows, and the cross-fade into the next
+const AREA = { x0: 46, x1: TW - 46, y0: 126, y1: TH - 92 };   // where the picture sits, between the page's header and footer
 
-// background and text, drawn once
+// the page around the picture: its header and footer, over a blur of the picture showing
 const bgCanvas = document.createElement("canvas");
 bgCanvas.width = TW; bgCanvas.height = TH;
 const bgTex = new THREE.CanvasTexture(bgCanvas);
@@ -241,7 +240,7 @@ bgTex.colorSpace = THREE.SRGBColorSpace;
 const bg = new THREE.Mesh(new THREE.PlaneGeometry(TW, TH), new THREE.MeshBasicMaterial({ map: bgTex, toneMapped: false }));
 bg.position.z = -1;
 screenScene.add(bg);
-function drawBackground(img) {
+function drawBackground(img, n) {
   const x = bgCanvas.getContext("2d");
   x.fillStyle = "#151515"; x.fillRect(0, 0, TW, TH);
   if (img) {   // blur by drawing small and scaling up
@@ -249,7 +248,7 @@ function drawBackground(img) {
     t.getContext("2d").drawImage(img, 0, 0, 48, 31);
     x.imageSmoothingQuality = "high";
     x.drawImage(t, -TW * 0.04, -TH * 0.04, TW * 1.08, TH * 1.08);
-    x.fillStyle = "rgba(8,8,10,0.62)"; x.fillRect(0, 0, TW, TH);
+    x.fillStyle = "rgba(8,8,10,0.66)"; x.fillRect(0, 0, TW, TH);
   }
   const font = s => `${s}px -apple-system, "Helvetica Neue", Inter, Arial, sans-serif`;
   x.fillStyle = "#f2f2f2"; x.textBaseline = "top"; x.textAlign = "left";
@@ -257,57 +256,48 @@ function drawBackground(img) {
   x.fillText("Software Developer", 236, 58); x.fillText("based in Greencastle, PA", 236, 82);
   x.fillText("Index   Info   Archive", 730, 58);
   x.textAlign = "right"; x.fillText("Email", TW - 26, 58);
-  x.textAlign = "center"; x.font = font(17); x.fillText("© 2026 Lennon Helman", TW / 2, TH - 52);
+  x.textAlign = "left"; x.font = font(17); x.fillText(`Project ${String(n + 1).padStart(2, "0")} / ${String(SHOTS.length).padStart(2, "0")}`, 46, TH - 58);
+  x.textAlign = "right"; x.fillText("© 2026 Lennon Helman", TW - 46, TH - 58);
   bgTex.needsUpdate = true;
 }
-drawBackground(null);
-const bgImg = new Image();
-bgImg.onload = () => { drawBackground(bgImg); dirty = true; };
-bgImg.src = "img/work/01.jpg";
+drawBackground(null, 0);
 
-const cards = [];
-for (let copy = 0; copy < COPIES; copy++)
-  SHOTS.forEach(([n, w], i) => {
-    const geo = new THREE.PlaneGeometry(1, 1, SEG, 1);
-    const mat = new THREE.MeshBasicMaterial({ toneMapped: false });
-    const mesh = new THREE.Mesh(geo, mat);
-    screenScene.add(mesh);
-    const card = { mesh, w, start: copy * TOTAL + SHOTS.slice(0, i).reduce((a, [, v]) => a + v + CGAP, 0) };
-    loader.load(`img/work/${n}.jpg`, tex => {
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = 4;
-      // crop the picture to cover its card
-      const ac = (w * k) / baseH, ai = tex.image.width / tex.image.height;
-      const uv = geo.attributes.uv;
-      let u0 = 0, u1 = 1, v0 = 0, v1 = 1;
-      if (ai > ac) { const uw = ac / ai; u0 = (1 - uw) / 2; u1 = 1 - u0; } else { const vh = ai / ac; v0 = (1 - vh) / 2; v1 = 1 - v0; }
-      for (let i2 = 0; i2 < uv.count; i2++) uv.setXY(i2, u0 + (u1 - u0) * uv.getX(i2), v0 + (v1 - v0) * uv.getY(i2));
-      uv.needsUpdate = true;
-      mat.map = tex; mat.needsUpdate = true;
-      dirty = true;
-    });
-    cards.push(card);
-  });
-const centre = (u, t) => 0.57 + 0.028 * Math.sin(2 * Math.PI * (u * 1.1 - t * 0.12)) + 0.012 * Math.sin(2 * Math.PI * (u * 2.3 + t * 0.21));
-const half = (u, t) => 0.112 + 0.108 * Math.sin(Math.PI * clamp01(u)) * (1 + 0.06 * Math.sin(t * 0.9 + u * 4));
-let offset = 0;
-function layoutStrip(t) {
-  const span = COPIES * TOTAL;
-  for (const c of cards) {
-    let x0 = ((c.start - offset) % span + span) % span;
-    if (x0 > 934) x0 -= span;
-    const x1 = x0 + c.w;
-    c.mesh.visible = x1 > 0 && x0 < 934;
-    if (!c.mesh.visible) continue;
-    const p = c.mesh.geometry.attributes.position;
-    for (let i = 0; i <= SEG; i++) {
-      const xs = x0 + ((x1 - x0) * i) / SEG, u = xs / 934;
-      const top = (centre(u, t) - half(u, t)) * TH, bot = (centre(u, t) + half(u, t)) * TH;
-      p.setXYZ(i, xs * k - TW / 2, TH / 2 - top, 0);             // top row
-      p.setXYZ(i + SEG + 1, xs * k - TW / 2, TH / 2 - bot, 0);   // bottom row
-    }
-    p.needsUpdate = true;
-  }
+// the pictures, and two frames to show them in: the one going and the one coming
+const blank = new THREE.DataTexture(new Uint8Array([21, 21, 21, 255]), 1, 1);
+blank.needsUpdate = true;
+const slides = SHOTS.map(n => ({ n, tex: null }));
+slides.forEach((s, i) => loader.load(`img/work/${s.n}.jpg`, tex => {
+  tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+  s.tex = tex;
+  if (i === 0) drawBackground(tex.image, 0);
+  dirty = true;
+}));
+const frames = [0, 1].map(i => {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: blank, transparent: true, toneMapped: false, depthTest: false }));
+  m.renderOrder = i;
+  screenScene.add(m);
+  return m;
+});
+let slideT = 0, shown = -1;
+// a picture, whole and as large as fits, drifting a touch larger as it shows (and in from the side as it arrives)
+function frame(mesh, s, alpha, slideIn, age) {
+  mesh.visible = !!s.tex && alpha > 0.002;
+  if (!mesh.visible) return;
+  if (mesh.material.map !== s.tex) mesh.material.map = s.tex;
+  const aw = AREA.x1 - AREA.x0, ah = AREA.y1 - AREA.y0, ia = s.tex.image.width / s.tex.image.height;
+  let w = aw, h = aw / ia;
+  if (h > ah) { h = ah; w = ah * ia; }
+  const kb = 0.97 + 0.03 * clamp01(age / (SLIDE + FADE));
+  mesh.scale.set(w * kb, h * kb, 1);
+  mesh.position.set((AREA.x0 + AREA.x1) / 2 - TW / 2 + slideIn * 48, TH / 2 - (AREA.y0 + AREA.y1) / 2, 0);
+  mesh.material.opacity = alpha;
+}
+function showSlides() {
+  const i = Math.floor(slideT / SLIDE), f = slideT - i * SLIDE, a = smooth(0, FADE, f);
+  const cur = slides[i % slides.length], prev = slides[(i - 1 + slides.length) % slides.length];
+  frame(frames[0], prev, i > 0 ? 1 - a : 0, -a, f + SLIDE);
+  frame(frames[1], cur, i > 0 ? a : 1, 1 - a, f);
+  if (i % slides.length !== shown && cur.tex) { shown = i % slides.length; drawBackground(cur.tex.image, shown); }
 }
 
 const display = new THREE.Mesh(new THREE.PlaneGeometry(SCR_W, SCR_H), decal(new THREE.MeshBasicMaterial({ map: rt.texture, toneMapped: false }), 4));
@@ -351,7 +341,7 @@ const HOUSE_DIST = 1000, HOUSE_ROT = -Math.PI / 6;
 // sight, with the sun's shadow round it, so its shadow shaders are made and everything is on the GPU; then redraw.
 // Nothing has to be compiled or uploaded when the house first comes into view, which is what makes a flight stutter.
 const house = makeHouse(quality, renderer, () => renderer.compileAsync(scene, camera).catch(() => {}).then(() => {
-  // three draws from along the flight (and in the kitchen) into one pixel of the canvas (the same shaders as a real frame; a render target
+  // draws from along the flight (and in the kitchen and the living room) into one pixel of the canvas (the same shaders as a real frame; a render target
   // would get different ones), so the house's shaders are linked and its geometry and textures are on the GPU
   // before it's seen. The next frame draws over that pixel.
   if (!openFit) resize();
@@ -360,14 +350,16 @@ const house = makeHouse(quality, renderer, () => renderer.compileAsync(scene, ca
   aimSun(1);
   renderer.autoClear = false;
   renderer.setViewport(0, 0, 1, 1);
-  for (const [path, t] of [["pos", 0.5], ["pos", 0.97], ["kpos", 1]]) {
-    tour[path].getPoint(t, warm.position); tour[path === "pos" ? "look" : "klook"].getPoint(t, look);
+  for (const [path, t] of [["pos", 0.5], ["pos", 0.97], ["kpos", 1], ["lpos", 1]]) {
+    tour[path].getPoint(t, warm.position); tour[{ pos: "look", kpos: "klook", lpos: "llook" }[path]].getPoint(t, look);
     warm.up.set(0, 1, 0); warm.lookAt(look);
     warm.near = 4; warm.far = 30000; warm.fov = 60; warm.updateProjectionMatrix();
     renderer.render(scene, warm);
   }
   renderer.setViewport(0, 0, vw, vh);
   renderer.autoClear = true;
+  for (const f of frames) f.visible = true;   // and the gallery's picture frames, on the laptop's screen
+  renderer.setRenderTarget(rt); renderer.render(screenScene, screenCam); renderer.setRenderTarget(null);
   aimSun(sunT);
   dirty = true;
   window.dispatchEvent(new Event("mac-ready"));
@@ -489,7 +481,22 @@ function planTour() {
     kw(K.center.x - 1, K.center.y, K.center.z)], false, "centripetal");
   const kTanV = portrait ? K.size.w / 0.88 / 2 / dK / aspect : Math.max(K.size.h / 0.6 / 2 / dK, K.size.w / 0.4 / 2 / dK / aspect);
   const fovK = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(kTanV)), 32, 76);
-  return { pos, look, fovMid: portrait ? 64 : 44, fovEnd, kpos, klook, fovK };
+  // and on to the living room for the reviews: back through the office, out over the balcony, down to the front door
+  // (which swings open), and in to the wall over the sofa
+  const V = house.living, LX = V.center.x;
+  const dL = portrait ? V.size.w / 0.9 / 2 / 0.19 : 470;
+  // (on a wide screen it looks a little lower than the prints, so the sofa's in the picture under them)
+  const lEnd = new THREE.Vector3(LX, V.center.y - (portrait ? 4 : 35), V.center.z + dL);
+  const lAim = V.center.clone().add(new THREE.Vector3(0, portrait ? 0 : -45, 0));
+  const lpos = new THREE.CatmullRomCurve3([kEnd, new THREE.Vector3(-320, OFFICE.eye, K.center.z), new THREE.Vector3(-120, OFFICE.eye - 6, 60),
+    new THREE.Vector3(0, 470, 200), new THREE.Vector3(-170, 480, 640), new THREE.Vector3(LX, 170, 470), new THREE.Vector3(LX, 166, 300), lEnd]
+    .map(v => kw(v.x, v.y, v.z)), false, "centripetal");
+  const llook = new THREE.CatmullRomCurve3([K.center, new THREE.Vector3(-150, 470, 45), new THREE.Vector3(0, 440, 300),
+    new THREE.Vector3(-120, 300, 560), new THREE.Vector3(LX, 150, 330), new THREE.Vector3(LX, 166, 0), new THREE.Vector3(LX, lAim.y, -150), lAim]
+    .map(v => kw(v.x, v.y, v.z)), false, "centripetal");
+  const lTanV = portrait ? V.size.w / 0.9 / 2 / dL / aspect : Math.max(V.size.w / 0.5 / 2 / dL / aspect, (V.size.h / 2 + 50) / dL);
+  const fovL = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(lTanV)), 30, 76);
+  return { pos, look, fovMid: portrait ? 64 : 44, fovEnd, kpos, klook, fovK, lpos, llook, fovL };
 }
 
 // Resolution: sharp but within a pixel budget, and lowered on the fly (then raised again) if frames run slow, so
@@ -523,18 +530,18 @@ function resize() {
 }
 
 /* ---------- per-frame update ---------- */
-let dirty = true, last = { rise: -1, go: -1, kit: -1 };
+let dirty = true, last = { rise: -1, go: -1, kit: -1, liv: -1 };
 const descT = new THREE.Vector3(), look = new THREE.Vector3(), SKY_T = new THREE.Vector3(0, 0, 0);
 // the services write themselves on the whiteboard once the camera has arrived in front of it, and are wiped again
 // once it has left the room, so they're written afresh on each visit; the kitchen's menu board the same
 let writing = 0, menuWriting = 0, busy = false;
-function update(rise, go, kit, now, dt) {
+function update(rise, go, kit, liv, now, dt) {
   if (!openFit) resize();
   // the gallery flows while the laptop's in view
   const stripOn = rise > 0 && go < 0.35;
-  if (stripOn && !reduce) offset = (offset + dt * 38) % TOTAL;
+  if (stripOn && !reduce) slideT += dt;
   const was = writing + menuWriting * 2;
-  const atBoard = go >= 0.999 && kit <= 0.001, atMenu = kit >= 0.999;
+  const atBoard = go >= 0.999 && kit <= 0.001, atMenu = kit >= 0.999 && liv <= 0.001;
   if (atBoard) writing = reduce ? 1 : Math.min(1, writing + dt / WRITE_SECONDS);
   else if (go < 0.6) writing = 0;
   if (atMenu) menuWriting = reduce ? 1 : Math.min(1, menuWriting + dt / WRITE_SECONDS);
@@ -542,9 +549,9 @@ function update(rise, go, kit, now, dt) {
   busy = (atBoard && writing < 1) || (atMenu && menuWriting < 1);
   house.board.reveal.value = writing;
   house.menu.reveal.value = menuWriting;
-  if (!stripOn && !dirty && rise === last.rise && go === last.go && kit === last.kit && writing + menuWriting * 2 === was) return;
+  if (!stripOn && !dirty && rise === last.rise && go === last.go && kit === last.kit && liv === last.liv && writing + menuWriting * 2 === was) return;
   const redraw = stripOn || dirty;   // the display's picture needs drawing again
-  last.rise = rise; last.go = go; last.kit = kit; dirty = false;
+  last.rise = rise; last.go = go; last.kit = kit; last.liv = liv; dirty = false;
 
   lid.rotation.x = -OPEN;
   // coming down from the sky: from high above the lawn, turning as it drops, to the view of the open laptop
@@ -576,6 +583,16 @@ function update(rise, go, kit, now, dt) {
     camera.lookAt(look);
     fov = L(tour.fovEnd, tour.fovK, smooth(0.1, 0.9, u));
   }
+  // and from the kitchen out and round to the living room
+  const v = clamp01(liv);
+  if (v > 0) {
+    tour.lpos.getPoint(v, camera.position);
+    tour.llook.getPoint(v, look);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(look);
+    fov = v < 0.5 ? L(tour.fovK, 56, smooth(0.1, 0.4, v)) : L(56, tour.fovL, smooth(0.75, 1, v));
+  }
+  house.door.open(smooth(0.6, 0.76, v) * THREE.MathUtils.degToRad(100));   // the front door swings open as the camera comes to it
   camera.fov = fov; camera.near = near; camera.far = far;
   camera.setViewOffset(vw, vh, 0, -shift, vw, vh);
   camera.updateProjectionMatrix();
@@ -583,7 +600,7 @@ function update(rise, go, kit, now, dt) {
   sky.position.copy(camera.position);
 
   if (redraw) {
-    layoutStrip(now / 1000);
+    showSlides();
     renderer.setRenderTarget(rt);
     renderer.render(screenScene, screenCam);
     renderer.setRenderTarget(null);
@@ -596,8 +613,8 @@ function update(rise, go, kit, now, dt) {
 
 addEventListener("resize", () => { resize(); });
 // once the web fonts are in, redraw the display's text and re-measure the headline the laptop sits under
-document.fonts && document.fonts.ready.then(() => { drawBackground(bgImg.complete && bgImg.naturalWidth ? bgImg : null); resize(); });
+document.fonts && document.fonts.ready.then(() => { shown = -1; resize(); });
 window.Mac = { update, resize, busy: () => busy };
 // draw once while the reel plays, so shaders and textures are ready before the laptop first rises
-(window.requestIdleCallback || (f => setTimeout(f, 200)))(() => update(0, 0, 0, performance.now(), 0));
+(window.requestIdleCallback || (f => setTimeout(f, 200)))(() => update(0, 0, 0, 0, performance.now(), 0));
 window.dispatchEvent(new Event("mac-ready"));
