@@ -14,7 +14,7 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import painterSrc from "./paint.worker.txt";   // paint.js, built as text (see package.json)
-import { makeBoard, boardSize, MENU_SIZE } from "./board.js";
+import { makeBoard, boardSize, MENU_SIZE, screenSize } from "./board.js";
 import { makePrints, printSize } from "./reviews.js";
 
 const T = 15;                         // wall thickness
@@ -299,6 +299,10 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
   OFFICE.board.w = bs.w + 12; OFFICE.board.h = bs.h + 12;
   M.board = board.writeOn(shaded(std0({ map: board.base, roughness: 0.3 }), "board", "aoRoom(p)"));
   M.interior.push(M.board);
+  const about = {};
+  // the office monitor's screen: unlit, it glows on its own
+  const aboutBoard = makeBoard("about", portrait);
+  M.screen = aboutBoard.writeOn(new THREE.MeshBasicMaterial({ map: aboutBoard.base, toneMapped: false }));
   M.menu = menuBoard.writeOn(shaded(std0({ map: menuBoard.base, roughness: 0.85 }), "menu", "aoRoom(p)"));
   M.kitchen.push(M.menu);
   const lights = [];
@@ -552,13 +556,40 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
       C.put(M.glow, new THREE.SphereGeometry(13, 32, 20).translate(x1 - 26, FLOOR + 104, zz + 20));
       contact(x0 - 6, x1 + 6, zz - 2, zz + 50, 0.55);
     }
-    // a desk along the left wall
+    // a desk along the left wall, set up for coding: a big monitor on a stand (turned upright on a phone held
+    // upright), a keyboard and mouse, a mug and a desk lamp. The monitor types out the about page.
     {
-      const dx = xl + 2, dz0 = -200, dz1 = -45, top = FLOOR + 74;
+      const dx = xl + 2, dz0 = -200, dz1 = -45, top = FLOOR + 74, zc = -122.5;
       C.box(M.oak, dx, dx + 72, top - 3, top, dz0, dz1);
       for (const lz of [dz0 + 3, dz1 - 6]) { C.box(M.blackMetal, dx + 4, dx + 7, FLOOR, top - 3, lz, lz + 3); C.box(M.blackMetal, dx + 64, dx + 67, FLOOR, top - 3, lz, lz + 3); }
-      C.box(M.blackMetal, dx + 20, dx + 45, top, top + 1.5, -135, -105);   // a closed notebook
       contact(dx - 4, dx + 76, dz0 - 4, dz1 + 4, 0.35);
+      const sc = screenSize(portrait), pw = sc.w + 2, ph = sc.h + 2, cy = top + (portrait ? 10 : 14) + ph / 2, fx = dx + 16;
+      C.box(M.blackMetal, fx - 2.4, fx, cy - ph / 2, cy + ph / 2, zc - pw / 2, zc + pw / 2);            // the panel
+      C.put(M.screen, new THREE.PlaneGeometry(sc.w, sc.h).rotateY(Math.PI / 2).translate(fx + 0.05, cy, zc));
+      C.box(M.blackMetal, fx - 7, fx - 3, top, cy, zc - 2.5, zc + 2.5);                                  // the stand
+      C.box(M.blackMetal, fx - 14, fx + 2, top, top + 1, zc - 11, zc + 11);
+      shadeH(M.shadeSq, fx - 17, fx + 5, zc - 14, zc + 14, top + 0.12, 0.45);
+      // keyboard, mouse, mug
+      C.box(M.felt, fx + 20, fx + 33, top, top + 1.4, zc - 22, zc + 22);
+      C.box(M.blackMetal, fx + 20.5, fx + 32.5, top + 1.4, top + 1.9, zc - 21.5, zc + 21.5);
+      shadeH(M.shadeSq, fx + 18, fx + 35, zc - 24, zc + 24, top + 0.12, 0.4);
+      C.put(M.blackMetal, new THREE.SphereGeometry(1, 20, 12).scale(3, 1.6, 2).translate(fx + 27, top + 1, zc + 34));
+      shadeH(M.shadeRound, fx + 22, fx + 32, zc + 29, zc + 39, top + 0.12, 0.4);
+      C.put(M.ceramic, new THREE.CylinderGeometry(4.2, 4, 9.5, 28).translate(fx + 22, top + 4.75, dz0 + 26));
+      C.put(M.ceramic, new THREE.TorusGeometry(2.6, 0.6, 8, 16).translate(fx + 22, top + 5, dz0 + 26 + 4.6));
+      shadeH(M.shadeRound, fx + 15, fx + 29, dz0 + 19, dz0 + 33, top + 0.12, 0.45);
+      // a black desk lamp at the far end, arm up and head angled down at the keyboard
+      const lx = dx + 10, lz = dz1 - 12;
+      C.put(M.blackMetal, new THREE.CylinderGeometry(7, 7.5, 1.6, 28).translate(lx, top + 0.8, lz));
+      C.put(M.blackMetal, new THREE.CylinderGeometry(0.8, 0.8, 42, 10).translate(0, 21, 0).rotateZ(-0.25).translate(lx, top + 1.6, lz));
+      C.put(M.blackMetal, new THREE.CylinderGeometry(0.7, 0.7, 30, 10).translate(0, 15, 0).rotateZ(-1.9).translate(lx + 10.2, top + 42, lz));
+      const hx = lx + 10.2 + 28.4, hy = top + 42 - 9.7;
+      C.put(M.blackMetal, new THREE.CylinderGeometry(3, 7, 11, 24, 1, true).rotateZ(0.4).translate(hx, hy - 3, lz));
+      C.put(M.glow, new THREE.CircleGeometry(6.4, 24).rotateX(Math.PI / 2).rotateZ(0.4).translate(hx + 2.2, hy - 8.2, lz));
+      shadeH(M.shadeRound, lx - 10, lx + 10, lz - 10, lz + 10, top + 0.12, 0.45);
+      about.center = new THREE.Vector3(fx + 0.05, cy, zc);
+      about.normal = new THREE.Vector3(1, 0, 0);
+      about.size = { w: pw, h: ph };
     }
   }
 
@@ -878,7 +909,7 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     model("chair.glb", -150, -190, 100, 0.55),       // a velvet armchair, turned to the room
     model("sofa.glb", LX, -249, 100, 0).then(o => { if (o) o.position.y = LIV.y0 + 0.2; return o; }),   // the living room's sofa
   ]);
-  Promise.all([surfaces, sky, models, board.ready, menuBoard.ready, prints.ready]).then(([surf, skyTex, objs]) => {
+  Promise.all([surfaces, sky, models, board.ready, menuBoard.ready, aboutBoard.ready, prints.ready]).then(([surf, skyTex, objs]) => {
     if (worker) worker.terminate();
     const roomEnv = pmrem.fromScene(officeLight(), 0.035, 1, 3000).texture;
     for (const m of M.interior) { m.envMap = roomEnv; m.envMapIntensity = 1; m.needsUpdate = true; }
@@ -919,7 +950,7 @@ export function makeHouse(quality, renderer, ready = () => {}, portrait = false)
     ready();
   });
 
-  return { group, board: { reveal: board.reveal }, menu: { reveal: menuBoard.reveal }, kitchen, living,
+  return { group, board: { reveal: board.reveal }, menu: { reveal: menuBoard.reveal }, screen: { reveal: aboutBoard.reveal }, about, kitchen, living,
            door: { open: a => { door.rotation.y = a; } } };
 }
 

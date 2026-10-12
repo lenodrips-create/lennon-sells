@@ -350,8 +350,8 @@ const house = makeHouse(quality, renderer, () => renderer.compileAsync(scene, ca
   aimSun(1);
   renderer.autoClear = false;
   renderer.setViewport(0, 0, 1, 1);
-  for (const [path, t] of [["pos", 0.5], ["pos", 0.97], ["kpos", 1], ["lpos", 1]]) {
-    tour[path].getPoint(t, warm.position); tour[{ pos: "look", kpos: "klook", lpos: "llook" }[path]].getPoint(t, look);
+  for (const [path, t] of [["pos", 0.5], ["pos", 0.97], ["apos", 1], ["kpos", 1], ["lpos", 1]]) {
+    tour[path].getPoint(t, warm.position); tour[{ pos: "look", apos: "alook", kpos: "klook", lpos: "llook" }[path]].getPoint(t, look);
     warm.up.set(0, 1, 0); warm.lookAt(look);
     warm.near = 4; warm.far = 30000; warm.fov = 60; warm.updateProjectionMatrix();
     renderer.render(scene, warm);
@@ -472,12 +472,20 @@ function planTour() {
   const share = portrait ? 0.92 : aspect < 1.35 ? 0.62 : 0.5;   // how much of the width the board takes at the end
   const tanH = B.w / share / 2 / (endZ - B.z);
   const fovEnd = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(tanH / aspect)), 32, 80);
-  // then on to the kitchen: turn left from the board, through the doorway, and stop square on to the menu board
-  const K = house.kitchen, kw = (x, y, z) => toWorld(x, y, z);
+  // then over to the desk on the left: sit down square on to the monitor, which types out the about page
+  const A = house.about, kw = (x, y, z) => toWorld(x, y, z);
+  const dA = portrait ? A.size.w / 0.9 / 2 / 0.2 : A.size.w / 0.58 / 2 / 0.56;
+  const aEnd = A.center.clone().addScaledVector(A.normal, dA);
+  const apos = new THREE.CatmullRomCurve3([kw(0, OFFICE.eye, endZ), kw(-70, OFFICE.eye - 12, -30), kw(aEnd.x, aEnd.y, aEnd.z)], false, "centripetal");
+  const alook = new THREE.CatmullRomCurve3([kw(0, B.y, B.z), kw(-280, A.center.y + 10, -110), kw(A.center.x, A.center.y, A.center.z)], false, "centripetal");
+  const aTanV = portrait ? A.size.w / 0.9 / 2 / dA / aspect : Math.max(A.size.w / 0.58 / 2 / dA / aspect, A.size.h / 0.7 / 2 / dA);
+  const fovA = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(aTanV)), 28, 76);
+  // then on to the kitchen: up from the desk, through the doorway, and stop square on to the menu board
+  const K = house.kitchen;
   const dK = portrait ? 215 : 235, kEnd = K.center.clone().addScaledVector(K.normal, dK);
-  const kpos = new THREE.CatmullRomCurve3([kw(0, OFFICE.eye, endZ), kw(-150, OFFICE.eye, K.center.z + 2),
+  const kpos = new THREE.CatmullRomCurve3([kw(aEnd.x, aEnd.y, aEnd.z), kw(-170, OFFICE.eye, -10),
     kw(-300, (OFFICE.eye + kEnd.y) / 2, K.center.z), kw(kEnd.x, kEnd.y, kEnd.z)], false, "centripetal");
-  const klook = new THREE.CatmullRomCurve3([kw(0, B.y, B.z), kw(-300, OFFICE.eye - 20, K.center.z), kw(K.center.x, K.center.y, K.center.z),
+  const klook = new THREE.CatmullRomCurve3([kw(A.center.x, A.center.y, A.center.z), kw(-300, OFFICE.eye - 20, K.center.z), kw(K.center.x, K.center.y, K.center.z),
     kw(K.center.x - 1, K.center.y, K.center.z)], false, "centripetal");
   const kTanV = portrait ? K.size.w / 0.88 / 2 / dK / aspect : Math.max(K.size.h / 0.6 / 2 / dK, K.size.w / 0.4 / 2 / dK / aspect);
   const fovK = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(kTanV)), 32, 76);
@@ -496,7 +504,7 @@ function planTour() {
     .map(v => kw(v.x, v.y, v.z)), false, "centripetal");
   const lTanV = portrait ? V.size.w / 0.9 / 2 / dL / aspect : Math.max(V.size.w / 0.5 / 2 / dL / aspect, (V.size.h / 2 + 50) / dL);
   const fovL = THREE.MathUtils.clamp(THREE.MathUtils.radToDeg(2 * Math.atan(lTanV)), 30, 76);
-  return { pos, look, fovMid: portrait ? 64 : 44, fovEnd, kpos, klook, fovK, lpos, llook, fovL };
+  return { pos, look, fovMid: portrait ? 64 : 44, fovEnd, apos, alook, fovA, kpos, klook, fovK, lpos, llook, fovL };
 }
 
 // Resolution: sharp but within a pixel budget, and lowered on the fly (then raised again) if frames run slow, so
@@ -530,28 +538,31 @@ function resize() {
 }
 
 /* ---------- per-frame update ---------- */
-let dirty = true, last = { rise: -1, go: -1, kit: -1, liv: -1 };
+let dirty = true, last = { rise: -1, go: -1, ab: -1, kit: -1, liv: -1 };
 const descT = new THREE.Vector3(), look = new THREE.Vector3(), SKY_T = new THREE.Vector3(0, 0, 0);
 // the services write themselves on the whiteboard once the camera has arrived in front of it, and are wiped again
 // once it has left the room, so they're written afresh on each visit; the kitchen's menu board the same
-let writing = 0, menuWriting = 0, busy = false;
-function update(rise, go, kit, liv, now, dt) {
+let writing = 0, typing = 0, menuWriting = 0, busy = false;
+function update(rise, go, ab, kit, liv, now, dt) {
   if (!openFit) resize();
   // the gallery flows while the laptop's in view
   const stripOn = rise > 0 && go < 0.35;
   if (stripOn && !reduce) slideT += dt;
-  const was = writing + menuWriting * 2;
-  const atBoard = go >= 0.999 && kit <= 0.001, atMenu = kit >= 0.999 && liv <= 0.001;
+  const was = writing + typing * 2 + menuWriting * 4;
+  const atBoard = go >= 0.999 && ab <= 0.001, atDesk = ab >= 0.999 && kit <= 0.001, atMenu = kit >= 0.999 && liv <= 0.001;
   if (atBoard) writing = reduce ? 1 : Math.min(1, writing + dt / WRITE_SECONDS);
   else if (go < 0.6) writing = 0;
+  if (atDesk) typing = reduce ? 1 : Math.min(1, typing + dt / WRITE_SECONDS);
+  else if (ab < 0.6) typing = 0;
   if (atMenu) menuWriting = reduce ? 1 : Math.min(1, menuWriting + dt / WRITE_SECONDS);
   else if (kit < 0.6) menuWriting = 0;
-  busy = (atBoard && writing < 1) || (atMenu && menuWriting < 1);
+  busy = (atBoard && writing < 1) || (atDesk && typing < 1) || (atMenu && menuWriting < 1);
   house.board.reveal.value = writing;
+  house.screen.reveal.value = typing;
   house.menu.reveal.value = menuWriting;
-  if (!stripOn && !dirty && rise === last.rise && go === last.go && kit === last.kit && liv === last.liv && writing + menuWriting * 2 === was) return;
+  if (!stripOn && !dirty && rise === last.rise && go === last.go && ab === last.ab && kit === last.kit && liv === last.liv && writing + typing * 2 + menuWriting * 4 === was) return;
   const redraw = stripOn || dirty;   // the display's picture needs drawing again
-  last.rise = rise; last.go = go; last.kit = kit; last.liv = liv; dirty = false;
+  last.rise = rise; last.go = go; last.ab = ab; last.kit = kit; last.liv = liv; dirty = false;
 
   lid.rotation.x = -OPEN;
   // coming down from the sky: from high above the lawn, turning as it drops, to the view of the open laptop
@@ -574,14 +585,23 @@ function update(rise, go, kit, liv, now, dt) {
     fov = t < 0.5 ? L(FOV, tour.fovMid, smooth(0, 0.2, t)) : L(tour.fovMid, tour.fovEnd, smooth(0.55, 1, t));
     shift *= 1 - smooth(0, 0.12, t);
   }
-  // and from the office on into the kitchen
+  // over to the desk
+  const a = clamp01(ab);
+  if (a > 0) {
+    tour.apos.getPoint(a, camera.position);
+    tour.alook.getPoint(a, look);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(look);
+    fov = L(tour.fovEnd, tour.fovA, smooth(0.1, 0.9, a));
+  }
+  // and from the desk on into the kitchen
   const u = clamp01(kit);
   if (u > 0) {
     tour.kpos.getPoint(u, camera.position);
     tour.klook.getPoint(u, look);
     camera.up.set(0, 1, 0);
     camera.lookAt(look);
-    fov = L(tour.fovEnd, tour.fovK, smooth(0.1, 0.9, u));
+    fov = L(tour.fovA, tour.fovK, smooth(0.1, 0.9, u));
   }
   // and from the kitchen out and round to the living room
   const v = clamp01(liv);
@@ -616,5 +636,5 @@ addEventListener("resize", () => { resize(); });
 document.fonts && document.fonts.ready.then(() => { shown = -1; resize(); });
 window.Mac = { update, resize, busy: () => busy };
 // draw once while the reel plays, so shaders and textures are ready before the laptop first rises
-(window.requestIdleCallback || (f => setTimeout(f, 200)))(() => update(0, 0, 0, 0, performance.now(), 0));
+(window.requestIdleCallback || (f => setTimeout(f, 200)))(() => update(0, 0, 0, 0, 0, performance.now(), 0));
 window.dispatchEvent(new Event("mac-ready"));
